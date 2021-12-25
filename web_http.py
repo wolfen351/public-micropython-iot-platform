@@ -45,7 +45,7 @@ class WebHTTPServer(Server):
 
         self.request = dict()
         self.conns = dict()
-        self.routes = {b"/": b"./index.html", b"/command": self.command}
+        self.routes = {b"/": b"./web_index.html", b"/command": self.command}
 
         self.ssid = None
 

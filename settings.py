@@ -1,9 +1,9 @@
 import uos
 
 
-class Creds:
+class Settings:
 
-    CRED_FILE = "./wifi.creds"
+    CRED_FILE = "./wifi.settings"
 
     def __init__(self, ssid=None, password=None):
         self.ssid = ssid

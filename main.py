@@ -9,7 +9,7 @@ Delay3 = 300
 
 import gc
 
-from d1mini_pins import PIN_D0, PIN_D1, PIN_D3, PIN_D5, PIN_D6, PIN_D7, PIN_D8, PIN_LED
+from d1mini_pins import PIN_D1, PIN_D3, PIN_D5, PIN_D6, PIN_D7, PIN_D8, PIN_LED
 
 # First get and connect to the WiFi
 print()
@@ -119,5 +119,5 @@ while True:
     sleep(0.1)
 
     # Debug output
-    print(Trigger1, Trigger2, " - ", LightOnAt[0], LightOffAt[0], LightOnAt[1], LightOffAt[1], LightOnAt[2], LightOffAt[2], LightOnAt[3], LightOffAt[3])
+    print("T1=", Trigger1, "T2=", Trigger2, " - (", LightOnAt[0], LightOffAt[0], ") (", LightOnAt[1], LightOffAt[1], ") (", LightOnAt[2], LightOffAt[2], ") (", LightOnAt[3], LightOffAt[3], ")")
         

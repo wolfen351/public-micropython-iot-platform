@@ -6,7 +6,7 @@ import utime as time
 
 from captive_dns import DNSServer
 from captive_http import HTTPServer
-from credentials import Creds
+from settings import Settings
 
 
 class CaptivePortal:
@@ -21,7 +21,7 @@ class CaptivePortal:
 
         self.essid = b"%s-%s" % (project,  binascii.hexlify(self.ap_if.config("mac")[-3:]))
 
-        self.creds = Creds()
+        self.creds = Settings()
 
         self.dns_server = None
         self.http_server = None
