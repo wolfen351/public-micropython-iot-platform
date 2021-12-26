@@ -1,6 +1,5 @@
 # Main 
 import gc
-import micropython
 import time
 
 print('\nConnecting to wifi...')
