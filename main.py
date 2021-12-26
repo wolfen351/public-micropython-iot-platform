@@ -15,16 +15,16 @@ del portal
 gc.collect()
 
 print()
-print("Starting Web..")
-from web_portal import WebPortal
-web = WebPortal()
-web.start();
-
-print()
 print("Starting LightControl..")
 from light_control import LightControl
 lights = LightControl()
 lights.start();
+
+print()
+print("Starting Web..")
+from web_portal import WebPortal
+web = WebPortal()
+web.start(lights);
 
 print("Ready!")
 

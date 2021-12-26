@@ -44,6 +44,9 @@ class LightControl:
         self.L4.off()
         print("LightControl ready!")
 
+    def command(self, name, value):
+        if (name == "switchLight"):
+            self.L1.off()
 
     # Prevent a number from dropping below -1
     def clampTo(self, val):
