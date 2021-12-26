@@ -109,15 +109,25 @@ class WebPortal(Server):
     def command(self, params):
         print("Reading command param")
         # Read form params
-        switchLight = unquote(params.get(b"switchLight", None))
-        print("SWITCH:", switchLight)
+        on = unquote(params.get(b"on", None))
+        off = unquote(params.get(b"off", None))
+        auto = unquote(params.get(b"auto", None))
 
-        self.lights.command('switchLight', switchLight)
+        if (on != b""):
+            self.lights.command(1, on)
+
+        if (off != b""):
+            self.lights.command(0, off)
+
+        if (auto != b""):
+            self.lights.command(2, auto)
 
         headers = (
             b"HTTP/1.1 307 Temporary Redirect\r\n"
             b"Location: /\r\n"
         )
+
+        gc.collect()
 
         return b"", headers
 

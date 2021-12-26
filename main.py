@@ -37,3 +37,5 @@ while True:
     led.on()
     sleep(0.1)
     led.off()
+
+    gc.collect()
