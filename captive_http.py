@@ -69,15 +69,12 @@ class HTTPServer(Server):
         if sock is self.sock:
             # client connecting on port 80, so spawn off a new
             # socket to handle this connection
-            print("- Accepting new HTTP connection")
             self.accept(sock)
         elif event & select.POLLIN:
             # socket has data to read in
-            print("- Reading incoming HTTP data")
             self.read(sock)
         elif event & select.POLLOUT:
             # existing connection has space to send more data
-            print("- Sending outgoing HTTP data")
             self.write_to(sock)
 
     def accept(self, server_sock):
@@ -129,12 +126,10 @@ class HTTPServer(Server):
 
     def connected(self, params):
         headers = b"HTTP/1.1 200 OK\r\n"
-        body = open("./captive_connected.html", "rb").read() % (self.ssid, self.local_ip)
+        body = b"Connected"
         return body, headers
 
     def get_response(self, req):
-        """generate a response body and headers, given a route"""
-
         headers = b"HTTP/1.1 200 OK\r\n"
         route = self.routes.get(req.path, None)
 
@@ -223,7 +218,6 @@ class HTTPServer(Server):
             try:
                 bytes_written = sock.write(c.buffmv[c.write_range[0] : c.write_range[1]])
             except OSError:
-                print('cannot write to a closed socket')
                 return
             if not bytes_written or c.write_range[1] < 536:
                 # either we wrote no bytes, or we wrote < TCP MSS of bytes

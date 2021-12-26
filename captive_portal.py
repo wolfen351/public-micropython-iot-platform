@@ -17,23 +17,25 @@ class CaptivePortal:
     def __init__(self, project="WOLF"):
         self.local_ip = self.AP_IP
         self.sta_if = network.WLAN(network.STA_IF)
-        self.ap_if = network.WLAN(network.AP_IF)
 
-        self.essid = b"%s-%s" % (project,  binascii.hexlify(self.ap_if.config("mac")[-3:]))
+        self.essid = b"%s-%s" % (project,  binascii.hexlify(self.sta_if.config("mac")[-3:]))
 
         self.creds = Settings()
 
         self.dns_server = None
         self.http_server = None
-        self.poller = select.poll()
 
         self.conn_time_start = None
 
     def start_access_point(self):
         # sometimes need to turn off AP before it will come up properly
+
+        # Only allocate ram for AP and poller if needed
+        self.ap_if = network.WLAN(network.AP_IF)
+        self.poller = select.poll()
+
         self.ap_if.active(False)
         while not self.ap_if.active():
-            print("Waiting for access point to turn on")
             self.ap_if.active(True)
             time.sleep(1)
         # IP address, netmask, gateway, DNS
@@ -44,11 +46,7 @@ class CaptivePortal:
         print("AP mode configured:", self.essid, self.ap_if.ifconfig())
 
     def connect_to_wifi(self):
-        print(
-            "Trying to connect to SSID '{:s}' with password {:s}".format(
-                self.creds.ssid, self.creds.password
-            )
-        )
+        print("Trying to connect to SSID '{:s}' with password {:s}".format(self.creds.ssid, self.creds.password))
 
         # initiate the connection
         self.sta_if.active(True)
@@ -63,7 +61,7 @@ class CaptivePortal:
             else:
                 print("Connected to {:s}".format(self.creds.ssid))
                 self.local_ip = self.sta_if.ifconfig()[0]
-                print("IP " + self.local_ip)
+                print("IP ", self.local_ip)
                 return True
 
         print(
@@ -99,38 +97,32 @@ class CaptivePortal:
             )
             if remaining <= 0:
                 self.ap_if.active(False)
-                print("Turned off access point")
         return False
 
     def captive_portal(self):
-        print("Starting captive portal")
         self.start_access_point()
 
         if self.http_server is None:
             self.http_server = HTTPServer(self.poller, self.local_ip)
-            print("Configured HTTP server")
         if self.dns_server is None:
             self.dns_server = DNSServer(self.poller, self.local_ip)
-            print("Configured DNS server")
 
-        try:
-            while True:
-                gc.collect()
-                # check for socket events and handle them
-                for response in self.poller.ipoll(1000):
-                    sock, event, *others = response
-                    is_handled = self.handle_dns(sock, event, others)
-                    if not is_handled:
-                        self.handle_http(sock, event, others)
+        while True:
+            gc.collect()
+            # check for socket events and handle them
+            for response in self.poller.ipoll(1000):
+                sock, event, *others = response
+                is_handled = self.handle_dns(sock, event, others)
+                if not is_handled:
+                    self.handle_http(sock, event, others)
 
-                if self.check_valid_wifi():
-                    print("Connected to WiFi!")
-                    self.http_server.set_ip(self.local_ip, self.creds.ssid)
-                    self.dns_server.stop(self.poller)
-                    break
+            if self.check_valid_wifi():
+                self.http_server.set_ip(self.local_ip, self.creds.ssid)
+                self.dns_server.stop(self.poller)
+                break
 
-        except KeyboardInterrupt:
-            print("Captive portal stopped")
+        self.ap_if.active(False)
+        self.ap_if = None
         self.cleanup()
 
     def handle_dns(self, sock, event, others):
@@ -151,7 +143,6 @@ class CaptivePortal:
         self.http_server.handle(sock, event, others)
 
     def cleanup(self):
-        print("Cleaning up")
         if self.dns_server:
             self.dns_server.stop(self.poller)
         gc.collect()

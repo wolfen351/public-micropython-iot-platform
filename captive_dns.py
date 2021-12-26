@@ -65,11 +65,10 @@ class DNSServer(Server):
             data, sender = sock.recvfrom(1024)
             request = DNSQuery(data)
 
-            print("Sending {:s} -> {:s}".format(request.domain, self.ip_addr))
             sock.sendto(request.answer(self.ip_addr), sender)
 
             # help MicroPython with memory management
             del request
             gc.collect()
         except Exception as e:
-            print("DNS server exception:", e)
+            pass

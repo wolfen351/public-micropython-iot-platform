@@ -10,7 +10,6 @@
 
 import usocket as socket
 import ustruct as struct
-from ubinascii import hexlify
 
 class MQTTException(Exception):
     pass
