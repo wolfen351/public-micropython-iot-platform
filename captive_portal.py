@@ -69,8 +69,7 @@ class CaptivePortal:
                 self.creds.ssid, self.creds.password, self.sta_if.status()
             )
         )
-        # forget the credentials since they didn't work, and turn off station mode
-        self.creds.remove()
+        # the credentials didn't work, so turn off station mode
         self.sta_if.active(False)
         return False
 

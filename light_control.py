@@ -1,4 +1,4 @@
-from d1mini_pins import PIN_D1, PIN_D3, PIN_D5, PIN_D6, PIN_D7, PIN_D8
+from d1mini_pins import PIN_D1, PIN_D3
 from machine import Pin
 
 class LightControl:
@@ -16,13 +16,6 @@ class LightControl:
     Period3 = Delay0 + Delay1 + Delay2 + Delay3
     Periods = [Period0, Period1, Period2, Period3]
 
-    # Light Pins
-    L1 = Pin(PIN_D8, Pin.OUT)
-    L2 = Pin(PIN_D7, Pin.OUT)
-    L3 = Pin(PIN_D6, Pin.OUT)
-    L4 = Pin(PIN_D5, Pin.OUT)
-    Lights = [L1, L2, L3, L4]
-
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
 
@@ -36,12 +29,15 @@ class LightControl:
     # When to change a light to OFF
     LightOffAt = [-1, -1, -1, -1]
 
+    def __init__(self, mosfet):
+        self.Mosfet = mosfet
+
+    def status(self):
+        return self.Modes
+
     def start(self):
         # Default all the lights to off
-        self.L1.off()
-        self.L2.off()
-        self.L3.off()
-        self.L4.off()
+        self.Mosfet.allOff()
 
     def convert(self, value):
         if (value == b"1"):
@@ -86,16 +82,15 @@ class LightControl:
 
     # If a timer reaches 0 then set the light on or off
     def setLight(self, OnAt, OffAt, Light, Mode):
-
         if (Mode == 0): # off
-            Light.off()
+            self.Mosfet.off(Light)
         if (Mode == 1): # on
-            Light.on()
+            self.Mosfet.on(Light)
         if (Mode == 2): # auto
             if (OnAt == 0):
-                Light.on()
+                self.Mosfet.on(Light)
             if (OffAt == 0):
-                Light.off()
+                self.Mosfet.off(Light)
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
     def subtract(self, OnAt, OffAt):
@@ -118,7 +113,7 @@ class LightControl:
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
                 self.LightOffAt[l] = self.atLeast(self.LightOffAt[l], self.Periods[l] + self.TimeOn)
 
-            self.setLight(self.LightOnAt[l], self.LightOffAt[l], self.Lights[l], self.Modes[l])
+            self.setLight(self.LightOnAt[l], self.LightOffAt[l], l+1, self.Modes[l])
             self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l])
 
         # Debug output

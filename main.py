@@ -27,17 +27,23 @@ from machine import Pin
 from light_control import LightControl
 from mqtt_control import MQTTControl
 from web_portal import WebPortal
+from mosfet_control import MosfetControl
+
+print()
+print("Starting MosfetControl..")
+mosfet = MosfetControl()
+mosfet.start();
 
 print()
 print("Starting LightControl..")
-lights = LightControl()
+lights = LightControl(mosfet)
 lights.start();
 gc.collect()
 
 print()
 print("Starting MQTT..")
 mqtt = MQTTControl()
-mqtt.start(lights)
+mqtt.start(lights, mosfet)
 gc.collect()
 
 print()
@@ -56,6 +62,7 @@ while True:
     web.tick()
     mqtt.tick()
     lights.tick()
+    mosfet.tick()
 
     # blink blue 
     ledOn = not ledOn;
