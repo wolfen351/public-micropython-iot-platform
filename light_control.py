@@ -1,13 +1,13 @@
-from d1mini_pins import PIN_D1, PIN_D3
+from d1mini_pins import PIN_D1, PIN_D2
 from machine import Pin
 
 class LightControl:
     # Parameters
-    TimeOn = 60
+    TimeOn = 900
     Delay0 = 0
-    Delay1 = 10
-    Delay2 = 30
-    Delay3 = 30
+    Delay1 = 100
+    Delay2 = 300
+    Delay3 = 300
 
     # Periods
     Period0 = Delay0
@@ -20,8 +20,8 @@ class LightControl:
     Modes = [2, 2, 2, 2]
 
     # Trigger Pins by connecting D1 or D3 to ground
-    T1 = Pin(PIN_D1, Pin.IN)#, Pin.PULL_UP) 
-    T2 = Pin(PIN_D3, Pin.IN)#, Pin.PULL_UP)
+    T1 = Pin(PIN_D1, Pin.IN) 
+    T2 = Pin(PIN_D2, Pin.IN)
 
     # When to change a light to ON
     LightOnAt = [-1, -1, -1, -1]
@@ -88,8 +88,10 @@ class LightControl:
             self.Mosfet.on(Light)
         if (Mode == 2): # auto
             if (OnAt == 0):
+                print("Switching on: ", Light)
                 self.Mosfet.on(Light)
             if (OffAt == 0):
+                print("Switching off: ", Light)
                 self.Mosfet.off(Light)
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
@@ -103,13 +105,13 @@ class LightControl:
         Trigger2 = self.T2.value()
 
         for l in range(4):
-            # If trigger 1 is set, then go upwards
-            if (Trigger1 == 1):
+            # If trigger 1 is set, then go upwards (connected to ground)
+            if (Trigger1 == 0):
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[l])
                 self.LightOffAt[l] = self.atLeast(self.LightOffAt[l], self.Periods[3-l] + self.TimeOn)
 
-            # If trigger 2 is set, then go downwards
-            if (Trigger2 == 1):
+            # If trigger 2 is set, then go downwards (connected to ground)
+            if (Trigger2 == 0):
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
                 self.LightOffAt[l] = self.atLeast(self.LightOffAt[l], self.Periods[l] + self.TimeOn)
 

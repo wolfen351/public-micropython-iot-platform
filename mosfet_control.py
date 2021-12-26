@@ -24,13 +24,13 @@ class MosfetControl:
 
     def allOn(self): # num is 1-4, but arrays are 0-3
         for num in range(4):
-            self.States[num - 1] = 1
-            self.Switches[num -1].on()
+            self.States[num] = 1
+            self.Switches[num].on()
 
     def allOff(self): # num is 1-4, but arrays are 0-3
         for num in range(4):
-            self.States[num - 1] = 0
-            self.Switches[num -1].off()
+            self.States[num] = 0
+            self.Switches[num].off()
             
     def on(self, num): # num is 1-4, but arrays are 0-3
         self.States[num - 1] = 1
@@ -46,7 +46,7 @@ class MosfetControl:
         else:
             self.off(self.num)
 
-    def command(self, num, onOff): # num is 1-4, but arrays are 0-3; OnOff=0 for off and 1 for on
+    def command(self, num, onOff): # num is 1-4, OnOff=0 for off and 1 for on
         if (onOff == 0): 
             self.off(num)
         if (onOff == 1): 
