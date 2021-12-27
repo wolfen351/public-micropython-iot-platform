@@ -52,6 +52,22 @@
     .lbl {
       width: 180px;
     }
+
+    .status {
+      display: flex;
+      width: 100px;
+      margin-left:auto;
+      margin-right: auto;
+    }
+
+    .status .light {
+      width: 25px;
+      height: 15px;
+      border: 1px solid black;
+      padding: 5px;
+      margin: 10px;
+      background-color: grey;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
@@ -84,7 +100,10 @@
   </form>
 
   <div class="status">
-
+    <div class="light light1">1</div>
+    <div class="light light2">2</div>
+    <div class="light light3">3</div>
+    <div class="light light4">4</div>
   </div>
 
   <div class="allsett">
@@ -109,11 +128,7 @@
   <script type="text/javascript">
     var intervalId = setInterval(function() {
       $.get('http://10.10.10.3/lightstatus',function( data ) {
-        //console.log(data);
         s = eval(data);
-        //console.log(s);
-        //$('.status').html(JSON.stringify(s))
-
         for (let i = 1; i < 5; i++) {
           if (s['l'+i] == 0)
             $(".off"+i).css("background-color", "darkgreen")
@@ -130,7 +145,15 @@
           else
             $(".auto"+i).css("background-color", "#e9e9ed");
         }
-
+      });
+      $.get('http://10.10.10.3/mosfetstatus',function( data ) {
+        s = eval(data);
+        for (let i = 1; i < 5; i++) {
+          if (s['l'+i] == 1)
+            $(".light"+i).css("background-color", "red")
+          else
+            $(".light"+i).css("background-color", "grey");
+        }
       });
     }, 2000);
   </script>

@@ -47,6 +47,9 @@ class LightControl:
     def status(self):
         return self.Modes
 
+    def mosfetstatus(self):
+        return self.Mosfet.status()
+
     def start(self):
         # Default all the lights to off
         self.Mosfet.allOff()

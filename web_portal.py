@@ -53,6 +53,7 @@ class WebPortal(Server):
             b"/command": self.command, 
             b"/settings": self.settings,
             b"/lightstatus": self.lightstatus,
+            b"/mosfetstatus": self.mosfetstatus,
         }
 
         self.ssid = None
@@ -159,6 +160,14 @@ class WebPortal(Server):
    
     def lightstatus(self, params):
         status = self.lights.status()
+        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+       
+        gc.collect()
+        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
+        return data, headers
+
+    def mosfetstatus(self, params):
+        status = self.lights.mosfetstatus()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
        
         gc.collect()
