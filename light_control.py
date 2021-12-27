@@ -1,13 +1,22 @@
 from d1mini_pins import PIN_D1, PIN_D2
-from machine import Pin
+from machine import Pin, sleep
 
 class LightControl:
-    # Parameters
-    TimeOn = 900
-    Delay0 = 0
-    Delay1 = 100
-    Delay2 = 300
-    Delay3 = 300
+
+    # Parameters (in milliseconds 1000=1s)
+    TimeOnSetting = 30000
+    Delay0Setting = 0
+    Delay1Setting = 1000
+    Delay2Setting = 3000
+    Delay3Setting = 3000
+
+    # Convert to number of loops using a timefactor
+    TimeFactor = 16# ms per loop
+    TimeOn = TimeOnSetting//TimeFactor
+    Delay0 = Delay0Setting//TimeFactor
+    Delay1 = Delay1Setting//TimeFactor
+    Delay2 = Delay2Setting//TimeFactor
+    Delay3 = Delay3Setting//TimeFactor
 
     # Periods
     Period0 = Delay0
@@ -87,11 +96,10 @@ class LightControl:
         if (Mode == 1): # on
             self.Mosfet.on(Light)
         if (Mode == 2): # auto
-            if (OnAt == 0):
-                print("Switching on: ", Light)
+            if (OnAt == 0): # Switch the light on, and stay on at least the TimeOn
                 self.Mosfet.on(Light)
+                self.LightOffAt[Light-1] = self.atLeast(self.LightOffAt[Light-1], self.TimeOn)
             if (OffAt == 0):
-                print("Switching off: ", Light)
                 self.Mosfet.off(Light)
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
@@ -108,15 +116,14 @@ class LightControl:
             # If trigger 1 is set, then go upwards (connected to ground)
             if (Trigger1 == 0):
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[l])
-                self.LightOffAt[l] = self.atLeast(self.LightOffAt[l], self.Periods[3-l] + self.TimeOn)
 
             # If trigger 2 is set, then go downwards (connected to ground)
             if (Trigger2 == 0):
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
-                self.LightOffAt[l] = self.atLeast(self.LightOffAt[l], self.Periods[l] + self.TimeOn)
 
             self.setLight(self.LightOnAt[l], self.LightOffAt[l], l+1, self.Modes[l])
             self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l])
 
         # Debug output
-        # print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
+        #print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
+        #sleep(100)

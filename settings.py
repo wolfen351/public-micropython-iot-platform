@@ -3,25 +3,25 @@ import uos
 
 class Settings:
 
-    CRED_FILE = "./wifi.settings"
+    SETTINGS_FILE = "./wifi.settings"
 
     def __init__(self, ssid=None, password=None):
         self.ssid = ssid
         self.password = password
 
     def write(self):
-        """Write credentials to CRED_FILE if valid input found."""
+        """Write credentials to SETTINGS if valid input found."""
         if self.is_valid():
-            with open(self.CRED_FILE, "wb") as f:
+            with open(self.SETTINGS_FILE, "wb") as f:
                 f.write(b",".join([self.ssid, self.password]))
-            print("Wrote credentials to {:s}".format(self.CRED_FILE))
+            print("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
 
         try:
-            with open(self.CRED_FILE, "rb") as f:
+            with open(self.SETTINGS_FILE, "rb") as f:
                 contents = f.read().split(b",")
-            print("Loaded WiFi credentials from {:s}".format(self.CRED_FILE))
+            print("Loaded WiFi credentials from {:s}".format(self.SETTINGS_FILE))
             if len(contents) == 2:
                 self.ssid, self.password = contents
 
@@ -39,7 +39,7 @@ class Settings:
         """
         # print("Attempting to remove {}".format(self.CRED_FILE))
         try:
-            uos.remove(self.CRED_FILE)
+            uos.remove(self.SETTINGS_FILE)
         except OSError:
             pass
 
