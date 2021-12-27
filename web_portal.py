@@ -48,7 +48,7 @@ class WebPortal(Server):
 
         self.request = dict()
         self.conns = dict()
-        self.routes = {b"/": b"./web_index.html", b"/command": self.command}
+        self.routes = {b"/": b"./web_index.html", b"/command": self.command, b"/settings": self.settings}
 
         self.ssid = None
         self.lights = None
@@ -121,6 +121,27 @@ class WebPortal(Server):
 
         if (auto != b""):
             self.lights.command(2, auto)
+
+        headers = (
+            b"HTTP/1.1 307 Temporary Redirect\r\n"
+            b"Location: /\r\n"
+        )
+
+        gc.collect()
+
+        return b"", headers
+
+    def settings(self, params):
+        print("Reading settings params")
+        # Read form params
+        TimeOn = unquote(params.get(b"TimeOn", None))
+        Delay1 = unquote(params.get(b"Delay1", None))
+        Delay2 = unquote(params.get(b"Delay2", None))
+        Delay3 = unquote(params.get(b"Delay3", None))
+        Delay4 = unquote(params.get(b"Delay4", None))
+
+        settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
+        self.lights.settings(settings)
 
         headers = (
             b"HTTP/1.1 307 Temporary Redirect\r\n"

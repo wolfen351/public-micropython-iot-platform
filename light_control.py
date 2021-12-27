@@ -10,20 +10,21 @@ class LightControl:
     Delay2Setting = 3000
     Delay3Setting = 3000
 
-    # Convert to number of loops using a timefactor
-    TimeFactor = 16# ms per loop
-    TimeOn = TimeOnSetting//TimeFactor
-    Delay0 = Delay0Setting//TimeFactor
-    Delay1 = Delay1Setting//TimeFactor
-    Delay2 = Delay2Setting//TimeFactor
-    Delay3 = Delay3Setting//TimeFactor
+    def calculateTimes(self):
+        # Convert to number of loops using a timefactor
+        self.TimeFactor = 16# ms per loop
+        self.TimeOn = self.TimeOnSetting//self.TimeFactor
+        self.Delay0 = self.Delay0Setting//self.TimeFactor
+        self.Delay1 = self.Delay1Setting//self.TimeFactor
+        self.Delay2 = self.Delay2Setting//self.TimeFactor
+        self.Delay3 = self.Delay3Setting//self.TimeFactor
 
-    # Periods
-    Period0 = Delay0
-    Period1 = Delay0 + Delay1
-    Period2 = Delay0 + Delay1 + Delay2
-    Period3 = Delay0 + Delay1 + Delay2 + Delay3
-    Periods = [Period0, Period1, Period2, Period3]
+        # Periods
+        self.Period0 = self.Delay0
+        self.Period1 = self.Delay0 + self.Delay1
+        self.Period2 = self.Delay0 + self.Delay1 + self.Delay2
+        self.Period3 = self.Delay0 + self.Delay1 + self.Delay2 + self.Delay3
+        self.Periods = [self.Period0, self.Period1, self.Period2, self.Period3]
 
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
@@ -40,6 +41,7 @@ class LightControl:
 
     def __init__(self, mosfet):
         self.Mosfet = mosfet
+        self.calculateTimes()
 
     def status(self):
         return self.Modes
@@ -68,6 +70,14 @@ class LightControl:
             self.Modes[num] = 0
         if (function == 2):
             self.Modes[num] = 2
+
+    def settings(self, settingsVals):
+        self.TimeOnSetting = settingsVals[0]
+        self.Delay0Setting = settingsVals[1]
+        self.Delay1Setting = settingsVals[2]
+        self.Delay2Setting = settingsVals[3]
+        self.Delay3Setting = settingsVals[4]
+        self.calculateTimes()
 
     # Prevent a number from dropping below -1
     def clampTo(self, val):
