@@ -13,7 +13,6 @@ from server import Server
 
 import gc
 
-
 def unquote(string):
     """stripped down implementation of urllib.parse unquote_to_bytes"""
 

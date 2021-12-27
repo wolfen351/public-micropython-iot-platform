@@ -29,8 +29,8 @@ try:
     from d1mini_pins import PIN_LED
     from machine import Pin
     from light_control import LightControl
-    from mqtt_control import MQTTControl
     from web_portal import WebPortal
+    from mqtt_control import MQTTControl
     from mosfet_control import MosfetControl
 
     print()

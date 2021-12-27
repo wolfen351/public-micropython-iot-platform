@@ -53,6 +53,7 @@
       width: 180px;
     }
   </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -62,25 +63,29 @@
 
   <form action="/command" method="get">
     <span>On:</span>
-    <button type="submit" name="on" value="1" class="btn">L1</button>
-    <button type="submit" name="on" value="2" class="btn">L2</button>
-    <button type="submit" name="on" value="3" class="btn">L3</button>
-    <button type="submit" name="on" value="4" class="btn">L4</button>
+    <button type="submit" name="on" value="1" class="btn on1">L1</button>
+    <button type="submit" name="on" value="2" class="btn on2">L2</button>
+    <button type="submit" name="on" value="3" class="btn on3">L3</button>
+    <button type="submit" name="on" value="4" class="btn on4">L4</button>
   </form>
   <form action="/command" method="get">
     <span>Off:</span>
-    <button type="submit" name="off" value="1" class="btn">L1</button>
-    <button type="submit" name="off" value="2" class="btn">L2</button>
-    <button type="submit" name="off" value="3" class="btn">L3</button>
-    <button type="submit" name="off" value="4" class="btn">L4</button>
+    <button type="submit" name="off" value="1" class="btn off1">L1</button>
+    <button type="submit" name="off" value="2" class="btn off2">L2</button>
+    <button type="submit" name="off" value="3" class="btn off3">L3</button>
+    <button type="submit" name="off" value="4" class="btn off4">L4</button>
   </form>
   <form action="/command" method="get">
     <span>Auto:</span>
-    <button type="submit" name="auto" value="1" class="btn">L1</button>
-    <button type="submit" name="auto" value="2" class="btn">L2</button>
-    <button type="submit" name="auto" value="3" class="btn">L3</button>
-    <button type="submit" name="auto" value="4" class="btn">L4</button>
+    <button type="submit" name="auto" value="1" class="btn auto1">L1</button>
+    <button type="submit" name="auto" value="2" class="btn auto2">L2</button>
+    <button type="submit" name="auto" value="3" class="btn auto3">L3</button>
+    <button type="submit" name="auto" value="4" class="btn auto4">L4</button>
   </form>
+
+  <div class="status">
+
+  </div>
 
   <div class="allsett">
     <br />
@@ -100,6 +105,35 @@
     </div>
 
   </div>
+
+  <script type="text/javascript">
+    var intervalId = setInterval(function() {
+      $.get('http://10.10.10.3/lightstatus',function( data ) {
+        //console.log(data);
+        s = eval(data);
+        //console.log(s);
+        //$('.status').html(JSON.stringify(s))
+
+        for (let i = 1; i < 5; i++) {
+          if (s['l'+i] == 0)
+            $(".off"+i).css("background-color", "darkgreen")
+          else
+            $(".off"+i).css("background-color", "#e9e9ed");
+
+          if (s['l'+i] == 1)
+            $(".on"+i).css("background-color", "darkgreen")
+          else
+            $(".on"+i).css("background-color", "#e9e9ed");
+
+          if (s['l'+i] == 2)
+            $(".auto"+i).css("background-color", "darkgreen")
+          else
+            $(".auto"+i).css("background-color", "#e9e9ed");
+        }
+
+      });
+    }, 2000);
+  </script>
 
 </body>
 

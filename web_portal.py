@@ -48,7 +48,12 @@ class WebPortal(Server):
 
         self.request = dict()
         self.conns = dict()
-        self.routes = {b"/": b"./web_index.html", b"/command": self.command, b"/settings": self.settings}
+        self.routes = {
+            b"/": b"./web_index.html", 
+            b"/command": self.command, 
+            b"/settings": self.settings,
+            b"/lightstatus": self.lightstatus,
+        }
 
         self.ssid = None
         self.lights = None
@@ -151,6 +156,14 @@ class WebPortal(Server):
         gc.collect()
 
         return b"", headers
+   
+    def lightstatus(self, params):
+        status = self.lights.status()
+        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+       
+        gc.collect()
+        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
+        return data, headers
 
     def get_response(self, req):
         """generate a response body and headers, given a route"""
@@ -185,7 +198,6 @@ class WebPortal(Server):
         # add new data to the full request
         sid = id(s)
         self.request[sid] = self.request.get(sid, b"") + data
-        print("Added some data")
 
         # check if additional data expected
         if data[-4:] != b"\r\n\r\n":
@@ -195,13 +207,8 @@ class WebPortal(Server):
             return
 
         # get the completed request
-        print("Parsing http request")
         req = self.parse_request(self.request.pop(sid))
-
-        print("Preparing http response")
         body, headers = self.get_response(req)
-
-        print("Preparing to write http response")
         self.prepare_write(s, body, headers)
 
     def prepare_write(self, s, body, headers):
