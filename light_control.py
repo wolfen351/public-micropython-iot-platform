@@ -1,4 +1,5 @@
 from d1mini_pins import PIN_D1, PIN_D2
+from light_settings import LightSettings
 from machine import Pin, sleep
 
 class LightControl:
@@ -49,6 +50,14 @@ class LightControl:
     def start(self):
         # Default all the lights to off
         self.Mosfet.allOff()
+        
+        lightSettings = LightSettings()
+        lightSettings.load()
+        self.TimeOnSetting = lightSettings.TimeOnSetting
+        self.Delay0Setting = lightSettings.Delay0Setting
+        self.Delay1Setting = lightSettings.Delay1Setting
+        self.Delay2Setting = lightSettings.Delay2Setting
+        self.Delay3Setting = lightSettings.Delay3Setting
 
     def convert(self, value):
         if (value == b"1"):
@@ -78,6 +87,16 @@ class LightControl:
         self.Delay2Setting = settingsVals[3]
         self.Delay3Setting = settingsVals[4]
         self.calculateTimes()
+
+        # Save the light settings to disk
+        lightSettings = LightSettings()
+        lightSettings.TimeOnSetting = self.TimeOnSetting
+        lightSettings.Delay0Setting = self.Delay0Setting
+        lightSettings.Delay1Setting = self.Delay1Setting
+        lightSettings.Delay2Setting = self.Delay2Setting
+        lightSettings.Delay3Setting = self.Delay3Setting
+        print(lightSettings)
+        lightSettings.write()
 
     # Prevent a number from dropping below -1
     def clampTo(self, val):

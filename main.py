@@ -80,7 +80,9 @@ try:
 
 except KeyboardInterrupt:
     raise
-except Exception:
+except Exception as e:
+    import sys
+    sys.print_exception(e)
     print("Fatal exception, will reboot in 30s")
-    sleep(30)
+    sleep(30000)
     machine.reset()
