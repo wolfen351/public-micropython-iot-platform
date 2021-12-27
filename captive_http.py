@@ -41,7 +41,7 @@ def unquote(string):
 
 
 class HTTPServer(Server):
-    def __init__(self, poller, local_ip):
+    def __init__(self, poller, local_ip, captive_portal):
         super().__init__(poller, 80, socket.SOCK_STREAM, "HTTP Server")
         if type(local_ip) is bytes:
             self.local_ip = local_ip
@@ -52,6 +52,7 @@ class HTTPServer(Server):
         self.routes = {b"/": b"./captive_settings.html", b"/login": self.login}
 
         self.ssid = None
+        self.captive_portal = captive_portal
 
         # queue up to 5 connection requests before refusing
         self.sock.listen(5)
@@ -116,6 +117,7 @@ class HTTPServer(Server):
 
         # Write out credentials
         WifiSettings(ssid=ssid, password=password).write()
+        self.captive_portal.waiting_for_new_creds = False
 
         headers = (
             b"HTTP/1.1 307 Temporary Redirect\r\n"

@@ -26,6 +26,7 @@ class CaptivePortal:
         self.http_server = None
 
         self.conn_time_start = None
+        self.waiting_for_new_creds = False
 
     def start_access_point(self):
         # sometimes need to turn off AP before it will come up properly
@@ -44,6 +45,7 @@ class CaptivePortal:
         )
         self.ap_if.config(essid=self.essid, authmode=network.AUTH_OPEN)
         print("AP mode configured:", self.essid, self.ap_if.ifconfig())
+        self.waiting_for_new_creds = True
 
     def connect_to_wifi(self):
         print("Trying to connect to SSID '{:s}' with password {:s}".format(self.creds.ssid, self.creds.password))
@@ -69,8 +71,7 @@ class CaptivePortal:
                 self.creds.ssid, self.creds.password, self.sta_if.status()
             )
         )
-        # the credentials didn't work, so turn off station mode
-        self.sta_if.active(False)
+
         return False
 
     def check_valid_wifi(self):
@@ -89,7 +90,7 @@ class CaptivePortal:
         self.start_access_point()
 
         if self.http_server is None:
-            self.http_server = HTTPServer(self.poller, self.local_ip)
+            self.http_server = HTTPServer(self.poller, self.local_ip, self)
         if self.dns_server is None:
             self.dns_server = DNSServer(self.poller, self.local_ip)
 
@@ -104,9 +105,19 @@ class CaptivePortal:
                     self.handle_http(sock, event, others)
 
             # Check if the creds we have work
-            if self.check_valid_wifi():
+            if not self.waiting_for_new_creds:
+                if self.check_valid_wifi():
+                    self.cleanup()
+                    return
+                else:
+                    print("Creds provided did not work, waiting for new attempt")
+                    self.waiting_for_new_creds = True
+
+            # Check if we magically got a connection from previously configured values (like the router came up while we are in AP)
+            if self.sta_if.isconnected():
                 self.cleanup()
-                return;
+                return
+                
 
         print("Gave up on getting new wifi credentials")
         self.cleanup()
