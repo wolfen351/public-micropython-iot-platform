@@ -4,7 +4,7 @@ import uselect as select
 import usocket as socket
 
 from collections import namedtuple
-from settings import Settings
+from wifi_settings import WifiSettings
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
 ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
@@ -115,7 +115,7 @@ class HTTPServer(Server):
         password = unquote(params.get(b"password", None))
 
         # Write out credentials
-        Settings(ssid=ssid, password=password).write()
+        WifiSettings(ssid=ssid, password=password).write()
 
         headers = (
             b"HTTP/1.1 307 Temporary Redirect\r\n"

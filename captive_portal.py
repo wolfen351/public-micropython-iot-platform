@@ -6,13 +6,13 @@ import utime as time
 
 from captive_dns import DNSServer
 from captive_http import HTTPServer
-from settings import Settings
+from wifi_settings import WifiSettings
 
 
 class CaptivePortal:
     AP_IP = "192.168.4.1"
-    AP_OFF_DELAY = const(10 * 1000)
     MAX_CONN_ATTEMPTS = 10
+    AP_WAIT = 300 #seconds
 
     def __init__(self, project="WOLF"):
         self.local_ip = self.AP_IP
@@ -20,7 +20,7 @@ class CaptivePortal:
 
         self.essid = b"%s-%s" % (project,  binascii.hexlify(self.sta_if.config("mac")[-3:]))
 
-        self.creds = Settings()
+        self.creds = WifiSettings()
 
         self.dns_server = None
         self.http_server = None
@@ -82,20 +82,7 @@ class CaptivePortal:
             # not connected, and no credentials to connect yet
             return False
 
-        if not self.ap_if.active():
-            # access point is already off; do nothing
-            return False
-
-        # already connected to WiFi, so turn off Access Point after a delay
-        if self.conn_time_start is None:
-            self.conn_time_start = time.ticks_ms()
-            remaining = self.AP_OFF_DELAY
-        else:
-            remaining = self.AP_OFF_DELAY - time.ticks_diff(
-                time.ticks_ms(), self.conn_time_start
-            )
-            if remaining <= 0:
-                self.ap_if.active(False)
+        # Not connected
         return False
 
     def captive_portal(self):
@@ -106,7 +93,8 @@ class CaptivePortal:
         if self.dns_server is None:
             self.dns_server = DNSServer(self.poller, self.local_ip)
 
-        while True:
+        t_end = time.time() + self.AP_WAIT
+        while time.time() < t_end:
             gc.collect()
             # check for socket events and handle them
             for response in self.poller.ipoll(1000):
@@ -115,13 +103,12 @@ class CaptivePortal:
                 if not is_handled:
                     self.handle_http(sock, event, others)
 
+            # Check if the creds we have work
             if self.check_valid_wifi():
-                self.http_server.set_ip(self.local_ip, self.creds.ssid)
-                self.dns_server.stop(self.poller)
-                break
+                self.cleanup()
+                return;
 
-        self.ap_if.active(False)
-        self.ap_if = None
+        print("Gave up on getting new wifi credentials")
         self.cleanup()
 
     def handle_dns(self, sock, event, others):
@@ -142,17 +129,19 @@ class CaptivePortal:
         self.http_server.handle(sock, event, others)
 
     def cleanup(self):
+        if self.http_server:
+            self.http_server.stop(self.poller)
         if self.dns_server:
             self.dns_server.stop(self.poller)
+        self.ap_if.active(False)
+        self.ap_if = None
+        self.cleanup()
         gc.collect()
 
     def try_connect_from_file(self):
         if self.creds.load().is_valid():
             if self.connect_to_wifi():
                 return True
-
-        # WiFi Connection failed - remove credentials from disk
-        self.creds.remove()
         return False
 
     def start(self):

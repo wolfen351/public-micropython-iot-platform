@@ -1,7 +1,7 @@
 import uos
 
 
-class Settings:
+class WifiSettings:
 
     SETTINGS_FILE = "./wifi.settings"
 
