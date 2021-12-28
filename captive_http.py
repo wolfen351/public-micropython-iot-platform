@@ -25,7 +25,7 @@ def unquote(string):
     # split into substrings on each escape character
     bits = string.split(b'%')
     if len(bits) == 1:
-        return string  # there was no escape character
+        return string.replace(b"+", b" ")  # there was no escape character
     
     res = [bits[0]]  # everything before the first escape character
 
