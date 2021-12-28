@@ -15,6 +15,10 @@ try:
         pass
     if (sta_if.isconnected()):
         print('network config:', sta_if.ifconfig())
+        # Disable AP
+        sta_ap = network.WLAN(network.AP_IF)
+        sta_ap.active(False)
+        del sta_ap
     else:
         print("No Wifi, starting portal to configure wifi")
         from captive_portal import CaptivePortal
@@ -24,6 +28,7 @@ try:
         machine.reset() # Reboot to save RAM
     del t_end
     del sta_if
+    gc.collect()
 
     # Import other modules needed
     from d1mini_pins import PIN_LED

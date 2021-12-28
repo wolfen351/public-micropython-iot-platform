@@ -54,6 +54,7 @@ class WebPortal(Server):
             b"/settings": self.settings,
             b"/lightstatus": self.lightstatus,
             b"/mosfetstatus": self.mosfetstatus,
+            b"/loadsettings": self.loadsettings,
         }
 
         self.ssid = None
@@ -68,15 +69,12 @@ class WebPortal(Server):
         if sock is self.sock:
             # client connecting on port 80, so spawn off a new
             # socket to handle this connection
-            print("- Accepting new HTTP connection")
             self.accept(sock)
         elif event & select.POLLIN:
             # socket has data to read in
-            print("- Reading incoming HTTP data")
             self.read(sock)
         elif event & select.POLLOUT:
             # existing connection has space to send more data
-            print("- Sending outgoing HTTP data")
             self.write_to(sock)
 
     def accept(self, server_sock):
@@ -98,6 +96,7 @@ class WebPortal(Server):
         req_lines = req.split(b"\r\n")
         req_type, full_path, http_ver = req_lines[0].split(b" ")
         path = full_path.split(b"?")
+        print("Web:", path)
         base_path = path[0]
         query = path[1] if len(path) > 1 else None
         query_params = (
@@ -113,7 +112,6 @@ class WebPortal(Server):
         return ReqInfo(req_type, base_path, query_params, host)
 
     def command(self, params):
-        print("Reading command param")
         # Read form params
         on = unquote(params.get(b"on", None))
         off = unquote(params.get(b"off", None))
@@ -137,8 +135,17 @@ class WebPortal(Server):
 
         return b"", headers
 
+    def loadsettings(self, params):
+        # Read form params
+        settings =  self.lights.getsettings()
+
+        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+        data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
+
+        gc.collect()
+        return data, headers
+
     def settings(self, params):
-        print("Reading settings params")
         # Read form params
         TimeOn = unquote(params.get(b"TimeOn", None))
         Delay1 = unquote(params.get(b"Delay1", None))
@@ -201,7 +208,6 @@ class WebPortal(Server):
         if not data:
             # no data in the TCP stream, so close the socket
             self.close(s)
-            print("No Data, closed")
             return
 
         # add new data to the full request
@@ -212,7 +218,6 @@ class WebPortal(Server):
         if data[-4:] != b"\r\n\r\n":
             # HTTP request is not finished if no blank line at the end
             # wait for next read event on this socket instead
-            print("Not done, waiting for more")
             return
 
         # get the completed request
@@ -248,7 +253,6 @@ class WebPortal(Server):
             try:
                 bytes_written = sock.write(c.buffmv[c.write_range[0] : c.write_range[1]])
             except OSError:
-                print('cannot write to a closed socket')
                 return
             if not bytes_written or c.write_range[1] < 536:
                 # either we wrote no bytes, or we wrote < TCP MSS of bytes
@@ -276,7 +280,6 @@ class WebPortal(Server):
 
     def close(self, s):
         """close the socket, unregister from poller, and delete connection"""
-        print("Closing Socket")
         s.close()
         self.poller.unregister(s)
         sid = id(s)

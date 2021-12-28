@@ -113,11 +113,11 @@
 
     <div class="sett">
       <form action="/settings" method="get">
-        <span class="lbl">Stay On For:</span><input type="text" name="TimeOn" value="30000">ms<br />
-        <span class="lbl">Delay before Light1:</span><input type="text" name="Delay1" value="0">ms<br />
-        <span class="lbl">Delay before Light2:</span><input type="text" name="Delay2" value="0">ms<br />
-        <span class="lbl">Delay before Light3:</span><input type="text" name="Delay3" value="0">ms<br />
-        <span class="lbl">Delay before Light4:</span><input type="text" name="Delay4" value="0">ms<br />
+        <span class="lbl">Stay On For:</span><input type="text" name="TimeOn" value="30000" id="TimeOn">ms<br />
+        <span class="lbl">Delay before Light1:</span><input type="text" name="Delay1" value="0" id="Delay1">ms<br />
+        <span class="lbl">Delay before Light2:</span><input type="text" name="Delay2" value="0" id="Delay2">ms<br />
+        <span class="lbl">Delay before Light3:</span><input type="text" name="Delay3" value="0" id="Delay3">ms<br />
+        <span class="lbl">Delay before Light4:</span><input type="text" name="Delay4" value="0" id="Delay4">ms<br />
         <button type="submit" class="btn">Save</button>
       </form>
 
@@ -156,6 +156,18 @@
         }
       });
     }, 2000);
+
+    $(
+    $.get('http://10.10.10.3/loadsettings',function( data ) {
+        s = eval(data);
+        $("#TimeOn").val(s.timeOn);
+        $("#Delay1").val(s.delay1);
+        $("#Delay2").val(s.delay2);
+        $("#Delay3").val(s.delay3);
+        $("#Delay4").val(s.delay4);
+
+      })
+    );
   </script>
 
 </body>

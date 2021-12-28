@@ -100,6 +100,10 @@ class LightControl:
         lightSettings.Delay3Setting = self.Delay3Setting
         print(lightSettings)
         lightSettings.write()
+    
+    def getsettings(self):
+        s = (self.TimeOnSetting, self.Delay0Setting, self.Delay1Setting, self.Delay2Setting, self.Delay3Setting)
+        return s
 
     # Prevent a number from dropping below -1
     def clampTo(self, val):
