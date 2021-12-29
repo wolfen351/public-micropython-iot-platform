@@ -7,18 +7,9 @@ import time
 
 class MQTTControl():
     def __init__(self):
-        self.lights = None
-        self.mqtt_server = "mqtt.wolfen.za.net"
         self.client_id = ubinascii.hexlify(machine.unique_id())
-        self.topic_sub = b'light4/%s/command/#' % (self.client_id)
-        self.topic_pub = b'light4/%s/status' % (self.client_id)
-        self.def_topic_sub = b'light4/%s/command/#' % (self.client_id)
-        self.def_topic_pub = b'light4/%s/status' % (self.client_id)
-        self.client = None
-        self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None]
 
     def sub_cb(self, topic, msg):
-        print((topic, msg))
         if topic.decode('ASCII').endswith(b'/on'):
             self.lights.command(1, msg)
         if topic.decode('ASCII').endswith(b'/off'):
@@ -34,7 +25,6 @@ class MQTTControl():
         print('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
 
     def command(self, params):
-        print("Reading command param")
         # Read form params
         on = 1
         off = 1
@@ -105,6 +95,7 @@ class MQTTControl():
 
 
     def start(self, lights, mosfet):
+        self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None]
         self.lights = lights
         self.mosfet = mosfet
 
@@ -114,16 +105,18 @@ class MQTTControl():
         self.mqtt_server = settings.Server
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
+        else:
+            self.topic_sub = b'light4/%s/command/#' % (self.client_id)
+
         if (settings.Publish != b""):
             self.topic_pub = settings.Publish
+        else:
+            self.topic_pub = b'light4/%s/status' % (self.client_id)
 
         if (self.enabled == b"Y"):
             self.sta_if = network.WLAN(network.STA_IF)
             self.connect_and_subscribe()
             self.post_status()
-            print("MQTT Client started")
-        else:
-            print("MQTT Disabled")
 
     def settings(self, settingsVals):
         # Apply the new settings
@@ -133,12 +126,12 @@ class MQTTControl():
         if (settingsVals[2] != b""):
             self.topic_sub = settingsVals[2]
         else:
-            self.topic_sub = self.def_topic_sub
+            self.topic_sub = b'light4/%s/command/#' % (self.client_id)
 
         if (settingsVals[3] != b""):
             self.topic_pub = settingsVals[3]
         else: 
-            self.topic_pub = self.def_topic_pub
+            self.topic_pub = b'light4/%s/status' % (self.client_id)
 
         # Save the settings to disk
         settings = MqttSettings()
@@ -146,7 +139,6 @@ class MQTTControl():
         settings.Server = self.mqtt_server
         settings.Subscribe = self.topic_sub
         settings.Publish = self.topic_pub
-        print(settings)
         settings.write()
     
     def getsettings(self):

@@ -89,11 +89,12 @@
     <h4>Enter MQTT Details here</h4>
 
     <div class="sett">
-      <form action="/mqttsettings" method="get">
-        <span class="lbl">Enable:</span><input type="checkbox" name="Enabled" checked="checked" id="Enabled"><br />
-        <span class="lbl">Server:</span><input type="text" name="Server" value="mqtt.wolfen.za.net" id="Server"><br />
-        <span class="lbl">Subscribe To:</span><input type="text" name="Subscribe" value="light4/qweqwewqe/command" id="Subscribe"><br />
-        <span class="lbl">Publish To:</span><input type="text" name="Publish" value="light4/qweqwewqe/command" id="Publish"><br />
+      <form action="/mqttsavesettings" method="get">
+        <span class="lbl">Enable:</span><input type="checkbox" checked="checked" id="EnabledCB" onchange="cb()"><br />
+        <span class="lbl">Server:</span><input type="text" name="server" value="mqtt.wolfen.za.net" id="Server"><br />
+        <span class="lbl">Subscribe To:</span><input type="text" name="subscribe" value="light4/qweqwewqe/command" id="Subscribe"><br />
+        <span class="lbl">Publish To:</span><input type="text" name="publish" value="light4/qweqwewqe/command" id="Publish"><br />
+        <input type="hidden" name="enable" value="Y" id="hide" />
         <button type="submit" class="btn">Save</button>
       </form>
     </div>
@@ -101,10 +102,26 @@
   </div>
 
   <script type="text/javascript">
+
+    function cb() {
+      if ($("#EnabledCB").is(':checked')) {
+        $("#hide").val("Y");
+      }
+      else {
+        $("#hide").val("N");
+      }
+    }
+
     $(
-    $.get('/loadmqttsettings',function( data ) {
+    $.get('/mqttloadsettings',function( data ) {
         s = eval(data);
-        $("#Enabled").val(s.enabled);
+        if (s.enable == "Y") {
+          $("#EnabledCB").prop('checked', true);
+        }
+        else {
+          $("#EnabledCB").prop('checked', false);
+        }
+        $("#hide").val(s.enable);
         $("#Server").val(s.server);
         $("#Subscribe").val(s.subscribe);
         $("#Publish").val(s.publish);

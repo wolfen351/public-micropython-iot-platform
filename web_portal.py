@@ -58,7 +58,7 @@ class WebPortal(Server):
             b"/lightstatus": self.lightstatus,
             b"/lightloadsettings": self.loadlightsettings,
             b"/lightsavesettings": self.savelightsettings,
-            b"/mqttloadsettings": self.loadmqtttsettings,
+            b"/mqttloadsettings": self.loadmqttsettings,
             b"/mqttsavesettings": self.savemqttsettings,
         }
 
@@ -167,7 +167,7 @@ class WebPortal(Server):
     def loadmqttsettings(self, params):
         settings =  self.mqtt.getsettings()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        data = b"{ \"enable\": %s, \"server\": %s, \"subscribe\": %s, \"publish\": %s }" % (settings[0], settings[1], settings[2], settings[3])
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
         gc.collect()
         return data, headers
 
