@@ -32,21 +32,15 @@
       height: 50px;
     }
 
-    .navbtn {
-      margin-top: 25px;
-      height:50px;
-      width: 130px;
-    }
-
     .sett {
       text-align: left;
       margin-left: auto;
       margin-right: auto;
-      width: 350px;
+      width: 500px; 
     }
 
     .sett input {
-      width: 100px;
+      /* width: 100px; */
       margin-left: 20px;
     }
 
@@ -59,6 +53,8 @@
     .sett button {
       margin-top: 25px;
       width: 80%;
+      margin-left: 10%; 
+      margin-right: 10%;
     }
 
     .lbl {
@@ -87,42 +83,24 @@
 <body>
   <h1>Light Controller</h1>
 
-  <br />
+  <div class="allsett">
+    <br />
+    <h3>Network Settings:</h3>
+    <h4>Please provide network settings here</h4>
 
-  <form action="/command" method="get">
-    <span>On:</span>
-    <button type="submit" name="on" value="1" class="btn on1">L1</button>
-    <button type="submit" name="on" value="2" class="btn on2">L2</button>
-    <button type="submit" name="on" value="3" class="btn on3">L3</button>
-    <button type="submit" name="on" value="4" class="btn on4">L4</button>
-  </form>
-  <form action="/command" method="get">
-    <span>Off:</span>
-    <button type="submit" name="off" value="1" class="btn off1">L1</button>
-    <button type="submit" name="off" value="2" class="btn off2">L2</button>
-    <button type="submit" name="off" value="3" class="btn off3">L3</button>
-    <button type="submit" name="off" value="4" class="btn off4">L4</button>
-  </form>
-  <form action="/command" method="get">
-    <span>Auto:</span>
-    <button type="submit" name="auto" value="1" class="btn auto1">L1</button>
-    <button type="submit" name="auto" value="2" class="btn auto2">L2</button>
-    <button type="submit" name="auto" value="3" class="btn auto3">L3</button>
-    <button type="submit" name="auto" value="4" class="btn auto4">L4</button>
-  </form>
-
-  <div class="status">
-    <div class="light light1">1</div>
-    <div class="light light2">2</div>
-    <div class="light light3">3</div>
-    <div class="light light4">4</div>
+    <div class="sett">
+      <form action="/netsettings" method="get">
+        <span class="lbl">SSID:</span><input type="text" name="Ssid" value="NETWORK" id="Ssid"><br />
+        <span class="lbl">Password:</span><input type="password" name="Password" value="******" id="Password"><br />
+        <span class="lbl">Type:</span><input type="radio" name="Type" value="DHCP" id="dhcp">DHCP<input type="radio" name="Type" value="Static" id="Static">Static<br />
+        <span class="lbl">IP:</span><input type="text" name="Ip" value="10.10.10.1" id="Ip"><br />
+        <span class="lbl">Netmask:</span><input type="text" name="Netmask" value="10.10.10.1" id="Netmask"><br />
+        <span class="lbl">Gateway:</span><input type="text" name="Gateway" value="10.10.10.1" id="Gateway"><br />
+        <button type="submit" class="btn">Save</button>
+      </form>
+    </div>
   </div>
 
-  <div class="nav">
-    <input type="button" class="navbtn" value="Light Settings" onclick="window.location='/light'"></input>
-    <input type="button" class="navbtn" value="MQTT Settings" onclick="window.location='/mqtt'"></input>
-    <input type="button" class="navbtn" value="Network Settings" onclick="window.location='/network'"></input>
-  </div>
 
   <script type="text/javascript">
     var intervalId = setInterval(function() {
@@ -156,6 +134,17 @@
       });
     }, 2000);
 
+    $(
+    $.get('/loadsettings',function( data ) {
+        s = eval(data);
+        $("#TimeOn").val(s.timeOn);
+        $("#Delay1").val(s.delay1);
+        $("#Delay2").val(s.delay2);
+        $("#Delay3").val(s.delay3);
+        $("#Delay4").val(s.delay4);
+
+      })
+    );
   </script>
 
 </body>

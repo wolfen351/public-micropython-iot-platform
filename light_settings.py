@@ -47,7 +47,7 @@ class LightSettings:
         1. Delete settings file from disk.
         2. Reset to defaults
         """
-        print("Attempting to remove {}".format(self.CRED_FILE))
+        print("Attempting to remove {}".format(self.SETTINGS_FILE))
         try:
             uos.remove(self.SETTINGS_FILE)
         except OSError:

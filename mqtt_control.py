@@ -1,4 +1,5 @@
 from mqtt import MQTTClient
+from mqtt_settings import MqttSettings
 import ubinascii
 import machine
 import network
@@ -11,6 +12,8 @@ class MQTTControl():
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.topic_sub = b'light4/%s/command/#' % (self.client_id)
         self.topic_pub = b'light4/%s/status' % (self.client_id)
+        self.def_topic_sub = b'light4/%s/command/#' % (self.client_id)
+        self.def_topic_pub = b'light4/%s/status' % (self.client_id)
         self.client = None
         self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None]
 
@@ -105,12 +108,52 @@ class MQTTControl():
         self.lights = lights
         self.mosfet = mosfet
 
-        self.sta_if = network.WLAN(network.STA_IF)
-        self.connect_and_subscribe()
-        self.post_status()
+        settings = MqttSettings()
+        settings.load()
+        self.enabled = settings.Enable
+        self.mqtt_server = settings.Server
+        if (settings.Subscribe != b""):
+            self.topic_sub = settings.Subscribe
+        if (settings.Publish != b""):
+            self.topic_pub = settings.Publish
 
-        print("MQTT Client started")
+        if (self.enabled == b"Y"):
+            self.sta_if = network.WLAN(network.STA_IF)
+            self.connect_and_subscribe()
+            self.post_status()
+            print("MQTT Client started")
+        else:
+            print("MQTT Disabled")
+
+    def settings(self, settingsVals):
+        # Apply the new settings
+        self.enabled = settingsVals[0]
+        self.mqtt_server = settingsVals[1]
+
+        if (settingsVals[2] != b""):
+            self.topic_sub = settingsVals[2]
+        else:
+            self.topic_sub = self.def_topic_sub
+
+        if (settingsVals[3] != b""):
+            self.topic_pub = settingsVals[3]
+        else: 
+            self.topic_pub = self.def_topic_pub
+
+        # Save the settings to disk
+        settings = MqttSettings()
+        settings.Enable = self.enabled
+        settings.Server = self.mqtt_server
+        settings.Subscribe = self.topic_sub
+        settings.Publish = self.topic_pub
+        print(settings)
+        settings.write()
+    
+    def getsettings(self):
+        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
+        return s
 
     def tick(self):
-        self.client.check_msg()
-        self.post_status()
+        if (self.enabled == b"Y"):
+            self.client.check_msg()
+            self.post_status()

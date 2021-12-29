@@ -50,15 +50,21 @@ class WebPortal(Server):
         self.conns = dict()
         self.routes = {
             b"/": b"./web_index.html", 
+            b"/light": b"./web_light.html", 
+            b"/mqtt": b"./web_mqtt.html", 
+            b"/network": b"./web_network.html", 
             b"/command": self.command, 
-            b"/settings": self.settings,
-            b"/lightstatus": self.lightstatus,
             b"/mosfetstatus": self.mosfetstatus,
-            b"/loadsettings": self.loadsettings,
+            b"/lightstatus": self.lightstatus,
+            b"/lightloadsettings": self.loadlightsettings,
+            b"/lightsavesettings": self.savelightsettings,
+            b"/mqttloadsettings": self.loadmqtttsettings,
+            b"/mqttsavesettings": self.savemqttsettings,
         }
 
         self.ssid = None
         self.lights = None
+        self.mqtt = None
 
         # queue up to 5 connection requests before refusing
         self.sock.listen(5)
@@ -135,34 +141,49 @@ class WebPortal(Server):
 
         return b"", headers
 
-    def loadsettings(self, params):
-        # Read form params
+    def loadlightsettings(self, params):
         settings =  self.lights.getsettings()
-
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
         data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
-
         gc.collect()
         return data, headers
 
-    def settings(self, params):
+    def savelightsettings(self, params):
         # Read form params
         TimeOn = unquote(params.get(b"TimeOn", None))
         Delay1 = unquote(params.get(b"Delay1", None))
         Delay2 = unquote(params.get(b"Delay2", None))
         Delay3 = unquote(params.get(b"Delay3", None))
         Delay4 = unquote(params.get(b"Delay4", None))
-
         settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
         self.lights.settings(settings)
-
         headers = (
             b"HTTP/1.1 307 Temporary Redirect\r\n"
             b"Location: /\r\n"
         )
-
         gc.collect()
+        return b"", headers
+    
+    def loadmqttsettings(self, params):
+        settings =  self.mqtt.getsettings()
+        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+        data = b"{ \"enable\": %s, \"server\": %s, \"subscribe\": %s, \"publish\": %s }" % (settings[0], settings[1], settings[2], settings[3])
+        gc.collect()
+        return data, headers
 
+    def savemqttsettings(self, params):
+        # Read form params
+        enable = unquote(params.get(b"enable", None))
+        server = unquote(params.get(b"server", None))
+        subscribe = unquote(params.get(b"subscribe", None))
+        publish = unquote(params.get(b"publish", None))
+        settings = (enable, server, subscribe, publish)
+        self.mqtt.settings(settings)
+        headers = (
+            b"HTTP/1.1 307 Temporary Redirect\r\n"
+            b"Location: /\r\n"
+        )
+        gc.collect()
         return b"", headers
    
     def lightstatus(self, params):
@@ -289,9 +310,10 @@ class WebPortal(Server):
             del self.conns[sid]
         gc.collect()
 
-    def start(self, lights):
+    def start(self, lights, mqtt):
         print("Web server started")
         self.lights = lights
+        self.mqtt = mqtt
 
     def tick(self):
         # check for socket events and handle them

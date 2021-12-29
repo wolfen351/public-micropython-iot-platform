@@ -58,7 +58,7 @@ try:
     print()
     print("Starting Web..")
     web = WebPortal()
-    web.start(lights);
+    web.start(lights, mqtt);
     gc.collect()
 
     print("Ready!")
