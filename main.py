@@ -31,12 +31,13 @@ try:
     gc.collect()
 
     # Import other modules needed
+    from mqtt_control import MQTTControl
+    from web_portal import WebPortal
+    from web_processor import WebProcessor
+    from light_control import LightControl
+    from mosfet_control import MosfetControl
     from d1mini_pins import PIN_LED
     from machine import Pin
-    from light_control import LightControl
-    from web_portal import WebPortal
-    from mqtt_control import MQTTControl
-    from mosfet_control import MosfetControl
 
     print()
     print("Starting MosfetControl..")
@@ -56,9 +57,14 @@ try:
     gc.collect()
 
     print()
+    print("Starting WebProcessor..")
+    webProcessor = WebProcessor()
+    webProcessor.start(lights, mqtt)
+    
+    print()
     print("Starting Web..")
     web = WebPortal()
-    web.start(lights, mqtt);
+    web.start(webProcessor);
     gc.collect()
 
     print("Ready!")

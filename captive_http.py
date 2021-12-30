@@ -115,7 +115,7 @@ class HTTPServer(Server):
         password = unquote(params.get(b"password", None))
 
         # Write out credentials
-        NetSettings(ssid=ssid, password=password).write()
+        NetSettings(Ssid=ssid, Password=password).write()
         self.captive_portal.waiting_for_new_creds = False
 
         headers = (

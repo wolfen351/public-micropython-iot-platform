@@ -2,7 +2,6 @@ import uerrno
 import uio
 import uselect as select
 import usocket as socket
-
 from collections import namedtuple
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
@@ -11,33 +10,6 @@ ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
 from server import Server
 
 import gc
-
-
-def unquote(string):
-    """stripped down implementation of urllib.parse unquote_to_bytes"""
-
-    if not string:
-        return b''
-
-    if isinstance(string, str):
-        string = string.encode('utf-8')
-
-    # split into substrings on each escape character
-    bits = string.split(b'%')
-    if len(bits) == 1:
-        return string  # there was no escape character
-    
-    res = [bits[0]]  # everything before the first escape character
-
-    # for each escape character, get the next two digits and convert to 
-    for item in bits[1:]:
-        code = item[:2]
-        char = bytes([int(code, 16)])  # convert to utf-8-encoded byte
-        res.append(char)  # append the converted character
-        res.append(item[2:])  # append anything else that occurred before the next escape character
-    
-    return b''.join(res)
-
 
 class WebPortal(Server):
     def __init__(self):
@@ -48,23 +20,7 @@ class WebPortal(Server):
 
         self.request = dict()
         self.conns = dict()
-        self.routes = {
-            b"/": b"./web_index.html", 
-            b"/light": b"./web_light.html", 
-            b"/mqtt": b"./web_mqtt.html", 
-            b"/network": b"./web_network.html", 
-            b"/command": self.command, 
-            b"/mosfetstatus": self.mosfetstatus,
-            b"/lightstatus": self.lightstatus,
-            b"/lightloadsettings": self.loadlightsettings,
-            b"/lightsavesettings": self.savelightsettings,
-            b"/mqttloadsettings": self.loadmqttsettings,
-            b"/mqttsavesettings": self.savemqttsettings,
-        }
-
         self.ssid = None
-        self.lights = None
-        self.mqtt = None
 
         # queue up to 5 connection requests before refusing
         self.sock.listen(5)
@@ -84,8 +40,6 @@ class WebPortal(Server):
             self.write_to(sock)
 
     def accept(self, server_sock):
-        """accept a new client request socket and register it for polling"""
-
         try:
             client_sock, addr = server_sock.accept()
         except OSError as e:
@@ -97,8 +51,6 @@ class WebPortal(Server):
         self.poller.register(client_sock, select.POLLIN)
 
     def parse_request(self, req):
-        """parse a raw HTTP request to get items of interest"""
-
         req_lines = req.split(b"\r\n")
         req_type, full_path, http_ver = req_lines[0].split(b" ")
         path = full_path.split(b"?")
@@ -117,95 +69,10 @@ class WebPortal(Server):
 
         return ReqInfo(req_type, base_path, query_params, host)
 
-    def command(self, params):
-        # Read form params
-        on = unquote(params.get(b"on", None))
-        off = unquote(params.get(b"off", None))
-        auto = unquote(params.get(b"auto", None))
-
-        if (on != b""):
-            self.lights.command(1, on)
-
-        if (off != b""):
-            self.lights.command(0, off)
-
-        if (auto != b""):
-            self.lights.command(2, auto)
-
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
-
-        gc.collect()
-
-        return b"", headers
-
-    def loadlightsettings(self, params):
-        settings =  self.lights.getsettings()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
-        gc.collect()
-        return data, headers
-
-    def savelightsettings(self, params):
-        # Read form params
-        TimeOn = unquote(params.get(b"TimeOn", None))
-        Delay1 = unquote(params.get(b"Delay1", None))
-        Delay2 = unquote(params.get(b"Delay2", None))
-        Delay3 = unquote(params.get(b"Delay3", None))
-        Delay4 = unquote(params.get(b"Delay4", None))
-        settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
-        self.lights.settings(settings)
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
-        gc.collect()
-        return b"", headers
-    
-    def loadmqttsettings(self, params):
-        settings =  self.mqtt.getsettings()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
-        gc.collect()
-        return data, headers
-
-    def savemqttsettings(self, params):
-        # Read form params
-        enable = unquote(params.get(b"enable", None))
-        server = unquote(params.get(b"server", None))
-        subscribe = unquote(params.get(b"subscribe", None))
-        publish = unquote(params.get(b"publish", None))
-        settings = (enable, server, subscribe, publish)
-        self.mqtt.settings(settings)
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
-        gc.collect()
-        return b"", headers
-   
-    def lightstatus(self, params):
-        status = self.lights.status()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-       
-        gc.collect()
-        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
-        return data, headers
-
-    def mosfetstatus(self, params):
-        status = self.lights.mosfetstatus()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-       
-        gc.collect()
-        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
-        return data, headers
-
     def get_response(self, req):
         """generate a response body and headers, given a route"""
 
-        headers = b"HTTP/1.1 200 OK\r\n"
+        headers = self.okayHeader
         route = self.routes.get(req.path, None)
 
         if type(route) is bytes:
@@ -223,8 +90,6 @@ class WebPortal(Server):
         return uio.BytesIO(b""), headers
 
     def read(self, s):
-        """read in client request from socket"""
-
         data = s.read()
         if not data:
             # no data in the TCP stream, so close the socket
@@ -265,8 +130,6 @@ class WebPortal(Server):
         self.poller.modify(s, select.POLLOUT)
 
     def write_to(self, sock):
-        """write the next message to an open socket"""
-
         # get the data that needs to be written to this socket
         c = self.conns[id(sock)]
         if c:
@@ -285,8 +148,6 @@ class WebPortal(Server):
                 self.buff_advance(c, bytes_written)
 
     def buff_advance(self, c, bytes_written):
-        """advance the writer buffer for this connection to next outgoing bytes"""
-
         if bytes_written == c.write_range[1] - c.write_range[0]:
             # wrote all the bytes we had buffered into the memoryview
             # set next write start on the memoryview to the beginning
@@ -300,7 +161,6 @@ class WebPortal(Server):
             c.write_range[0] += bytes_written
 
     def close(self, s):
-        """close the socket, unregister from poller, and delete connection"""
         s.close()
         self.poller.unregister(s)
         sid = id(s)
@@ -310,10 +170,26 @@ class WebPortal(Server):
             del self.conns[sid]
         gc.collect()
 
-    def start(self, lights, mqtt):
+    def start(self, webProcessor):
+
+        self.webProcessor = webProcessor
+
+        self.routes = {
+            b"/": b"./web_index.html", 
+            b"/light": b"./web_light.html", 
+            b"/mqtt": b"./web_mqtt.html", 
+            b"/network": b"./web_network.html", 
+            b"/command": self.webProcessor.command, 
+            b"/mosfetstatus": self.webProcessor.mosfetstatus,
+            b"/lightstatus": self.webProcessor.lightstatus,
+            b"/lightloadsettings": self.webProcessor.loadlightsettings,
+            b"/lightsavesettings": self.webProcessor.savelightsettings,
+            b"/mqttloadsettings": self.webProcessor.loadmqttsettings,
+            b"/mqttsavesettings": self.webProcessor.savemqttsettings,
+            b"/netloadsettings": self.webProcessor.loadnetsettings,
+            b"/netsavesettings": self.webProcessor.savenetsettings
+        }
         print("Web server started")
-        self.lights = lights
-        self.mqtt = mqtt
 
     def tick(self):
         # check for socket events and handle them

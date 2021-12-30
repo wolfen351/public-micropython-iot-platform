@@ -6,12 +6,12 @@ import utime as time
 
 from captive_dns import DNSServer
 from captive_http import HTTPServer
-from wifi_settings import WifiSettings
+from network_settings import NetSettings
 
 
 class CaptivePortal:
     AP_IP = "192.168.4.1"
-    MAX_CONN_ATTEMPTS = 10
+    MAX_CONN_ATTEMPTS = 3
     AP_WAIT = 300 #seconds
 
     def __init__(self, project="WOLF"):
@@ -20,7 +20,7 @@ class CaptivePortal:
 
         self.essid = b"%s-%s" % (project,  binascii.hexlify(self.sta_if.config("mac")[-3:]))
 
-        self.creds = WifiSettings()
+        self.creds = NetSettings()
 
         self.dns_server = None
         self.http_server = None
@@ -48,11 +48,11 @@ class CaptivePortal:
         self.waiting_for_new_creds = True
 
     def connect_to_wifi(self):
-        print("Trying to connect to SSID '{:s}' with password {:s}".format(self.creds.ssid, self.creds.password))
+        print("Trying to connect to SSID '{:s}' with password {:s}".format(self.creds.Ssid, self.creds.Password))
 
         # initiate the connection
         self.sta_if.active(True)
-        self.sta_if.connect(self.creds.ssid, self.creds.password)
+        self.sta_if.connect(self.creds.Ssid, self.creds.Password)
 
         attempts = 1
         while attempts <= self.MAX_CONN_ATTEMPTS:
@@ -61,14 +61,14 @@ class CaptivePortal:
                 time.sleep(2)
                 attempts += 1
             else:
-                print("Connected to {:s}".format(self.creds.ssid))
+                print("Connected to {:s}".format(self.creds.Ssid))
                 self.local_ip = self.sta_if.ifconfig()[0]
                 print("IP ", self.local_ip)
                 return True
 
         print(
             "Failed to connect to {:s} with {:s}. WLAN status={:d}".format(
-                self.creds.ssid, self.creds.password, self.sta_if.status()
+                self.creds.Ssid, self.creds.Password, self.sta_if.status()
             )
         )
 
@@ -144,9 +144,9 @@ class CaptivePortal:
             self.http_server.stop(self.poller)
         if self.dns_server:
             self.dns_server.stop(self.poller)
-        self.ap_if.active(False)
-        self.ap_if = None
-        self.cleanup()
+        if self.ap_if != None:
+            self.ap_if.active(False)
+            self.ap_if = None
         gc.collect()
 
     def try_connect_from_file(self):

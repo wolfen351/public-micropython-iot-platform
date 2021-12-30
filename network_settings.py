@@ -16,7 +16,7 @@ class NetSettings:
         """Write settings to settings_file if valid input found."""
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
-                f.write(",".join([self.Ssid, self.Password, self.Type, self.Ip, self.Netmask, self.Gateway]))
+                f.write(b",".join([self.Ssid, self.Password, self.Type, self.Ip, self.Netmask, self.Gateway]))
             print("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
