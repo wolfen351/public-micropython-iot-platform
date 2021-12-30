@@ -95,7 +95,6 @@ class WebProcessor():
     def lightstatus(self, params):
         status = self.lights.status()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-       
         gc.collect()
         data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
         return data, headers
@@ -103,7 +102,6 @@ class WebProcessor():
     def mosfetstatus(self, params):
         status = self.lights.mosfetstatus()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-       
         gc.collect()
         data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
         return data, headers
@@ -112,20 +110,14 @@ class WebProcessor():
         on = self.unquote(params.get(b"on", None))
         off = self.unquote(params.get(b"off", None))
         auto = self.unquote(params.get(b"auto", None))
-
         if (on != b""):
             self.lights.command(1, on)
-
         if (off != b""):
             self.lights.command(0, off)
-
         if (auto != b""):
             self.lights.command(2, auto)
-
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-
         gc.collect()
-
         return b"", headers
 
     def start(self, lights, mqtt):
