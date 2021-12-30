@@ -1,7 +1,6 @@
 # Main 
 from machine import sleep
 import machine
-from network_settings import NetSettings
 
 try:
     import gc
@@ -17,10 +16,11 @@ try:
 
     # Apply the settings the user wants
     try:
+        from network_settings import NetSettings
         netSettings = NetSettings()
         netSettings.load()
         if (netSettings.Type == b"Static"):
-            sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, '8.8.8.8'))
+            sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
         del netSettings
         del NetSettings
         gc.collect()
