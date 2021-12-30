@@ -8,6 +8,7 @@ import time
 class MQTTControl():
     def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.init = False
 
     def sub_cb(self, topic, msg):
         if topic.decode('ASCII').endswith(b'/on'):
@@ -113,11 +114,6 @@ class MQTTControl():
         else:
             self.topic_pub = b'light4/%s/status' % (self.client_id)
 
-        if (self.enabled == b"Y"):
-            self.sta_if = network.WLAN(network.STA_IF)
-            self.connect_and_subscribe()
-            self.post_status()
-
     def settings(self, settingsVals):
         # Apply the new settings
         self.enabled = settingsVals[0]
@@ -147,5 +143,14 @@ class MQTTControl():
 
     def tick(self):
         if (self.enabled == b"Y"):
-            self.client.check_msg()
-            self.post_status()
+            self.sta_if = network.WLAN(network.STA_IF)
+            if (self.sta_if.isconnected()):
+                try:
+                    if (not self.init):
+                        self.init = True
+                        self.connect_and_subscribe()
+                    self.client.check_msg()
+                    self.post_status()
+                except Exception as e:
+                    self.connect_and_subscribe()
+                    raise

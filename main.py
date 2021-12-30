@@ -4,48 +4,6 @@ import machine
 
 try:
     import gc
-    import time
-
-    print('\nConnecting to wifi...')
-    import network
-    sta_if = network.WLAN(network.STA_IF)
-    t_end = time.time() + 15
-    sta_if.active(True)
-    while not sta_if.isconnected() and time.time() < t_end:
-        pass
-
-    # Apply the settings the user wants
-    try:
-        from network_settings import NetSettings
-        netSettings = NetSettings()
-        netSettings.load()
-        if (netSettings.Type == b"Static"):
-            sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
-        del netSettings
-        del NetSettings
-        gc.collect()
-    except Exception as e:
-        import sys
-        sys.print_exception(e)
-        pass
-
-    if (sta_if.isconnected()):
-        print('network config:', sta_if.ifconfig())
-
-        # Disable AP
-        sta_ap = network.WLAN(network.AP_IF)
-        sta_ap.active(False)
-        del sta_ap
-    else:
-        print("No Wifi, starting portal to configure wifi")
-        from captive_portal import CaptivePortal
-        portal = CaptivePortal(project="4LIGHTS")
-        portal.start()
-        import machine
-        machine.reset() # Reboot to save RAM
-    del t_end
-    del sta_if
-    gc.collect()
 
     # Import other modules needed
     from mqtt_control import MQTTControl
@@ -55,6 +13,12 @@ try:
     from mosfet_control import MosfetControl
     from d1mini_pins import PIN_LED
     from machine import Pin
+    from wifi import WifiHandler
+
+    print()
+    print("Starting Wifi..")
+    wifi = WifiHandler()
+    wifi.start()
 
     print()
     print("Starting MosfetControl..")
@@ -102,13 +66,14 @@ try:
     while True:
         # tick all the modules
 
-        runSafe(web.tick);
-        runSafe(mqtt.tick);
-        runSafe(lights.tick);
-        runSafe(mosfet.tick);
+        runSafe(wifi.tick)
+        runSafe(web.tick)
+        runSafe(mqtt.tick)
+        runSafe(lights.tick)
+        runSafe(mosfet.tick)
 
         # blink blue 
-        ledOn = not ledOn;
+        ledOn = not ledOn
         if (ledOn):
             led.on()
         else:
