@@ -79,7 +79,8 @@ try:
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            pass
+            import sys
+            sys.print_exception(e)
 
     while True:
         # tick all the modules

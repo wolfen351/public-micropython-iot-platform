@@ -72,7 +72,7 @@ class WebPortal(Server):
     def get_response(self, req):
         """generate a response body and headers, given a route"""
 
-        headers = self.okayHeader
+        headers = "HTTP/1.1 200 Ok\r\n"
         route = self.routes.get(req.path, None)
 
         if type(route) is bytes:
