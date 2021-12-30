@@ -66,12 +66,22 @@ try:
     led = Pin(PIN_LED, Pin.OUT)
     ledOn = True
 
+    def runSafe(cmd):
+        try:
+            cmd()
+            gc.collect()
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            pass
+
     while True:
         # tick all the modules
-        web.tick()
-        mqtt.tick()
-        lights.tick()
-        mosfet.tick()
+
+        runSafe(web.tick);
+        runSafe(mqtt.tick);
+        runSafe(lights.tick);
+        runSafe(mosfet.tick);
 
         # blink blue 
         ledOn = not ledOn;

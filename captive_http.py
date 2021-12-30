@@ -4,7 +4,7 @@ import uselect as select
 import usocket as socket
 
 from collections import namedtuple
-from wifi_settings import WifiSettings
+from network_settings import NetSettings
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
 ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
@@ -115,7 +115,7 @@ class HTTPServer(Server):
         password = unquote(params.get(b"password", None))
 
         # Write out credentials
-        WifiSettings(ssid=ssid, password=password).write()
+        NetSettings(ssid=ssid, password=password).write()
         self.captive_portal.waiting_for_new_creds = False
 
         headers = (
