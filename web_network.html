@@ -89,7 +89,7 @@
     <h4>Please provide network settings here</h4>
 
     <div class="sett">
-      <form action="/netsettings" method="get">
+      <form action="/netsavesettings" method="get">
         <span class="lbl">SSID:</span><input type="text" name="Ssid" value="NETWORK" id="Ssid"><br />
         <span class="lbl">Password:</span><input type="password" name="Password" value="******" id="Password"><br />
         <span class="lbl">Type:</span><input type="radio" name="Type" value="DHCP" id="dhcp">DHCP<input type="radio" name="Type" value="Static" id="Static">Static<br />
@@ -105,14 +105,14 @@
 
   <script type="text/javascript">
     $(
-    $.get('/loadnetsettings',function( data ) {
+    $.get('/netloadsettings',function( data ) {
         s = eval(data);
-        $("#TimeOn").val(s.timeOn);
-        $("#Delay1").val(s.delay1);
-        $("#Delay2").val(s.delay2);
-        $("#Delay3").val(s.delay3);
-        $("#Delay4").val(s.delay4);
-
+        $("#Ssid").val(s.ssid);
+        $("#Password").val(s.password);
+        $("#Type").val(s.type);
+        $("#Ip").val(s.ip);
+        $("#Netmask").val(s.netmask);
+        $("#Gateway").val(s.gateway);
       })
     );
   </script>

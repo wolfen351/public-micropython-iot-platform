@@ -8,7 +8,7 @@ class WebProcessor():
         self.lights = None
         self.mqtt = None
 
-    def unquote(string):
+    def unquote(self, string):
         if not string:
             return b''
 
@@ -47,10 +47,7 @@ class WebProcessor():
         Delay4 = self.unquote(params.get(b"Delay4", None))
         settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
         self.lights.settings(settings)
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         gc.collect()
         return b"", headers
 
@@ -69,10 +66,7 @@ class WebProcessor():
         publish = self.unquote(params.get(b"publish", None))
         settings = (enable, server, subscribe, publish)
         self.mqtt.settings(settings)
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         gc.collect()
         return b"", headers
     
@@ -86,16 +80,15 @@ class WebProcessor():
 
     def savenetsettings(self, params):
         # Read form params
-        enable = self.unquote(params.get(b"enable", None))
-        server = self.unquote(params.get(b"server", None))
-        subscribe = self.unquote(params.get(b"subscribe", None))
-        publish = self.unquote(params.get(b"publish", None))
-        settings = (enable, server, subscribe, publish)
-        self.mqtt.settings(settings)
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
+        ssid = self.unquote(params.get(b"Ssid", None))
+        password = self.unquote(params.get(b"Password", None))
+        type = self.unquote(params.get(b"Type", None))
+        ip = self.unquote(params.get(b"Ip", None))
+        netmask = self.unquote(params.get(b"Netmask", None))
+        gateway = self.unquote(params.get(b"Gateway", None))
+        settings = NetSettings(ssid, password, type, ip, netmask, gateway)
+        settings.write()
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         gc.collect()
         return b"", headers
 
@@ -129,10 +122,7 @@ class WebProcessor():
         if (auto != b""):
             self.lights.command(2, auto)
 
-        headers = (
-            b"HTTP/1.1 307 Temporary Redirect\r\n"
-            b"Location: /\r\n"
-        )
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
 
         gc.collect()
 
