@@ -1,7 +1,4 @@
 # Main 
-from machine import sleep
-import machine
-
 try:
     import gc
 
@@ -60,8 +57,7 @@ try:
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            import sys
-            sys.print_exception(e)
+            print(e)
 
     while True:
         # tick all the modules
@@ -85,8 +81,8 @@ try:
 except KeyboardInterrupt:
     raise
 except Exception as e:
-    import sys
+    import sys, machine
     sys.print_exception(e)
     print("Fatal exception, will reboot in 30s")
-    sleep(10000)
+    machine.sleep(10)
     machine.reset()

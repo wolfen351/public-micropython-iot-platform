@@ -1,5 +1,3 @@
-import gc
-
 from network_settings import NetSettings
 
 class WebProcessor():
@@ -35,7 +33,6 @@ class WebProcessor():
         settings =  self.lights.getsettings()
         headers = self.okayHeader
         data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
-        gc.collect()
         return data, headers
 
     def savelightsettings(self, params):
@@ -48,14 +45,12 @@ class WebProcessor():
         settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
         self.lights.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        gc.collect()
         return b"", headers
 
     def loadmqttsettings(self, params):
         settings =  self.mqtt.getsettings()
         headers = self.okayHeader
         data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
-        gc.collect()
         return data, headers
 
     def savemqttsettings(self, params):
@@ -67,7 +62,6 @@ class WebProcessor():
         settings = (enable, server, subscribe, publish)
         self.mqtt.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        gc.collect()
         return b"", headers
     
     def loadnetsettings(self, params):
@@ -75,7 +69,6 @@ class WebProcessor():
         settings.load()
         headers = self.okayHeader
         data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (settings.Ssid, settings.Password, settings.Type, settings.Ip, settings.Netmask, settings.Gateway)
-        gc.collect()
         return data, headers
 
     def savenetsettings(self, params):
@@ -89,20 +82,17 @@ class WebProcessor():
         settings = NetSettings(ssid, password, type, ip, netmask, gateway)
         settings.write()
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        gc.collect()
         return b"", headers
 
     def lightstatus(self, params):
         status = self.lights.status()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        gc.collect()
         data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
         return data, headers
 
     def mosfetstatus(self, params):
         status = self.lights.mosfetstatus()
         headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        gc.collect()
         data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
         return data, headers
 
@@ -117,7 +107,6 @@ class WebProcessor():
         if (auto != b""):
             self.lights.command(2, auto)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        gc.collect()
         return b"", headers
 
     def start(self, lights, mqtt):

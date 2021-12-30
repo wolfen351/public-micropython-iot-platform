@@ -9,7 +9,7 @@ fi
 read MAX < lastedit.dat
 #echo "Last sync was at $MAX"
 
-for f in *.py *.html *.sh
+for f in *.py *.html *.sh *.js
 do
   THIS=$(stat -c %Y $f)
 #  echo $f was edited at $THIS

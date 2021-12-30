@@ -9,8 +9,6 @@ ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
 
 from server import Server
 
-import gc
-
 class WebPortal(Server):
     def __init__(self):
 
@@ -116,7 +114,6 @@ class WebPortal(Server):
         headers += "\r\n"
         # TCP/IP MSS is 536 bytes, so create buffer of this size and
         # initially populate with header data
-        gc.collect()
         buff = bytearray(headers + "\x00" * (536 - len(headers)))
         # use memoryview to read directly into the buffer without copying
         buffmv = memoryview(buff)
@@ -169,7 +166,6 @@ class WebPortal(Server):
             del self.request[sid]
         if sid in self.conns:
             del self.conns[sid]
-        gc.collect()
 
     def start(self, webProcessor):
 
@@ -177,6 +173,7 @@ class WebPortal(Server):
 
         self.routes = {
             b"/": b"./web_index.html", 
+            b"/jquery-3.6.0.min.js": b"./jquery-3.6.0.min.js",
             b"/light": b"./web_light.html", 
             b"/mqtt": b"./web_mqtt.html", 
             b"/network": b"./web_network.html", 

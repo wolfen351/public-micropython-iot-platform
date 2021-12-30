@@ -28,6 +28,7 @@ class WifiHandler():
         sta_if.active(True)
         netSettings = NetSettings()
         netSettings.load()
+        print("Network: ", netSettings.Ssid)
         sta_if.connect(netSettings.Ssid, netSettings.Password)
         if (netSettings.Type == b"Static"):
             sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
