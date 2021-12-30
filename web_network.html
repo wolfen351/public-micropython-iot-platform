@@ -92,7 +92,10 @@
       <form action="/netsavesettings" method="get">
         <span class="lbl">SSID:</span><input type="text" name="Ssid" value="NETWORK" id="Ssid"><br />
         <span class="lbl">Password:</span><input type="password" name="Password" value="******" id="Password"><br />
-        <span class="lbl">Type:</span><input type="radio" name="Type" value="DHCP" id="dhcp">DHCP<input type="radio" name="Type" value="Static" id="Static">Static<br />
+        <span class="lbl">Type:</span>
+            <input type="radio" name="Type" value="DHCP" id="dhcp">DHCP
+            <input type="radio" name="Type" value="Static" id="Static">Static
+            <br />
         <span class="lbl">IP:</span><input type="text" name="Ip" value="10.10.10.1" id="Ip"><br />
         <span class="lbl">Netmask:</span><input type="text" name="Netmask" value="10.10.10.1" id="Netmask"><br />
         <span class="lbl">Gateway:</span><input type="text" name="Gateway" value="10.10.10.1" id="Gateway"><br />
@@ -109,6 +112,14 @@
         s = eval(data);
         $("#Ssid").val(s.ssid);
         $("#Password").val(s.password);
+
+        if (s.type == "DHCP") {
+          $("#dhcp").prop('checked',true);
+        }
+        else {
+          $("#Static").prop('checked',true);
+        }
+        
         $("#Type").val(s.type);
         $("#Ip").val(s.ip);
         $("#Netmask").val(s.netmask);

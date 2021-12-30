@@ -106,5 +106,5 @@ except Exception as e:
     import sys
     sys.print_exception(e)
     print("Fatal exception, will reboot in 30s")
-    sleep(30000)
+    sleep(10000)
     machine.reset()
