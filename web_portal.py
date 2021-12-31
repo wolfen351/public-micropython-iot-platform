@@ -70,7 +70,7 @@ class WebPortal(Server):
     def get_response(self, req):
         """generate a response body and headers, given a route"""
 
-        headers = "HTTP/1.1 200 Ok\r\n"
+        headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
 
         if type(route) is bytes:
@@ -81,7 +81,7 @@ class WebPortal(Server):
             # call a function, which may or may not return a response
             response = route(req.params)
             body = response[0] or b""
-            headers = response[1] or headers
+            headers = response[1]
             return uio.BytesIO(body), headers
 
         headers = b"HTTP/1.1 404 Not Found\r\n"
