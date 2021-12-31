@@ -24,14 +24,19 @@ class WifiHandler():
 
     def station(self):
         print('\nConnecting to wifi...')
-        sta_if = network.WLAN(network.STA_IF)
-        sta_if.active(True)
-        netSettings = NetSettings()
-        netSettings.load()
-        print("Network: ", netSettings.Ssid)
-        sta_if.connect(netSettings.Ssid, netSettings.Password)
-        if (netSettings.Type == b"Static"):
-            sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
+        try:
+            sta_if = network.WLAN(network.STA_IF)
+            sta_if.active(True)
+            netSettings = NetSettings()
+            netSettings.load()
+            print("Network: ", netSettings.Ssid)
+            sta_if.connect(netSettings.Ssid, netSettings.Password)
+            if (netSettings.Type == b"Static"):
+                sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print("Error connecting to wifi:", e)
     
     def tick(self):
         if (not self.apMode):

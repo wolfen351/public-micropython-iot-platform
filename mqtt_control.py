@@ -11,6 +11,7 @@ class MQTTControl():
         self.init = False
 
     def sub_cb(self, topic, msg):
+        print("MQTT: ", topic, msg)
         if topic.decode('ASCII').endswith(b'/on'):
             self.lights.command(1, msg)
         if topic.decode('ASCII').endswith(b'/off'):

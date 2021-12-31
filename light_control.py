@@ -40,6 +40,9 @@ class LightControl:
     # When to change a light to OFF
     LightOffAt = [-1, -1, -1, -1]
 
+    # State of the triggers
+    Triggers = [1, 1]
+
     def __init__(self, mosfet):
         self.Mosfet = mosfet
         self.calculateTimes()
@@ -147,6 +150,14 @@ class LightControl:
         # Main Loop
         Trigger1 = self.T1.value()
         Trigger2 = self.T2.value()
+
+        if (self.Triggers[0] != Trigger1):
+            self.Triggers[0] = Trigger1
+            print("Light: Trigger 1")
+
+        if (self.Triggers[1] != Trigger1):
+            self.Triggers[1] = Trigger1
+            print("Light: Trigger 2")
 
         for l in range(4):
             # If trigger 1 is set, then go upwards (connected to ground)
