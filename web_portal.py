@@ -20,8 +20,8 @@ class WebPortal(Server):
         self.conns = dict()
         self.ssid = None
 
-        # queue up to 5 connection requests before refusing
-        self.sock.listen(5)
+        # queue up to 3 connection requests before refusing
+        self.sock.listen(3)
         self.sock.setblocking(False)
 
     #@micropython.native
