@@ -5,8 +5,8 @@ try:
     # Import other modules needed
     from mqtt_control import MQTTControl
     from web_portal import WebPortal
-    from web_processor import WebProcessor
     from light_control import LightControl
+    from web_processor import WebProcessor
     from mosfet_control import MosfetControl
     from d1mini_pins import PIN_LED
     from machine import Pin
@@ -84,5 +84,5 @@ except Exception as e:
     import sys, machine
     sys.print_exception(e)
     print("Fatal exception, will reboot in 30s")
-    machine.sleep(10)
+    machine.sleep(10000)
     machine.reset()

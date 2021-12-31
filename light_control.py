@@ -50,6 +50,9 @@ class LightControl:
     def status(self):
         return self.Modes
 
+    def triggers(self):
+        return self.Triggers
+
     def mosfetstatus(self):
         return self.Mosfet.status()
 
@@ -155,8 +158,8 @@ class LightControl:
             self.Triggers[0] = Trigger1
             print("Light: Trigger 1")
 
-        if (self.Triggers[1] != Trigger1):
-            self.Triggers[1] = Trigger1
+        if (self.Triggers[1] != Trigger2):
+            self.Triggers[1] = Trigger2
             print("Light: Trigger 2")
 
         for l in range(4):

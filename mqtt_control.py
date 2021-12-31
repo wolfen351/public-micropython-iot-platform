@@ -9,6 +9,7 @@ class MQTTControl():
     def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
+        self.status = None
 
     def sub_cb(self, topic, msg):
         print("MQTT: ", topic, msg)
@@ -42,6 +43,9 @@ class MQTTControl():
             self.lights.command(2, auto)
 
     def post_status(self):
+
+        if (self.status == None):
+            self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None, None, None]
 
         if (self.status[0] != "true"):
             self.client.publish(self.topic_pub + b"/wifi/up", "true")
@@ -95,9 +99,16 @@ class MQTTControl():
             self.client.publish(self.topic_pub + b"/light/L4", str(ls[3]))
             self.status[11] = ls[3]
 
+        ts = self.lights.triggers()
+        if (self.status[12] != ts[0]):
+            self.client.publish(self.topic_pub + b"/light/T1", str(ts[0]))
+            self.status[12] = ts[0]
+
+        if (self.status[13] != ts[1]):
+            self.client.publish(self.topic_pub + b"/light/T2", str(ts[1]))
+            self.status[13] = ts[1]
 
     def start(self, lights, mosfet):
-        self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None]
         self.lights = lights
         self.mosfet = mosfet
 
