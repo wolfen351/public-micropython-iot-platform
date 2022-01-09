@@ -3,7 +3,7 @@ try:
     import gc
 
     # Import other modules needed
-    from mqtt_control import MQTTControl
+    #from mqtt_control import MQTTControl
     from web_portal import WebPortal
     from light_control import LightControl
     from web_processor import WebProcessor
