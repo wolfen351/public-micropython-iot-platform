@@ -1,3 +1,4 @@
+from serial_log import SerialLog
 import usocket as socket
 import uselect as select
 
@@ -17,10 +18,10 @@ class Server:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(addr)
 
-        #print(self.name, "listening on", addr)
+        SerialLog.log(self.name, "listening on", addr)
 
     def stop(self, poller):
         poller.unregister(self.sock)
         self.sock.close()
-        #print(self.name, "stopped")
+        SerialLog.log(self.name, "stopped")
  

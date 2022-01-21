@@ -1,6 +1,7 @@
 from light_settings import LightSettings
 from machine import Pin
 import time
+from serial_log import SerialLog
 
 class LightControl:
 
@@ -106,7 +107,7 @@ class LightControl:
         lightSettings.Delay1Setting = self.Delay1Setting
         lightSettings.Delay2Setting = self.Delay2Setting
         lightSettings.Delay3Setting = self.Delay3Setting
-        #print(lightSettings)
+        SerialLog.log(lightSettings)
         lightSettings.write()
     
     def getsettings(self):
@@ -160,11 +161,11 @@ class LightControl:
 
         if (self.Triggers[0] != Trigger1):
             self.Triggers[0] = Trigger1
-            #print("Light: Trigger 1")
+            SerialLog.log("Light: Trigger 1")
 
         if (self.Triggers[1] != Trigger2):
             self.Triggers[1] = Trigger2
-            #print("Light: Trigger 2")
+            SerialLog.log("Light: Trigger 2")
 
         diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
         self.lastrun = time.ticks_ms()
@@ -182,5 +183,5 @@ class LightControl:
             self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l], diff)
 
         # Debug output
-        #print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
+        #SerialLog.log("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
         #sleep(100)

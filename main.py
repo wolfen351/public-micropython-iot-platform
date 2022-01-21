@@ -1,5 +1,4 @@
 # Main 
-#print("Main.py")
 try:
     import gc
 
@@ -12,41 +11,44 @@ try:
     from machine import Pin
     from wifi import WifiHandler
     import sys, machine
+    from serial_log import SerialLog
     
-    #print()
-    #print("Starting Wifi..")
+    SerialLog.enable()
+
+    SerialLog.log()
+    SerialLog.log("Starting Wifi..")
     wifi = WifiHandler()
     wifi.start()
 
-    #print()
-    #print("Starting MosfetControl..")
+    SerialLog.log()
+    SerialLog.log("Starting MosfetControl..")
     mosfet = MosfetControl()
     mosfet.start();
 
-    #print()
-    #print("Starting LightControl..")
+    SerialLog.log()
+    SerialLog.log("Starting LightControl..")
     lights = LightControl(mosfet)
     lights.start();
     gc.collect()
 
-    #print()
-    #print("Starting MQTT..")
+    SerialLog.log()
+    SerialLog.log("Starting MQTT..")
     mqtt = MQTTControl()
     mqtt.start(lights, mosfet)
     gc.collect()
 
-    #print()
-    #print("Starting WebProcessor..")
+    SerialLog.log()
+    SerialLog.log("Starting WebProcessor..")
     webProcessor = WebProcessor()
     webProcessor.start(lights, mqtt)
     
-    #print()
-    #print("Starting Web..")
+    SerialLog.log()
+    SerialLog.log("Starting Web..")
     web = WebPortal()
     web.start(webProcessor);
     gc.collect()
 
-    #print("Ready!")
+    SerialLog.log("Ready!")
 
     led = Pin(15, Pin.OUT)
     ledOn = True
@@ -57,7 +59,7 @@ try:
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            #print(e)
+            SerialLog.log(e)
             sys.print_exception(e)
             gc.collect()
 
@@ -81,6 +83,6 @@ except KeyboardInterrupt:
     raise
 except Exception as e:
     sys.print_exception(e)
-    #print("Fatal exception, will reboot in 10s")
+    SerialLog.log("Fatal exception, will reboot in 10s")
     machine.sleep(10000)
     machine.reset()

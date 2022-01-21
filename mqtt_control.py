@@ -1,5 +1,6 @@
 from mqtt import MQTTClient
 from mqtt_settings import MqttSettings
+from serial_log import SerialLog
 import ubinascii
 import machine
 import network
@@ -13,7 +14,7 @@ class MQTTControl():
         self.sta_if = network.WLAN(network.STA_IF)
 
     def sub_cb(self, topic, msg):
-        #print("MQTT: ", topic, msg)
+        SerialLog.log("MQTT: ", topic, msg)
         if topic.decode('ASCII').endswith(b'/on'):
             self.lights.command(1, msg)
         if topic.decode('ASCII').endswith(b'/off'):
@@ -26,7 +27,7 @@ class MQTTControl():
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         self.client.subscribe(self.topic_sub)
-        #print('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
 
     def command(self, params):
         # Read form params

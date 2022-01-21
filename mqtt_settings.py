@@ -1,3 +1,4 @@
+from serial_log import SerialLog
 import uos
 
 class MqttSettings:
@@ -15,13 +16,13 @@ class MqttSettings:
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
                 f.write(",".join([self.Enable, self.Server, self.Subscribe, self.Publish]))
-            #print("Wrote settings to {:s}".format(self.SETTINGS_FILE))
+            SerialLog.log("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
         try:
             with open(self.SETTINGS_FILE, "rb") as f:
                 contents = f.read().split(b",")
-            #print("Loaded settings from {:s}".format(self.SETTINGS_FILE))
+            SerialLog.log("Loaded settings from {:s}".format(self.SETTINGS_FILE))
             if len(contents) == 4:
                 self.Enable = contents[0]
                 self.Server = contents[1]
@@ -31,7 +32,7 @@ class MqttSettings:
             if not self.is_valid():
                 self.remove()
 
-            #print(contents)
+            SerialLog.log(contents)
 
         except OSError:
             pass
@@ -43,7 +44,7 @@ class MqttSettings:
         1. Delete settings file from disk.
         2. Reset to defaults
         """
-        #print("Attempting to remove {}".format(self.SETTINGS_FILE))
+        SerialLog.log("Attempting to remove {}".format(self.SETTINGS_FILE))
         try:
             uos.remove(self.SETTINGS_FILE)
         except OSError:

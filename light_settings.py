@@ -1,3 +1,4 @@
+from serial_log import SerialLog
 import uos
 
 
@@ -17,14 +18,14 @@ class LightSettings:
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
                 f.write(",".join([str(self.TimeOnSetting),str(self.Delay0Setting),str(self.Delay1Setting),str(self.Delay2Setting),str(self.Delay3Setting)]))
-            #print("Wrote settings to {:s}".format(self.SETTINGS_FILE))
+            SerialLog.log("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
 
         try:
             with open(self.SETTINGS_FILE, "rb") as f:
                 contents = f.read().split(b",")
-            #print("Loaded Light Settings from {:s}".format(self.SETTINGS_FILE))
+            SerialLog.log("Loaded Light Settings from {:s}".format(self.SETTINGS_FILE))
             if len(contents) == 5:
                 self.TimeOnSetting = int(contents[0])
                 self.Delay0Setting = int(contents[1])
@@ -35,7 +36,7 @@ class LightSettings:
             if not self.is_valid():
                 self.remove()
 
-            #print(contents)
+            SerialLog.log(contents)
 
         except OSError:
             pass
@@ -47,7 +48,7 @@ class LightSettings:
         1. Delete settings file from disk.
         2. Reset to defaults
         """
-        #print("Attempting to remove {}".format(self.SETTINGS_FILE))
+        SerialLog.log("Attempting to remove {}".format(self.SETTINGS_FILE))
         try:
             uos.remove(self.SETTINGS_FILE)
         except OSError:
