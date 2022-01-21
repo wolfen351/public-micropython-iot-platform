@@ -81,7 +81,7 @@
       background-color: grey;
     }
   </style>
-  <script src="jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -125,35 +125,43 @@
   </div>
 
   <script type="text/javascript">
+
     var intervalId = setInterval(function() {
-      $.get('/lightstatus',function( data ) {
-        s = eval(data);
-        for (let i = 1; i < 5; i++) {
-          if (s['l'+i] == 0)
-            $(".off"+i).css("background-color", "darkgreen")
-          else
-            $(".off"+i).css("background-color", "#e9e9ed");
 
-          if (s['l'+i] == 1)
-            $(".on"+i).css("background-color", "darkgreen")
-          else
-            $(".on"+i).css("background-color", "#e9e9ed");
+      fetch('/lightstatus')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+          for (let i = 1; i < 5; i++) {
+            if (s['l'+i] == 0)
+              $(".off"+i).css("background-color", "darkgreen")
+            else
+              $(".off"+i).css("background-color", "#e9e9ed");
 
-          if (s['l'+i] == 2)
-            $(".auto"+i).css("background-color", "darkgreen")
-          else
-            $(".auto"+i).css("background-color", "#e9e9ed");
-        }
-      });
-      $.get('/mosfetstatus',function( data ) {
-        s = eval(data);
-        for (let i = 1; i < 5; i++) {
-          if (s['l'+i] == 1)
-            $(".light"+i).css("background-color", "red")
-          else
-            $(".light"+i).css("background-color", "grey");
-        }
-      });
+            if (s['l'+i] == 1)
+              $(".on"+i).css("background-color", "darkgreen")
+            else
+              $(".on"+i).css("background-color", "#e9e9ed");
+
+            if (s['l'+i] == 2)
+              $(".auto"+i).css("background-color", "darkgreen")
+            else
+              $(".auto"+i).css("background-color", "#e9e9ed");
+          }
+        });
+
+      fetch('/mosfetstatus')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+          for (let i = 1; i < 5; i++) {
+            if (s['l'+i] == 1)
+              $(".light"+i).css("background-color", "red")
+            else
+              $(".light"+i).css("background-color", "grey");
+          }
+        });
+
     }, 2000);
 
   </script>

@@ -77,7 +77,7 @@
       background-color: grey;
     }
   </style>
-  <script src="jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -125,8 +125,13 @@
     }
 
     $(
-    $.get('/mqttloadsettings',function( data ) {
-        s = eval(data);
+
+
+      fetch('/mqttloadsettings')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+
         if (s.enable == "Y") {
           $("#EnabledCB").prop('checked', true);
         }
@@ -137,7 +142,9 @@
         $("#Server").val(s.server);
         $("#Subscribe").val(s.subscribe);
         $("#Publish").val(s.publish);
+
       })
+
     );
   </script>
 

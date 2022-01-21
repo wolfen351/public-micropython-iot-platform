@@ -75,7 +75,7 @@
       background-color: grey;
     }
   </style>
-  <script src="jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -103,15 +103,20 @@
 
   <script type="text/javascript">
     $(
-    $.get('/lightloadsettings',function( data ) {
-        s = eval(data);
-        $("#TimeOn").val(s.timeOn);
-        $("#Delay1").val(s.delay1);
-        $("#Delay2").val(s.delay2);
-        $("#Delay3").val(s.delay3);
-        $("#Delay4").val(s.delay4);
 
-      })
+
+      fetch('/lightloadsettings')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+
+          $("#TimeOn").val(s.timeOn);
+          $("#Delay1").val(s.delay1);
+          $("#Delay2").val(s.delay2);
+          $("#Delay3").val(s.delay3);
+          $("#Delay4").val(s.delay4);
+        })
+      
     );
   </script>
 
