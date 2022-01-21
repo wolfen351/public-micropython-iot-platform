@@ -77,6 +77,8 @@ class WebPortal(Server):
         if (route == None):
             # assume misses are a file
             try:
+                if (req.path.endswith(b".js")):
+                    headers += "content-type: application/javascript\r\n"
                 return open(req.path, "rb"), headers
             except OSError: #open failed
                 headers = b"HTTP/1.1 404 Not Found\r\n"
