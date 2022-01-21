@@ -13,6 +13,8 @@ class WebProcessor():
         if isinstance(string, str):
             string = string.encode('utf-8')
 
+        string = string.replace(b"+", b" ")
+
         # split into substrings on each escape character
         bits = string.split(b'%')
         if len(bits) == 1:
