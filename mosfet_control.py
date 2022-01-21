@@ -1,12 +1,11 @@
-from d1mini_pins import PIN_D5, PIN_D6, PIN_D7, PIN_D8
 from machine import Pin
 
 class MosfetControl:
     # Switch Pins
-    S1 = Pin(PIN_D8, Pin.OUT)
-    S2 = Pin(PIN_D7, Pin.OUT)
-    S3 = Pin(PIN_D6, Pin.OUT)
-    S4 = Pin(PIN_D5, Pin.OUT)
+    S1 = Pin(12, Pin.OUT)
+    S2 = Pin(11, Pin.OUT)
+    S3 = Pin(9, Pin.OUT)
+    S4 = Pin(7, Pin.OUT)
     Switches = [S1, S2, S3, S4]
 
     # Actual of the lights (0=Off, 1=On)
