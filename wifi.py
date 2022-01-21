@@ -18,10 +18,11 @@ class WifiHandler():
 
     def ap(self):
         # Enable AP
-        print("Starting AP..")
+        essid = "4Lights-%s" % self.client_id.decode('ascii')
+        print("Starting AP: " + essid)
         self.ap_if.active(True)
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "192.168.4.1"))
-        self.ap_if.config(essid=b"4Lights-"+self.client_id, authmode=network.AUTH_OPEN)
+        self.ap_if.config(essid=essid, authmode=network.AUTH_OPEN)
         self.sta_if.active(False)
         self.apMode = True
 

@@ -23,9 +23,9 @@ done
 # record the last time a file was edited
 stat -c %Y *.py | sort -r | head -n 1 > lastedit.dat
 
-# reboot
-# esptool.py chip_id
-echo "Reboot the S2 Mini and press a key"
-read -p "Press any key to continue... " -n1 -s
+echo "Rebooting..."
+echo -e "import machine\r\nmachine.reset()\r\n" | picocom -qrx 1000 -b 115200 /dev/ttyACM0
+sleep 1
+echo "Ctrl+A,X to exit"
+picocom /dev/ttyACM0 -b 115200 -q
 
-picocom /dev/ttyACM0 -b 115200

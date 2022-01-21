@@ -1,4 +1,5 @@
 # Main 
+print("Main.py")
 try:
     import gc
 
@@ -10,7 +11,8 @@ try:
     from mosfet_control import MosfetControl
     from machine import Pin
     from wifi import WifiHandler
-
+    import sys, machine
+    
     print()
     print("Starting Wifi..")
     wifi = WifiHandler()
@@ -36,7 +38,7 @@ try:
     print()
     print("Starting WebProcessor..")
     webProcessor = WebProcessor()
-    webProcessor.start(lights, None)
+    webProcessor.start(lights, mqtt)
     
     print()
     print("Starting Web..")
@@ -56,6 +58,7 @@ try:
             raise
         except Exception as e:
             print(e)
+            sys.print_exception(e)
             gc.collect()
 
     while True:
@@ -77,7 +80,6 @@ try:
 except KeyboardInterrupt:
     raise
 except Exception as e:
-    import sys, machine
     sys.print_exception(e)
     print("Fatal exception, will reboot in 10s")
     machine.sleep(10000)

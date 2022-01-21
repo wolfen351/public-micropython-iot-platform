@@ -98,6 +98,16 @@
         <button type="submit" class="btn">Save</button>
 
         <button onclick="window.history.back()" class="btn">Back</button>
+
+        <pre>
+          Example Commands:
+
+          Switch 1 to ON:   mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/on' -m 1
+          Switch 2 to OFF:  mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/off' -m 2
+          Switch 3 to AUTO: mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/auto' -m 3
+
+          The topic specifies the action and the payload the number 1-4
+        </pre>
       </form>
     </div>
 

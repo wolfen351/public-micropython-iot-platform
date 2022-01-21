@@ -1,5 +1,6 @@
 from light_settings import LightSettings
-from machine import Pin, sleep
+from machine import Pin
+import time
 
 class LightControl:
 
@@ -12,12 +13,11 @@ class LightControl:
 
     def calculateTimes(self):
         # Convert to number of loops using a timefactor
-        self.TimeFactor = 16# ms per loop
-        self.TimeOn = self.TimeOnSetting//self.TimeFactor
-        self.Delay0 = self.Delay0Setting//self.TimeFactor
-        self.Delay1 = self.Delay1Setting//self.TimeFactor
-        self.Delay2 = self.Delay2Setting//self.TimeFactor
-        self.Delay3 = self.Delay3Setting//self.TimeFactor
+        self.TimeOn = self.TimeOnSetting
+        self.Delay0 = self.Delay0Setting
+        self.Delay1 = self.Delay1Setting
+        self.Delay2 = self.Delay2Setting
+        self.Delay3 = self.Delay3Setting
 
         # Periods
         self.Period0 = self.Delay0
@@ -67,6 +67,9 @@ class LightControl:
         self.Delay2Setting = lightSettings.Delay2Setting
         self.Delay3Setting = lightSettings.Delay3Setting
 
+        self.lastrun = time.ticks_ms()
+        self.calculateTimes()
+
     def convert(self, value):
         if (value == b"1"):
             return 0
@@ -111,10 +114,12 @@ class LightControl:
         return s
 
     # Prevent a number from dropping below -1
-    def clampTo(self, val):
-        if (val < -1):
+    def clampTo(self, old, new):
+        if (old > 0 and new < 0):
+            return 0
+        if (old < 0 and new < 0):
             return -1
-        return val
+        return new
 
     # Make the number at most the desired value, deal with -1 
     def atMost(self, current, desired):
@@ -144,8 +149,8 @@ class LightControl:
                 self.Mosfet.off(Light)
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
-    def subtract(self, OnAt, OffAt):
-        return self.clampTo(OnAt - 1), self.clampTo(OffAt - 1)
+    def subtract(self, OnAt, OffAt, diff):
+        return self.clampTo(OnAt, OnAt - diff), self.clampTo(OffAt, OffAt - diff)
 
 
     def tick(self):
@@ -161,6 +166,9 @@ class LightControl:
             self.Triggers[1] = Trigger2
             print("Light: Trigger 2")
 
+        diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
+        self.lastrun = time.ticks_ms()
+
         for l in range(4):
             # If trigger 1 is set, then go upwards (connected to ground)
             if (Trigger1 == 0):
@@ -171,7 +179,7 @@ class LightControl:
                 self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
 
             self.setLight(self.LightOnAt[l], self.LightOffAt[l], l+1, self.Modes[l])
-            self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l])
+            self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l], diff)
 
         # Debug output
         #print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")

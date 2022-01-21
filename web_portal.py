@@ -75,7 +75,11 @@ class WebPortal(Server):
 
         if (route == None):
             # assume misses are a file
-            return open(req.path, "rb"), headers
+            try:
+                return open(req.path, "rb"), headers
+            except OSError: #open failed
+                headers = b"HTTP/1.1 404 Not Found\r\n"
+                return uio.BytesIO(b""), headers
 
         if type(route) is bytes:
             # expect a filename, so return contents of file
