@@ -21,7 +21,7 @@ class WifiHandler():
         print("Starting AP..")
         self.ap_if.active(True)
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "192.168.4.1"))
-        self.ap_if.config(essid="4Lights-"+self.client_id, authmode=network.AUTH_OPEN)
+        self.ap_if.config(essid=b"4Lights-"+self.client_id, authmode=network.AUTH_OPEN)
         self.sta_if.active(False)
         self.apMode = True
 

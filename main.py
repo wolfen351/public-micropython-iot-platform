@@ -8,7 +8,6 @@ try:
     from light_control import LightControl
     from web_processor import WebProcessor
     from mosfet_control import MosfetControl
-    from d1mini_pins import PIN_LED
     from machine import Pin
     from wifi import WifiHandler
 
@@ -47,17 +46,17 @@ try:
 
     print("Ready!")
 
-    led = Pin(PIN_LED, Pin.OUT)
+    led = Pin(15, Pin.OUT)
     ledOn = True
 
     def runSafe(cmd):
         try:
             cmd()
-            gc.collect()
         except KeyboardInterrupt:
             raise
         except Exception as e:
             print(e)
+            gc.collect()
 
     while True:
         # tick all the modules
@@ -74,9 +73,6 @@ try:
             led.on()
         else:
             led.off()
-
-        #clean up
-        gc.collect()
 
 except KeyboardInterrupt:
     raise

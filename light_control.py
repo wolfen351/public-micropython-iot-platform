@@ -1,4 +1,3 @@
-from d1mini_pins import PIN_D1, PIN_D2
 from light_settings import LightSettings
 from machine import Pin, sleep
 
@@ -30,9 +29,9 @@ class LightControl:
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
 
-    # Trigger Pins by connecting D1 or D3 to ground
-    T1 = Pin(PIN_D1, Pin.IN) 
-    T2 = Pin(PIN_D2, Pin.IN)
+    # Trigger Pins by connecting D1 or D2 to ground
+    T1 = Pin(35, Pin.IN) 
+    T2 = Pin(33, Pin.IN)
 
     # When to change a light to ON
     LightOnAt = [-1, -1, -1, -1]
