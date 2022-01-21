@@ -1,4 +1,6 @@
 from network_settings import NetSettings
+import machine
+from wifi import WifiHandler
 
 class WebProcessor():
     def __init__(self):
@@ -84,6 +86,10 @@ class WebProcessor():
         settings = NetSettings(ssid, password, type, ip, netmask, gateway)
         settings.write()
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        # Connect using the new settings
+        WifiHandler().station()
+        # Reboot
+        machine.reset()
         return b"", headers
 
     def lightstatus(self, params):

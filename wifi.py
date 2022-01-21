@@ -1,3 +1,5 @@
+import machine
+import ubinascii
 import network
 from network_settings import NetSettings
 import time
@@ -7,6 +9,9 @@ class WifiHandler():
         self.connected = False
         self.apMode = False
         self.downTimeStart = time.time() # start time of no connection
+        self.sta_if = network.WLAN(network.STA_IF)
+        self.ap_if = network.WLAN(network.AP_IF)
+        self.client_id = ubinascii.hexlify(machine.unique_id())
 
     def start(self):
         self.station()
@@ -14,25 +19,22 @@ class WifiHandler():
     def ap(self):
         # Enable AP
         print("Starting AP..")
-        ap_if = network.WLAN(network.AP_IF)
-        sta_if = network.WLAN(network.STA_IF)
-        ap_if.active(True)
-        ap_if.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "192.168.4.1"))
-        ap_if.config(essid="4Lights", authmode=network.AUTH_OPEN)
-        sta_if.active(False)
+        self.ap_if.active(True)
+        self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "192.168.4.1"))
+        self.ap_if.config(essid="4Lights-"+self.client_id, authmode=network.AUTH_OPEN)
+        self.sta_if.active(False)
         self.apMode = True
 
     def station(self):
         print('\nConnecting to wifi...')
         try:
-            sta_if = network.WLAN(network.STA_IF)
-            sta_if.active(True)
+            self.sta_if.active(True)
             netSettings = NetSettings()
             netSettings.load()
             print("Network: ", netSettings.Ssid)
-            sta_if.connect(netSettings.Ssid, netSettings.Password)
+            self.sta_if.connect(netSettings.Ssid, netSettings.Password)
             if (netSettings.Type == b"Static"):
-                sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
+                self.sta_if.ifconfig((netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
         except KeyboardInterrupt:
             raise
         except Exception as e:
@@ -40,19 +42,18 @@ class WifiHandler():
     
     def tick(self):
         if (not self.apMode):
-            sta_if = network.WLAN(network.STA_IF)
-            if (sta_if.isconnected() and not self.connected):
+            if (self.sta_if.isconnected() and not self.connected):
                 # New connection
                 self.connected = True
-                print('Wifi Connected! Config:', sta_if.ifconfig())
+                print('Wifi Connected! Config:', self.sta_if.ifconfig())
                 # Disable AP
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
 
-            if (not sta_if.isconnected() and self.connected):
+            if (not self.sta_if.isconnected() and self.connected):
                 # Connection lost
                 print('Wifi Connection lost, waiting to reconnect')
 
-            if (not sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
+            if (not self.sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
                 # Never connected, run an AP after 30s of downtime
                 self.ap()

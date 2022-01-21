@@ -10,6 +10,7 @@ class MQTTControl():
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None
+        self.sta_if = network.WLAN(network.STA_IF)
 
     def sub_cb(self, topic, msg):
         print("MQTT: ", topic, msg)
@@ -155,7 +156,6 @@ class MQTTControl():
 
     def tick(self):
         if (self.enabled == b"Y"):
-            self.sta_if = network.WLAN(network.STA_IF)
             if (self.sta_if.isconnected()):
                 try:
                     if (not self.init):

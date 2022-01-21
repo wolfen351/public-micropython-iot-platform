@@ -16,9 +16,16 @@ do
   if [ $THIS -gt $MAX ]
   then
     echo Sending $f
-    ampy --port /dev/ttyUSB0 put $f
+    ampy --port /dev/ttyACM0 put $f
   fi
 done
 
 # record the last time a file was edited
 stat -c %Y *.py | sort -r | head -n 1 > lastedit.dat
+
+# reboot
+# esptool.py chip_id
+echo "Reboot the S2 Mini and press a key"
+read -p "Press any key to continue... " -n1 -s
+
+picocom /dev/ttyACM0 -b 115200

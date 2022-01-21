@@ -3,7 +3,7 @@ try:
     import gc
 
     # Import other modules needed
-    #from mqtt_control import MQTTControl
+    from mqtt_control import MQTTControl
     from web_portal import WebPortal
     from light_control import LightControl
     from web_processor import WebProcessor
@@ -28,11 +28,11 @@ try:
     lights.start();
     gc.collect()
 
-    # print()
-    # print("Starting MQTT..")
-    # mqtt = MQTTControl()
-    # mqtt.start(lights, mosfet)
-    # gc.collect()
+    print()
+    print("Starting MQTT..")
+    mqtt = MQTTControl()
+    mqtt.start(lights, mosfet)
+    gc.collect()
 
     print()
     print("Starting WebProcessor..")
@@ -64,7 +64,7 @@ try:
 
         runSafe(wifi.tick)
         runSafe(web.tick)
-        #runSafe(mqtt.tick)
+        runSafe(mqtt.tick)
         runSafe(lights.tick)
         runSafe(mosfet.tick)
 
@@ -83,6 +83,6 @@ except KeyboardInterrupt:
 except Exception as e:
     import sys, machine
     sys.print_exception(e)
-    print("Fatal exception, will reboot in 30s")
+    print("Fatal exception, will reboot in 10s")
     machine.sleep(10000)
     machine.reset()

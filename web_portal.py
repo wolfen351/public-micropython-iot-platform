@@ -73,6 +73,10 @@ class WebPortal(Server):
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
 
+        if (route == None):
+            # assume misses are a file
+            return open(req.path, "rb"), headers
+
         if type(route) is bytes:
             # expect a filename, so return contents of file
             return open(route, "rb"), headers
@@ -173,7 +177,6 @@ class WebPortal(Server):
 
         self.routes = {
             b"/": b"./web_index.html", 
-            b"/jquery-3.6.0.min.js": b"./jquery-3.6.0.min.js",
             b"/light": b"./web_light.html", 
             b"/mqtt": b"./web_mqtt.html", 
             b"/network": b"./web_network.html", 
