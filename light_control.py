@@ -106,7 +106,7 @@ class LightControl:
         lightSettings.Delay1Setting = self.Delay1Setting
         lightSettings.Delay2Setting = self.Delay2Setting
         lightSettings.Delay3Setting = self.Delay3Setting
-        print(lightSettings)
+        #print(lightSettings)
         lightSettings.write()
     
     def getsettings(self):
@@ -160,11 +160,11 @@ class LightControl:
 
         if (self.Triggers[0] != Trigger1):
             self.Triggers[0] = Trigger1
-            print("Light: Trigger 1")
+            #print("Light: Trigger 1")
 
         if (self.Triggers[1] != Trigger2):
             self.Triggers[1] = Trigger2
-            print("Light: Trigger 2")
+            #print("Light: Trigger 2")
 
         diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
         self.lastrun = time.ticks_ms()

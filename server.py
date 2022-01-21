@@ -17,10 +17,10 @@ class Server:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(addr)
 
-        print(self.name, "listening on", addr)
+        #print(self.name, "listening on", addr)
 
     def stop(self, poller):
         poller.unregister(self.sock)
         self.sock.close()
-        print(self.name, "stopped")
+        #print(self.name, "stopped")
  

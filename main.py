@@ -1,5 +1,5 @@
 # Main 
-print("Main.py")
+#print("Main.py")
 try:
     import gc
 
@@ -13,40 +13,40 @@ try:
     from wifi import WifiHandler
     import sys, machine
     
-    print()
-    print("Starting Wifi..")
+    #print()
+    #print("Starting Wifi..")
     wifi = WifiHandler()
     wifi.start()
 
-    print()
-    print("Starting MosfetControl..")
+    #print()
+    #print("Starting MosfetControl..")
     mosfet = MosfetControl()
     mosfet.start();
 
-    print()
-    print("Starting LightControl..")
+    #print()
+    #print("Starting LightControl..")
     lights = LightControl(mosfet)
     lights.start();
     gc.collect()
 
-    print()
-    print("Starting MQTT..")
+    #print()
+    #print("Starting MQTT..")
     mqtt = MQTTControl()
     mqtt.start(lights, mosfet)
     gc.collect()
 
-    print()
-    print("Starting WebProcessor..")
+    #print()
+    #print("Starting WebProcessor..")
     webProcessor = WebProcessor()
     webProcessor.start(lights, mqtt)
     
-    print()
-    print("Starting Web..")
+    #print()
+    #print("Starting Web..")
     web = WebPortal()
     web.start(webProcessor);
     gc.collect()
 
-    print("Ready!")
+    #print("Ready!")
 
     led = Pin(15, Pin.OUT)
     ledOn = True
@@ -57,7 +57,7 @@ try:
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            print(e)
+            #print(e)
             sys.print_exception(e)
             gc.collect()
 
@@ -81,6 +81,6 @@ except KeyboardInterrupt:
     raise
 except Exception as e:
     sys.print_exception(e)
-    print("Fatal exception, will reboot in 10s")
+    #print("Fatal exception, will reboot in 10s")
     machine.sleep(10000)
     machine.reset()

@@ -52,7 +52,7 @@ class WebPortal(Server):
         req_lines = req.split(b"\r\n")
         req_type, full_path, http_ver = req_lines[0].split(b" ")
         path = full_path.split(b"?")
-        print("Web:", path)
+        #print("Web:", path)
         base_path = path[0]
         query = path[1] if len(path) > 1 else None
         query_params = (
@@ -194,7 +194,7 @@ class WebPortal(Server):
             b"/netloadsettings": self.webProcessor.loadnetsettings,
             b"/netsavesettings": self.webProcessor.savenetsettings
         }
-        print("Web server started")
+        #print("Web server started")
 
     def tick(self):
         # check for socket events and handle them

@@ -1,10 +1,10 @@
 {
     "python.autoComplete.extraPaths": [
-        "c:/Users/drpar/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.8/microExamples/code-completion"
+        "/home/wolfen/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.8/microExamples/code-completion"
     ],
     "python.linting.pylintArgs": [
         "--init-hook",
-        "import sys; sys.path.append('c:/Users/drpar/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.8/microExamples/code-completion')"
+        "import sys; sys.path.append('/home/wolfen/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.8/microExamples/code-completion')"
     ],
     "files.associations": {
         ".mpyproject.json": "jsonc"
