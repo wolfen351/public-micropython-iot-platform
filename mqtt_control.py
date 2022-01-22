@@ -22,6 +22,12 @@ class MQTTControl():
         self.client.connect()
         self.client.subscribe(self.topic_sub)
         SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        self.home_assistant_configure()
+
+    def home_assistant_configure(self):
+        homeAssistantUrl = "homeassistant/sensor/%s" % self.client_id.decode('ascii')
+        self.client.publish("%s/config" % homeAssistantUrl, '{"name":"temp_sensor_%s","dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id.decode('ascii'), homeAssistantUrl) )
+#        self.client.publish("%s/config" % homeAssistantUrl, '{"name":"temp_sensor_%s","device_class":"temperature","state_topic":"%s/state","unit_of_meas":"°C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id, homeAssistantUrl))
 
     def post_status(self):
 
