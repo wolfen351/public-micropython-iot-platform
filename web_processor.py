@@ -5,8 +5,6 @@ from wifi import WifiHandler
 class WebProcessor():
     def __init__(self):
         self.okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        self.lights = None
-        self.mqtt = None
 
     def unquote(self, string):
         if not string:
@@ -32,24 +30,6 @@ class WebProcessor():
             res.append(item[2:])  # append anything else that occurred before the next escape character
         
         return b''.join(res)
-
-    def loadlightsettings(self, params):
-        settings =  self.lights.getsettings()
-        headers = self.okayHeader
-        data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
-        return data, headers
-
-    def savelightsettings(self, params):
-        # Read form params
-        TimeOn = self.unquote(params.get(b"TimeOn", None))
-        Delay1 = self.unquote(params.get(b"Delay1", None))
-        Delay2 = self.unquote(params.get(b"Delay2", None))
-        Delay3 = self.unquote(params.get(b"Delay3", None))
-        Delay4 = self.unquote(params.get(b"Delay4", None))
-        settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
-        self.lights.settings(settings)
-        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        return b"", headers
 
     def loadmqttsettings(self, params):
         settings =  self.mqtt.getsettings()
@@ -92,31 +72,5 @@ class WebProcessor():
         machine.reset()
         return b"", headers
 
-    def lightstatus(self, params):
-        status = self.lights.status()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
-        return data, headers
-
-    def mosfetstatus(self, params):
-        status = self.lights.mosfetstatus()
-        headers = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
-        data = b"{ \"l1\": %s, \"l2\": %s, \"l3\": %s, \"l4\": %s }" % (status[0], status[1], status[2], status[3])
-        return data, headers
-
-    def command(self, params):
-        on = self.unquote(params.get(b"on", None))
-        off = self.unquote(params.get(b"off", None))
-        auto = self.unquote(params.get(b"auto", None))
-        if (on != b""):
-            self.lights.command(1, on)
-        if (off != b""):
-            self.lights.command(0, off)
-        if (auto != b""):
-            self.lights.command(2, auto)
-        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        return b"", headers
-
-    def start(self, lights, mqtt):
-        self.lights = lights
+    def start(self, mqtt):
         self.mqtt = mqtt

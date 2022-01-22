@@ -184,14 +184,8 @@ class WebPortal(Server):
 
         self.routes = {
             b"/": b"./web_index.html", 
-            b"/light": b"./web_light.html", 
             b"/mqtt": b"./web_mqtt.html", 
             b"/network": b"./web_network.html", 
-            b"/command": self.webProcessor.command, 
-            b"/mosfetstatus": self.webProcessor.mosfetstatus,
-            b"/lightstatus": self.webProcessor.lightstatus,
-            b"/lightloadsettings": self.webProcessor.loadlightsettings,
-            b"/lightsavesettings": self.webProcessor.savelightsettings,
             b"/mqttloadsettings": self.webProcessor.loadmqttsettings,
             b"/mqttsavesettings": self.webProcessor.savemqttsettings,
             b"/netloadsettings": self.webProcessor.loadnetsettings,

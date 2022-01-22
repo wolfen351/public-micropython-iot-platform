@@ -15,12 +15,6 @@ class MQTTControl():
 
     def sub_cb(self, topic, msg):
         SerialLog.log("MQTT: ", topic, msg)
-        if topic.decode('ASCII').endswith(b'/on'):
-            self.lights.command(1, msg)
-        if topic.decode('ASCII').endswith(b'/off'):
-            self.lights.command(0, msg)
-        if topic.decode('ASCII').endswith(b'/auto'):
-            self.lights.command(2, msg)
 
     def connect_and_subscribe(self):
         self.client = MQTTClient(self.client_id, self.mqtt_server)
@@ -28,21 +22,6 @@ class MQTTControl():
         self.client.connect()
         self.client.subscribe(self.topic_sub)
         SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
-
-    def command(self, params):
-        # Read form params
-        on = 1
-        off = 1
-        auto = 1
-
-        if (on != b""):
-            self.lights.command(1, on)
-
-        if (off != b""):
-            self.lights.command(0, off)
-
-        if (auto != b""):
-            self.lights.command(2, auto)
 
     def post_status(self):
 
@@ -66,53 +45,7 @@ class MQTTControl():
             self.client.publish(self.topic_pub + b"/wifi/rssi", str(self.sta_if.status('rssi')))
             self.status[3] = time.time() + 60
 
-        ms = self.mosfet.status()
-        
-        if (self.status[4] != ms[0]):
-            self.client.publish(self.topic_pub + b"/mosfet/S1", str(ms[0]))
-            self.status[4] = ms[0]
-
-        if (self.status[5] != ms[1]):
-            self.client.publish(self.topic_pub + b"/mosfet/S2", str(ms[1]))
-            self.status[5] = ms[1]
-
-        if (self.status[6] != ms[2]):
-            self.client.publish(self.topic_pub + b"/mosfet/S3", str(ms[2]))
-            self.status[6] = ms[2]
-
-        if (self.status[7] != ms[3]):
-            self.client.publish(self.topic_pub + b"/mosfet/S4", str(ms[3]))
-            self.status[7] = ms[3]
-
-        ls = self.lights.status()
-        if (self.status[8] != ls[0]):
-            self.client.publish(self.topic_pub + b"/light/L1", str(ls[0]))
-            self.status[8] = ls[0]
-
-        if (self.status[9] != ls[1]):
-            self.client.publish(self.topic_pub + b"/light/L2", str(ls[1]))
-            self.status[9] = ls[1]
-
-        if (self.status[10] != ls[2]):
-            self.client.publish(self.topic_pub + b"/light/L3", str(ls[2]))
-            self.status[10] = ls[2]
-
-        if (self.status[11] != ls[3]):
-            self.client.publish(self.topic_pub + b"/light/L4", str(ls[3]))
-            self.status[11] = ls[3]
-
-        ts = self.lights.triggers()
-        if (self.status[12] != ts[0]):
-            self.client.publish(self.topic_pub + b"/light/T1", str(ts[0]))
-            self.status[12] = ts[0]
-
-        if (self.status[13] != ts[1]):
-            self.client.publish(self.topic_pub + b"/light/T2", str(ts[1]))
-            self.status[13] = ts[1]
-
-    def start(self, lights, mosfet):
-        self.lights = lights
-        self.mosfet = mosfet
+    def start(self):
 
         settings = MqttSettings()
         settings.load()
@@ -121,12 +54,12 @@ class MQTTControl():
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
         else:
-            self.topic_sub = b'light4/%s/command/#' % (self.client_id)
+            self.topic_sub = b'tempMon/%s/command/#' % (self.client_id)
 
         if (settings.Publish != b""):
             self.topic_pub = settings.Publish
         else:
-            self.topic_pub = b'light4/%s/status' % (self.client_id)
+            self.topic_pub = b'tempMon/%s/status' % (self.client_id)
 
     def settings(self, settingsVals):
         # Apply the new settings
@@ -136,12 +69,12 @@ class MQTTControl():
         if (settingsVals[2] != b""):
             self.topic_sub = settingsVals[2]
         else:
-            self.topic_sub = b'light4/%s/command/#' % (self.client_id)
+            self.topic_sub = b'tempMon/%s/command/#' % (self.client_id)
 
         if (settingsVals[3] != b""):
             self.topic_pub = settingsVals[3]
         else: 
-            self.topic_pub = b'light4/%s/status' % (self.client_id)
+            self.topic_pub = b'tempMon/%s/status' % (self.client_id)
 
         # Save the settings to disk
         settings = MqttSettings()

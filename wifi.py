@@ -19,7 +19,7 @@ class WifiHandler():
 
     def ap(self):
         # Enable AP
-        essid = "4Lights-%s" % self.client_id.decode('ascii')
+        essid = "TempMon-%s" % self.client_id.decode('ascii')
         SerialLog.log("Starting AP: " + essid)
         self.ap_if.active(True)
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "192.168.4.1"))

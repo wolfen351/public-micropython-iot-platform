@@ -5,9 +5,7 @@ try:
     # Import other modules needed
     from mqtt_control import MQTTControl
     from web_portal import WebPortal
-    from light_control import LightControl
     from web_processor import WebProcessor
-    from mosfet_control import MosfetControl
     from machine import Pin
     from wifi import WifiHandler
     import sys, machine
@@ -21,26 +19,15 @@ try:
     wifi.start()
 
     SerialLog.log()
-    SerialLog.log("Starting MosfetControl..")
-    mosfet = MosfetControl()
-    mosfet.start();
-
-    SerialLog.log()
-    SerialLog.log("Starting LightControl..")
-    lights = LightControl(mosfet)
-    lights.start();
-    gc.collect()
-
-    SerialLog.log()
     SerialLog.log("Starting MQTT..")
     mqtt = MQTTControl()
-    mqtt.start(lights, mosfet)
+    mqtt.start()
     gc.collect()
 
     SerialLog.log()
     SerialLog.log("Starting WebProcessor..")
     webProcessor = WebProcessor()
-    webProcessor.start(lights, mqtt)
+    webProcessor.start(mqtt)
     
     SerialLog.log()
     SerialLog.log("Starting Web..")
@@ -69,8 +56,6 @@ try:
         runSafe(wifi.tick)
         runSafe(web.tick)
         runSafe(mqtt.tick)
-        runSafe(lights.tick)
-        runSafe(mosfet.tick)
 
         # blink blue 
         ledOn = not ledOn

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Light Contoller</title>
+  <title>Temperature Monitor</title>
   <style>
     body {
       font-family: sans-serif;
@@ -68,20 +68,12 @@
       margin-right: auto;
     }
 
-    .status .light {
-      width: 25px;
-      height: 15px;
-      border: 1px solid black;
-      padding: 5px;
-      margin: 10px;
-      background-color: grey;
-    }
   </style>
   <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <h1>Light Controller</h1>
+  <h1>Temperature Monitor</h1>
 
   <div class="allsett">
     <br />
@@ -92,8 +84,8 @@
       <form action="/mqttsavesettings" method="get">
         <span class="lbl">Enable:</span><input type="checkbox" checked="checked" id="EnabledCB" onchange="cb()"><br />
         <span class="lbl">Server:</span><input type="text" name="server" value="mqtt.wolfen.za.net" id="Server"><br />
-        <span class="lbl">Subscribe To:</span><input type="text" name="subscribe" value="light4/qweqwewqe/command" id="Subscribe"><br />
-        <span class="lbl">Publish To:</span><input type="text" name="publish" value="light4/qweqwewqe/command" id="Publish"><br />
+        <span class="lbl">Subscribe To:</span><input type="text" name="subscribe" value="temp/qweqwewqe/command" id="Subscribe"><br />
+        <span class="lbl">Publish To:</span><input type="text" name="publish" value="temp/qweqwewqe/command" id="Publish"><br />
         <input type="hidden" name="enable" value="Y" id="hide" />
         <button type="submit" class="btn">Save</button>
 
@@ -102,9 +94,7 @@
         <pre>
           Example Commands:
 
-          Switch 1 to ON:   mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/on' -m 1
-          Switch 2 to OFF:  mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/off' -m 2
-          Switch 3 to AUTO: mosquitto_pub -h 'mqtt.wolfen.za.net' -t 'light4/84f703d8083c/command/light/auto' -m 3
+          (none presently implemented)
 
           The topic specifies the action and the payload the number 1-4
         </pre>
