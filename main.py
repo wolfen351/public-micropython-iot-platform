@@ -14,6 +14,10 @@ try:
     SerialLog.enable()
 
     SerialLog.log()
+    SerialLog.log("Speed to 240Mhz")
+    machine.freq(240000000) # set the CPU frequency to 240 MHz
+
+    SerialLog.log()
     SerialLog.log("Starting Wifi..")
     wifi = WifiHandler()
     wifi.start()
