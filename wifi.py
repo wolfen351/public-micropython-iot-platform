@@ -30,8 +30,11 @@ class WifiHandler():
     def station(self):
         SerialLog.log('\nConnecting to wifi...')
         try:
-            self.sta_if.config(dhcp_hostname=b"TempSensor-%s" % self.client_id.decode('ascii'))
+            self.ap_if.active(False)
+            if (self.sta_if.isconnected()):
+                self.sta_if.disconnect()
             self.sta_if.active(True)
+            self.sta_if.config(dhcp_hostname=b"TempSensor-%s" % self.client_id.decode('ascii'))
             netSettings = NetSettings()
             netSettings.load()
             SerialLog.log("Network: ", netSettings.Ssid)
@@ -42,6 +45,8 @@ class WifiHandler():
             raise
         except Exception as e:
             SerialLog.log("Error connecting to wifi:", e)
+            import sys
+            sys.print_exception(e)
             pass
 
     def tick(self):
