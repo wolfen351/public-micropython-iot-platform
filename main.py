@@ -1,6 +1,11 @@
 # Main 
+
 try:
-    import gc
+    # Turn on the LED to show we are alive
+    import machine
+    from machine import Pin
+    led = Pin(15, Pin.OUT)
+    led.on()
 
     # Import other modules needed
     from mqtt_control import MQTTControl
@@ -10,8 +15,10 @@ try:
     from wifi import WifiHandler
     import sys, machine
     from serial_log import SerialLog
+    import gc
+    from temp_monitor import TempMonitor
     
-    SerialLog.enable()
+    #SerialLog.disable() # disable for live, otherwise you pay 30s startup cost
 
     SerialLog.log()
     SerialLog.log("Speed to 240Mhz")
@@ -23,10 +30,14 @@ try:
     wifi.start()
 
     SerialLog.log()
+    SerialLog.log("Starting Temperature..")
+    temp = TempMonitor()
+    temp.start()
+
+    SerialLog.log()
     SerialLog.log("Starting MQTT..")
     mqtt = MQTTControl()
-    mqtt.start()
-    gc.collect()
+    mqtt.start(temp)
 
     SerialLog.log()
     SerialLog.log("Starting WebProcessor..")
@@ -37,11 +48,14 @@ try:
     SerialLog.log("Starting Web..")
     web = WebPortal()
     web.start(webProcessor);
+
+    SerialLog.log()
+    SerialLog.log("Cleanup..")
     gc.collect()
 
+    SerialLog.log()
     SerialLog.log("Ready!")
 
-    led = Pin(15, Pin.OUT)
     ledOn = True
 
     def runSafe(cmd):
@@ -56,10 +70,10 @@ try:
 
     while True:
         # tick all the modules
-
         runSafe(wifi.tick)
         runSafe(web.tick)
         runSafe(mqtt.tick)
+        runSafe(temp.tick)
 
         # blink blue 
         ledOn = not ledOn
@@ -71,6 +85,7 @@ try:
 except KeyboardInterrupt:
     raise
 except Exception as e:
+    import sys, serial_log
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     machine.sleep(10000)

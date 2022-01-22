@@ -45,7 +45,11 @@ class MQTTControl():
             self.client.publish(self.topic_pub + b"/wifi/rssi", str(self.sta_if.status('rssi')))
             self.status[3] = time.time() + 60
 
-    def start(self):
+        if (self.status[4] != self.temp.currentTemp()):
+            self.client.publish(self.topic_pub + b"/temp/current", str(self.temp.currentTemp()))
+            self.status[4] = self.temp.currentTemp()
+
+    def start(self, temp):
 
         settings = MqttSettings()
         settings.load()
@@ -60,6 +64,8 @@ class MQTTControl():
             self.topic_pub = settings.Publish
         else:
             self.topic_pub = b'tempMon/%s/status' % (self.client_id)
+        
+        self.temp = temp
 
     def settings(self, settingsVals):
         # Apply the new settings
