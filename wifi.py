@@ -30,6 +30,7 @@ class WifiHandler():
     def station(self):
         SerialLog.log('\nConnecting to wifi...')
         try:
+            self.sta_if.config(dhcp_hostname=b"TempSensor-%s" % self.client_id.decode('ascii'))
             self.sta_if.active(True)
             netSettings = NetSettings()
             netSettings.load()
