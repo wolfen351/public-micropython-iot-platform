@@ -12,6 +12,8 @@ class MQTTControl():
         self.init = False
         self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
+        self.homeAssistantUrl = "homeassistant/sensor/%s" % self.client_id.decode('ascii')
+
 
     def sub_cb(self, topic, msg):
         SerialLog.log("MQTT: ", topic, msg)
@@ -25,9 +27,10 @@ class MQTTControl():
         self.home_assistant_configure()
 
     def home_assistant_configure(self):
-        homeAssistantUrl = "homeassistant/sensor/%s" % self.client_id.decode('ascii')
-        self.client.publish("%s/config" % homeAssistantUrl, '{"name":"temp_sensor_%s","dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id.decode('ascii'), homeAssistantUrl) )
-#        self.client.publish("%s/config" % homeAssistantUrl, '{"name":"temp_sensor_%s","device_class":"temperature","state_topic":"%s/state","unit_of_meas":"°C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id, homeAssistantUrl))
+        self.client.publish("%s/config" % self.homeAssistantUrl, '{"name":"temp_sensor_%s","dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id.decode('ascii'), self.homeAssistantUrl) )
+
+    def home_assistant_status(self, temperature):
+        self.client.publish("%s/state" % self.homeAssistantUrl, '{"temperature":%s}' % (str(temperature)) )
 
     def post_status(self):
 
@@ -54,6 +57,7 @@ class MQTTControl():
         if (self.status[4] != self.temp.currentTemp()):
             self.client.publish(self.topic_pub + b"/temp/current", str(self.temp.currentTemp()))
             self.status[4] = self.temp.currentTemp()
+            self.home_assistant_status(self.temp.currentTemp())
 
     def start(self, temp):
 
