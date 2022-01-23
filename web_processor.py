@@ -31,6 +31,12 @@ class WebProcessor():
         
         return b''.join(res)
 
+    def gettemp(self, params):
+        tempVal = self.temp.currentTemp()
+        headers = self.okayHeader
+        data = b"{ \"temp\": %s }" % (tempVal)
+        return data, headers
+
     def loadmqttsettings(self, params):
         settings =  self.mqtt.getsettings()
         headers = self.okayHeader
@@ -72,5 +78,6 @@ class WebProcessor():
         machine.reset()
         return b"", headers
 
-    def start(self, mqtt):
+    def start(self, mqtt, temp):
         self.mqtt = mqtt
+        self.temp = temp

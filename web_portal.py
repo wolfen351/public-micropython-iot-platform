@@ -186,6 +186,7 @@ class WebPortal(Server):
             b"/": b"./web_index.html", 
             b"/mqtt": b"./web_mqtt.html", 
             b"/network": b"./web_network.html", 
+            b"/temp": self.webProcessor.gettemp,
             b"/mqttloadsettings": self.webProcessor.loadmqttsettings,
             b"/mqttsavesettings": self.webProcessor.savemqttsettings,
             b"/netloadsettings": self.webProcessor.loadnetsettings,
