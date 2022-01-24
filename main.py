@@ -85,7 +85,8 @@ try:
 except KeyboardInterrupt:
     raise
 except Exception as e:
-    import sys, serial_log
+    import sys
+    from serial_log import SerialLog
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     machine.sleep(10000)

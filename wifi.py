@@ -4,6 +4,7 @@ import ubinascii
 import network
 from network_settings import NetSettings
 import time
+import uota
 
 class WifiHandler():
     def __init__(self):
@@ -58,6 +59,10 @@ class WifiHandler():
                 # Disable AP
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
+                # Check for update and update if needed
+                if uota.check_for_updates():
+                    uota.install_new_firmware()
+                    machine.reset()
 
             if (not self.sta_if.isconnected() and self.connected):
                 # Connection lost

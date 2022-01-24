@@ -11,7 +11,7 @@ fi
 read MAX < lastedit.dat
 echo "Last sync for this board was at $MAX"
 
-for f in *.py *.html *.sh *.js
+for f in *.py *.html *.sh *.js *.cfg
 do
   THIS=$(stat -c %Y $f)
 #  echo $f was edited at $THIS
@@ -26,8 +26,19 @@ do
   fi
 done
 
+# make firmware archive for ota
+cat version | perl -ne 'chomp; print join(".", splice(@{[split/\./,$_]}, 0, -1), map {++$_} pop @{[split/\./,$_]}), "\n";' > version_new
+rm version
+mv version_new version
+echo "Version is now:"
+ampy --port /dev/ttyACM0 put version
+tar -czf firmware.tar.gz *.py *.html *.sh *.js *.cfg version
+V="$(cat version);firmware.tar.gz;30;$(sha256sum firmware.tar.gz | cut -d " " -f 1)"
+echo $V
+echo $V > latest
+
 # record the last time a file was edited
-stat -c %Y *.py | sort -r | head -n 1 > lastedit.dat
+stat -c %Y *.py *.html *.sh *.js *.cfg version | sort -r | head -n 1 > lastedit.dat
 ampy --port /dev/ttyACM0 put lastedit.dat
 
 echo "Rebooting..."
