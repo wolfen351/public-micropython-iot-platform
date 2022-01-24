@@ -42,7 +42,7 @@ try:
     SerialLog.log()
     SerialLog.log("Starting WebProcessor..")
     webProcessor = WebProcessor()
-    webProcessor.start(mqtt)
+    webProcessor.start(mqtt, temp)
     
     SerialLog.log()
     SerialLog.log("Starting Web..")

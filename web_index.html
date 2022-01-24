@@ -81,7 +81,7 @@
   <h1>Temperature Monitor</h1>
 
   <br />
-
+  <div id='tempdisplay'></div>
 
   <div class="nav">
     <input type="button" class="navbtn" value="MQTT Settings" onclick="window.location='/mqtt'"></input>
@@ -92,7 +92,15 @@
 
     var intervalId = setInterval(function() {
 
+      url = 'http://10.10.10.3/temp'
 
+fetch('/temp')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+          $('#tempdisplay').html(s.temp);
+
+        })
 
 
 
