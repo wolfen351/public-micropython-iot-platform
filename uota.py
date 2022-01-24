@@ -103,27 +103,14 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
             SerialLog.log('not enough free space for the new firmware')
             return False
 
-        if remote_hash:
-            import uhashlib
-            import ubinascii
-            hash_obj = uhashlib.sha256()
-
         response = urequests.get(ota_config['url'] + remote_filename)
         with open(ota_config['tmp_filename'], 'wb') as f:
             while True:
                 chunk = response.raw.read(512)
                 if not chunk:
                     break
-                if remote_hash:
-                    hash_obj.update(chunk)
                 f.write(chunk)
-        sha256 = ubinascii.hexlify(hash_obj.digest()).decode()
-        if remote_hash and sha256 != remote_hash:
-            SerialLog.log("Local Sha256: ", sha256)
 
-            SerialLog.log('hashes don\'t match, cannot install the new firmware')
-            uos.remove(ota_config['tmp_filename'])
-            return False
         return True
     else:
         SerialLog.log("Up to date!")
