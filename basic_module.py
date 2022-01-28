@@ -11,12 +11,15 @@ class BasicModule:
     def getTelemetry(self):
         return {}
 
+    def processTelemetry(self, telemetry):
+        pass
+
     def getCommands(self):
         return []
 
     def processCommands(self, command, parameters):
         pass
 
-    def processTelemetry(self, telemetry):
-        pass
+
+
 
