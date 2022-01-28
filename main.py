@@ -1,17 +1,15 @@
 # Main 
-
 try:
     # Turn on the LED to show we are alive
-    import machine
     from machine import Pin
     led = Pin(15, Pin.OUT)
     led.on()
 
     # Import other modules needed
     from mqtt_control import MQTTControl
-    from web_portal import WebPortal
+    from homeassistant_control import HomeAssistantControl
+    from thingsboard_control import ThingsboardControl
     from web_processor import WebProcessor
-    from machine import Pin
     from wifi import WifiHandler
     import sys, machine
     from serial_log import SerialLog
@@ -40,15 +38,20 @@ try:
     mqtt.start(temp)
 
     SerialLog.log()
-    SerialLog.log("Starting WebProcessor..")
-    webProcessor = WebProcessor()
-    webProcessor.start(mqtt, temp)
-    
-    SerialLog.log()
-    SerialLog.log("Starting Web..")
-    web = WebPortal()
-    web.start(webProcessor);
+    SerialLog.log("Starting HA MQTT..")
+    ha = HomeAssistantControl()
+    ha.start(temp)
 
+    SerialLog.log()
+    SerialLog.log("Starting TB MQTT..")
+    tb = ThingsboardControl()
+    tb.start(temp)
+
+    SerialLog.log()
+    SerialLog.log("Starting WebProcessor..")
+    web = WebProcessor()
+    web.start(mqtt, ha, temp)
+    
     SerialLog.log()
     SerialLog.log("Cleanup..")
     gc.collect()
@@ -73,6 +76,8 @@ try:
         runSafe(wifi.tick)
         runSafe(web.tick)
         runSafe(mqtt.tick)
+        runSafe(ha.tick)
+        runSafe(tb.tick)
         runSafe(temp.tick)
 
         # blink blue 

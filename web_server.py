@@ -10,7 +10,7 @@ ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
 
 from server import Server
 
-class WebPortal(Server):
+class WebServer(Server):
     def __init__(self):
 
         self.poller = select.poll()
@@ -178,20 +178,8 @@ class WebPortal(Server):
         if sid in self.conns:
             del self.conns[sid]
 
-    def start(self, webProcessor):
-
-        self.webProcessor = webProcessor
-
-        self.routes = {
-            b"/": b"./web_index.html", 
-            b"/mqtt": b"./web_mqtt.html", 
-            b"/network": b"./web_network.html", 
-            b"/temp": self.webProcessor.gettemp,
-            b"/mqttloadsettings": self.webProcessor.loadmqttsettings,
-            b"/mqttsavesettings": self.webProcessor.savemqttsettings,
-            b"/netloadsettings": self.webProcessor.loadnetsettings,
-            b"/netsavesettings": self.webProcessor.savenetsettings
-        }
+    def start(self, routes):
+        self.routes = routes
         SerialLog.log("Web server started")
 
     def tick(self):
