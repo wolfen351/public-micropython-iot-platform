@@ -59,6 +59,8 @@ try:
     SerialLog.log()
     SerialLog.log("Ready!")
 
+    allModules = [ ha ]
+
     ledOn = True
 
     def runSafe(cmd):
@@ -71,12 +73,38 @@ try:
             sys.print_exception(e)
             gc.collect()
 
+    telemetry = {}
+
     while True:
+
+        # tick all modules
+        for mod in allModules:
+            mod.tick()
+
+        # get all telemetry
+        for mod in allModules:
+            # merge all telemetry into the telemetry object
+            telemetry = { **telemetry, **mod.getTelemetry() }
+
+        # process all telemetry
+        for mod in allModules:
+            mod.processTelemetry(telemetry)
+
+        # get all commands
+        commands = []
+        for mod in allModules:
+            # add all commands to the commands list
+            commands.extend(mod.getCommands()) 
+
+        # process all commands
+        for mod in allModules:
+            mod.processCommands(commands)
+
+        # obsolete!
         # tick all the modules
         runSafe(wifi.tick)
         runSafe(web.tick)
         runSafe(mqtt.tick)
-        runSafe(ha.tick)
         runSafe(tb.tick)
         runSafe(temp.tick)
 

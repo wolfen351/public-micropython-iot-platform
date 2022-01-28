@@ -1,3 +1,4 @@
+from basic_module import BasicModule
 from homeassistant_settings import HomeAssistantSettings
 from mqtt import MQTTClient
 from serial_log import SerialLog
@@ -6,7 +7,7 @@ import machine
 import network
 import time
 
-class HomeAssistantControl():
+class HomeAssistantControl(BasicModule):
     def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
@@ -69,7 +70,6 @@ class HomeAssistantControl():
             self.home_assistant_status(self.temp.currentTemp(), self.sta_if.status('rssi'), self.sta_if.ifconfig()[0], self.sta_if.config('essid'))
 
     def start(self, temp):
-
         settings = HomeAssistantSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -125,3 +125,4 @@ class HomeAssistantControl():
                 except Exception as e:
                     self.connect_and_subscribe()
                     raise
+    
