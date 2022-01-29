@@ -19,6 +19,7 @@ class MqttControl(BasicModule):
         self.mqtt_password = None
         self.basicSettings = basicSettings
         self.telemetry = {}
+        self.client = None
 
     def start(self):
         settings = MqttSettings()
@@ -53,18 +54,18 @@ class MqttControl(BasicModule):
 
     def processTelemetry(self, telemetry):
 
-        stuffToPost = []
-        
-        for attr, value in self.telemetry.items():
-            if (telemetry[attr] != self.telemetry[attr]):
-                stuffToPost.append({attr, value})
+        if (self.client != None):
+            stuffToPost = []
+            
+            for attr, value in self.telemetry.items():
+                if (value != telemetry[attr]):
+                    stuffToPost.append([attr, telemetry[attr]])
 
-        if (len(stuffToPost) > 0):
-            for bit in stuffToPost:
-                SerialLog.log("Sending MQTT: ", bit)
-                self.client.publish(self.topic_pub + b"/" % bit["attr"], bit["value"])
+            if (len(stuffToPost) > 0):
+                for bit in stuffToPost:
+                    self.client.publish(self.topic_pub + b"/%s" % (bit[0]), str(bit[1]))
 
-        self.telemetry = telemetry
+            self.telemetry = telemetry.copy()
 
 
     def getCommands(self):

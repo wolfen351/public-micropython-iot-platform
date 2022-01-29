@@ -13,7 +13,7 @@ class SerialLog(object):
         SerialLog.enabled = False
 
     @staticmethod
-    def log(message = "", message2 = None, message3 = None):
+    def log(message = "", message2 = None, message3 = None, message4 = None):
         if SerialLog.enabled:
             startedAt = time.ticks_ms()
             if (message2 == None):
@@ -22,7 +22,10 @@ class SerialLog(object):
                 if (message3 == None):
                     print(message, message2)
                 else:
-                    print(message, message2, message3)
+                    if (message4 == None):
+                        print(message, message2, message3)
+                    else:
+                        print(message, message2, message3, message4)
             endedAt = time.ticks_ms()
 
             # Logging is taking more than 1000ms PER LINE, stopping now

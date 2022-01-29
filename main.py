@@ -47,7 +47,7 @@ try:
     allModules = [ 
         WifiHandler(basicSettings), 
         TempMonitor(basicSettings), 
-        #MqttControl(basicSettings), 
+        MqttControl(basicSettings), 
         #HomeAssistantControl(basicSettings), 
         #ThingsboardControl(basicSettings), 
         web
