@@ -85,7 +85,7 @@ class WifiHandler(BasicModule):
         settings.write()
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         # Connect using the new settings
-        WifiHandler().station()
+        self.station()
         # Reboot
         machine.reset()
         return b"", headers
