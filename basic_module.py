@@ -19,7 +19,3 @@ class BasicModule:
 
     def processCommands(self, commands):
         pass
-
-
-
-

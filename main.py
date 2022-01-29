@@ -1,5 +1,15 @@
 # Main 
-
+def runSafe(cmd, p1 = None):
+    try:
+        if (p1 != None):
+            return cmd(p1)
+        return cmd()
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        SerialLog.log(e)
+        sys.print_exception(e)
+        gc.collect()
 
 try:
     # Turn on the LED to show we are alive
@@ -32,37 +42,22 @@ try:
         'ShortName': 'TempMon'
     }
 
+    # register all the modules
     wifi = WifiHandler(basicSettings)
     temp = TempMonitor(basicSettings)
     mqtt = MqttControl(basicSettings)
     homeassistant = HomeAssistantControl(basicSettings)
     tb = ThingsboardControl(basicSettings)
     web = WebProcessor(basicSettings)
-    
-    SerialLog.log("Cleanup..")
-    gc.collect()
-
-    SerialLog.log()
-    SerialLog.log("Ready!")
-
     allModules = [ wifi, temp, mqtt, homeassistant, tb, web ]
+    
+    # start all the modules up
     for mod in allModules:
         SerialLog.log("Starting: ", mod)
         mod.start()
 
     ledOn = True
 
-    def runSafe(cmd, p1 = None):
-        try:
-            if (p1 != None):
-                return cmd(p1)
-            return cmd()
-        except KeyboardInterrupt:
-            raise
-        except Exception as e:
-            SerialLog.log(e)
-            sys.print_exception(e)
-            gc.collect()
 
     telemetry = dict()
 

@@ -4,9 +4,31 @@ from web_server import WebServer
 from wifi import WifiHandler
 
 class WebProcessor():
-    def __init__(self):
+
+    def __init__(self, basicSettings):
         self.okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 
+    def start(self):
+        self.server = WebServer()
+        self.server.start(self.getRoutes())
+
+    def tick(self):
+        self.server.tick()
+
+    def getTelemetry(self):
+        return {}
+
+    def processTelemetry(self, telemetry):
+        pass
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+
+    #internal code
     def unquote(self, string):
         if not string:
             return b''
@@ -129,15 +151,3 @@ class WebProcessor():
         # Reboot
         machine.reset()
         return b"", headers
-
-    def start(self, mqtt, ha, tb, temp):
-        self.mqtt = mqtt
-        self.temp = temp
-        self.ha = ha
-        self.server = WebServer()
-        self.server.start(self.getRoutes())
-        
-    def tick(self):
-        self.server.tick()
-
-
