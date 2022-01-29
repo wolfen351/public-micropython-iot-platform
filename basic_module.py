@@ -1,5 +1,5 @@
 class BasicModule:
-    def __init__(self):
+    def __init__(self, basicSettings):
         pass
 
     def start(self):
@@ -17,7 +17,7 @@ class BasicModule:
     def getCommands(self):
         return []
 
-    def processCommands(self, command, parameters):
+    def processCommands(self, commands):
         pass
 
 

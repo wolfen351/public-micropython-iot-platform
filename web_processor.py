@@ -38,15 +38,15 @@ class WebProcessor():
             b"/ha": b"./web_ha.html", 
             b"/mqtt": b"./web_mqtt.html", 
             b"/network": b"./web_network.html", 
-            b"/temp": self.webProcessor.gettemp,
-            b"/tbloadsettings": self.webProcessor.loadtbsettings,
-            b"/tbsavesettings": self.webProcessor.savetbsettings,
-            b"/haloadsettings": self.webProcessor.loadhasettings,
-            b"/hasavesettings": self.webProcessor.savehasettings,
-            b"/mqttloadsettings": self.webProcessor.loadmqttsettings,
-            b"/mqttsavesettings": self.webProcessor.savemqttsettings,
-            b"/netloadsettings": self.webProcessor.loadnetsettings,
-            b"/netsavesettings": self.webProcessor.savenetsettings
+            b"/temp": self.gettemp,
+            b"/tbloadsettings": self.loadtbsettings,
+            b"/tbsavesettings": self.savetbsettings,
+            b"/haloadsettings": self.loadhasettings,
+            b"/hasavesettings": self.savehasettings,
+            b"/mqttloadsettings": self.loadmqttsettings,
+            b"/mqttsavesettings": self.savemqttsettings,
+            b"/netloadsettings": self.loadnetsettings,
+            b"/netsavesettings": self.savenetsettings
         }
 
     def gettemp(self, params):
@@ -88,6 +88,23 @@ class WebProcessor():
         self.ha.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
+
+    def loadtbsettings(self, params):
+        settings =  self.tb.getsettings()
+        headers = self.okayHeader
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
+        return data, headers
+
+    def savetbsettings(self, params):
+        # Read form params
+        enable = self.unquote(params.get(b"enable", None))
+        server = self.unquote(params.get(b"server", None))
+        subscribe = self.unquote(params.get(b"subscribe", None))
+        publish = self.unquote(params.get(b"publish", None))
+        settings = (enable, server, subscribe, publish)
+        self.tb.settings(settings)
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers
     
     def loadnetsettings(self, params):
         settings = NetSettings()
@@ -113,7 +130,7 @@ class WebProcessor():
         machine.reset()
         return b"", headers
 
-    def start(self, mqtt, ha, temp):
+    def start(self, mqtt, ha, tb, temp):
         self.mqtt = mqtt
         self.temp = temp
         self.ha = ha

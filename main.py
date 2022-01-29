@@ -5,54 +5,55 @@ try:
     led = Pin(15, Pin.OUT)
     led.on()
 
+    # set the CPU frequency to 240 MHz
+    from serial_log import SerialLog
+    SerialLog.log()
+    SerialLog.log("CPU 240Mhz")
+    import machine
+    machine.freq(240000000) 
+
     # Import other modules needed
+    SerialLog.log("Loading code..")
     from mqtt_control import MQTTControl
     from homeassistant_control import HomeAssistantControl
     from thingsboard_control import ThingsboardControl
     from web_processor import WebProcessor
     from wifi import WifiHandler
-    import sys, machine
-    from serial_log import SerialLog
+    import sys
     import gc
     from temp_monitor import TempMonitor
     
-    #SerialLog.disable() # disable for live, otherwise you pay 30s startup cost
+    #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
-    SerialLog.log()
-    SerialLog.log("Speed to 240Mhz")
-    machine.freq(240000000) # set the CPU frequency to 240 MHz
+    basicSettings = { 
+        'Name': 'Temperature Sensor',
+        'ShortName': 'TempMon'
+    }
 
-    SerialLog.log()
     SerialLog.log("Starting Wifi..")
     wifi = WifiHandler()
     wifi.start()
 
-    SerialLog.log()
     SerialLog.log("Starting Temperature..")
     temp = TempMonitor()
     temp.start()
 
-    SerialLog.log()
     SerialLog.log("Starting MQTT..")
     mqtt = MQTTControl()
     mqtt.start(temp)
 
-    SerialLog.log()
     SerialLog.log("Starting HA MQTT..")
-    ha = HomeAssistantControl()
-    ha.start(temp)
+    ha = HomeAssistantControl(basicSettings)
+    ha.start()
 
-    SerialLog.log()
     SerialLog.log("Starting TB MQTT..")
     tb = ThingsboardControl()
     tb.start(temp)
 
-    SerialLog.log()
     SerialLog.log("Starting WebProcessor..")
     web = WebProcessor()
-    web.start(mqtt, ha, temp)
+    web.start(mqtt, ha, tb, temp)
     
-    SerialLog.log()
     SerialLog.log("Cleanup..")
     gc.collect()
 
@@ -63,9 +64,11 @@ try:
 
     ledOn = True
 
-    def runSafe(cmd):
+    def runSafe(cmd, p1 = None):
         try:
-            cmd()
+            if (p1 != None):
+                return cmd(p1)
+            return cmd()
         except KeyboardInterrupt:
             raise
         except Exception as e:
@@ -73,32 +76,32 @@ try:
             sys.print_exception(e)
             gc.collect()
 
-    telemetry = {}
+    telemetry = dict()
 
     while True:
 
         # tick all modules
         for mod in allModules:
-            mod.tick()
+            runSafe(mod.tick)
 
         # get all telemetry
         for mod in allModules:
             # merge all telemetry into the telemetry object
-            telemetry = { **telemetry, **mod.getTelemetry() }
+            telemetry.update(runSafe(mod.getTelemetry))
 
         # process all telemetry
         for mod in allModules:
-            mod.processTelemetry(telemetry)
+            runSafe(mod.processTelemetry, telemetry)
 
         # get all commands
         commands = []
         for mod in allModules:
             # add all commands to the commands list
-            commands.extend(mod.getCommands()) 
+            commands.extend(runSafe(mod.getCommands))
 
         # process all commands
         for mod in allModules:
-            mod.processCommands(commands)
+            runSafe(mod.processCommands, commands)
 
         # obsolete!
         # tick all the modules
@@ -120,6 +123,7 @@ except KeyboardInterrupt:
 except Exception as e:
     import sys
     from serial_log import SerialLog
+    import machine
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     machine.sleep(10000)
