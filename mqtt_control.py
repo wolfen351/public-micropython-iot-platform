@@ -104,7 +104,7 @@ class MqttControl(BasicModule):
         SerialLog.log("MQTT Command Received: ", topic, msg)
 
     def connect_and_subscribe(self):
-        self.client = MQTTClient(self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+        self.client = MQTTClient("mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         self.client.subscribe(self.topic_sub)
