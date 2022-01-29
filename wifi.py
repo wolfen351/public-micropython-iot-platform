@@ -1,3 +1,4 @@
+from basic_module import BasicModule
 import machine
 from serial_log import SerialLog
 import ubinascii
@@ -5,8 +6,9 @@ import network
 from network_settings import NetSettings
 import time
 import uota
+from web_processor import okayHeader
 
-class WifiHandler():
+class WifiHandler(BasicModule):
 
     def __init__(self, basicSettings):
         self.connected = False
@@ -55,7 +57,39 @@ class WifiHandler():
     def processCommands(self, commands):
         pass
 
+    def getRoutes(self):
+        return {
+            b"/network": b"./web_network.html", 
+            b"/netloadsettings": self.loadnetsettings,
+            b"/netsavesettings": self.savenetsettings
+        }
+
     # internal functions
+
+    def loadnetsettings(self, params):
+        settings = NetSettings()
+        settings.load()
+        headers = okayHeader
+        data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (settings.Ssid, settings.Password, settings.Type, settings.Ip, settings.Netmask, settings.Gateway)
+        return data, headers
+
+    def savenetsettings(self, params):
+        # Read form params
+        ssid = self.unquote(params.get(b"Ssid", None))
+        password = self.unquote(params.get(b"Password", None))
+        type = self.unquote(params.get(b"Type", None))
+        ip = self.unquote(params.get(b"Ip", None))
+        netmask = self.unquote(params.get(b"Netmask", None))
+        gateway = self.unquote(params.get(b"Gateway", None))
+        settings = NetSettings(ssid, password, type, ip, netmask, gateway)
+        settings.write()
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        # Connect using the new settings
+        WifiHandler().station()
+        # Reboot
+        machine.reset()
+        return b"", headers
+
     def ap(self):
         # Enable AP
         SerialLog.log("Starting AP: " + self.essid)

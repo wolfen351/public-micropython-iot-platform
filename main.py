@@ -52,13 +52,16 @@ try:
     allModules = [ wifi, temp, mqtt, homeassistant, tb, web ]
     
     # start all the modules up
+    routes = {}
     for mod in allModules:
         SerialLog.log("Starting: ", mod)
         mod.start()
+        routes.update(runSafe(mod.getRoutes))
 
+    web.setRoutes(routes)
+
+    # some storage
     ledOn = True
-
-
     telemetry = dict()
 
     while True:
@@ -103,3 +106,4 @@ except Exception as e:
     SerialLog.log("Fatal exception, will reboot in 10s")
     machine.sleep(10000)
     machine.reset()
+

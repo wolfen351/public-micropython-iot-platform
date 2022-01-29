@@ -178,9 +178,11 @@ class WebServer(Server):
         if sid in self.conns:
             del self.conns[sid]
 
-    def start(self, routes):
-        self.routes = routes
+    def start(self):
         SerialLog.log("Web server started")
+
+    def setRoutes(self, routes):
+        self.routes = routes
 
     def tick(self):
         # check for socket events and handle them

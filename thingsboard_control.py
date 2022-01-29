@@ -6,6 +6,7 @@ import ubinascii
 import machine
 import network
 import time
+from web_processor import okayHeader
 
 class ThingsboardControl(BasicModule):
 
@@ -118,6 +119,23 @@ class ThingsboardControl(BasicModule):
     def getsettings(self):
         s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
         return s
+
+    def loadtbsettings(self, params):
+        settings =  self.getsettings()
+        headers = okayHeader
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
+        return data, headers
+
+    def savetbsettings(self, params):
+        # Read form params
+        enable = self.unquote(params.get(b"enable", None))
+        server = self.unquote(params.get(b"server", None))
+        subscribe = self.unquote(params.get(b"subscribe", None))
+        publish = self.unquote(params.get(b"publish", None))
+        settings = (enable, server, subscribe, publish)
+        self.tb.settings(settings)
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers
 
 
     

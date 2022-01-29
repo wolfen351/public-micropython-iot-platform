@@ -5,6 +5,7 @@ from serial_log import SerialLog
 import ubinascii
 import machine
 import network
+from web_processor import okayHeader
 
 class MqttControl(BasicModule):
 
@@ -72,7 +73,31 @@ class MqttControl(BasicModule):
     def processCommands(self, commands):
         pass
 
+    def getRoutes(self):
+        return {
+            b"/mqtt": b"./web_mqtt.html", 
+            b"/mqttloadsettings": self.loadmqttsettings,
+            b"/mqttsavesettings": self.savemqttsettings,
+        }
+
     # Internal Code 
+
+    def loadmqttsettings(self, params):
+        settings =  self.mqtt.getsettings()
+        headers = okayHeader
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
+        return data, headers
+
+    def savemqttsettings(self, params):
+        # Read form params
+        enable = self.unquote(params.get(b"enable", None))
+        server = self.unquote(params.get(b"server", None))
+        subscribe = self.unquote(params.get(b"subscribe", None))
+        publish = self.unquote(params.get(b"publish", None))
+        settings = (enable, server, subscribe, publish)
+        self.mqtt.settings(settings)
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers
 
     def sub_cb(self, topic, msg):
         SerialLog.log("MQTT Command Received: ", topic, msg)

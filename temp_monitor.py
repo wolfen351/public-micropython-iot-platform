@@ -1,8 +1,10 @@
+from basic_module import BasicModule
 import ds18x20, onewire, machine
 from serial_log import SerialLog
 import time
+from web_processor import okayHeader
 
-class TempMonitor():
+class TempMonitor(BasicModule):
 
     lastTemp = 0
     lastConvert = 0
@@ -42,9 +44,17 @@ class TempMonitor():
     def processCommands(self, commands):
         pass
 
+    def getRoutes(self):
+        return {
+            b"/temp": self.gettemp,
+        }
+
     # Internal code here
     def currentTemp(self):
         return self.lastTemp
 
-
-            
+    def gettemp(self, params):
+        tempVal = self.temp.currentTemp()
+        headers = okayHeader
+        data = b"{ \"temp\": %s }" % (tempVal)
+        return data, headers            

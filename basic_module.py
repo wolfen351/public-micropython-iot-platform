@@ -19,3 +19,6 @@ class BasicModule:
 
     def processCommands(self, commands):
         pass
+
+    def getRoutes(self):
+        return {}
