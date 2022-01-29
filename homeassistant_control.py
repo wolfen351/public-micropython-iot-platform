@@ -6,7 +6,7 @@ import ubinascii
 import machine
 import network
 import time
-from web_processor import okayHeader
+from web_processor import okayHeader, unquote
 
 class HomeAssistantControl(BasicModule):
 
@@ -97,10 +97,10 @@ class HomeAssistantControl(BasicModule):
 
     def savehasettings(self, params):
         # Read form params
-        enable = self.unquote(params.get(b"enable", None))
-        server = self.unquote(params.get(b"server", None))
-        subscribe = self.unquote(params.get(b"subscribe", None))
-        publish = self.unquote(params.get(b"publish", None))
+        enable = unquote(params.get(b"enable", None))
+        server = unquote(params.get(b"server", None))
+        subscribe = unquote(params.get(b"subscribe", None))
+        publish = unquote(params.get(b"publish", None))
         settings = (enable, server, subscribe, publish)
         self.ha.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"

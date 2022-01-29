@@ -6,7 +6,7 @@ import network
 from network_settings import NetSettings
 import time
 import uota
-from web_processor import okayHeader
+from web_processor import okayHeader, unquote
 
 class WifiHandler(BasicModule):
 
@@ -75,12 +75,12 @@ class WifiHandler(BasicModule):
 
     def savenetsettings(self, params):
         # Read form params
-        ssid = self.unquote(params.get(b"Ssid", None))
-        password = self.unquote(params.get(b"Password", None))
-        type = self.unquote(params.get(b"Type", None))
-        ip = self.unquote(params.get(b"Ip", None))
-        netmask = self.unquote(params.get(b"Netmask", None))
-        gateway = self.unquote(params.get(b"Gateway", None))
+        ssid = unquote(params.get(b"Ssid", None))
+        password = unquote(params.get(b"Password", None))
+        type = unquote(params.get(b"Type", None))
+        ip = unquote(params.get(b"Ip", None))
+        netmask = unquote(params.get(b"Netmask", None))
+        gateway = unquote(params.get(b"Gateway", None))
         settings = NetSettings(ssid, password, type, ip, netmask, gateway)
         settings.write()
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
