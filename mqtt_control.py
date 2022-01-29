@@ -83,7 +83,7 @@ class MqttControl(BasicModule):
     # Internal Code 
 
     def loadmqttsettings(self, params):
-        settings =  self.mqtt.getsettings()
+        settings =  self.getsettings()
         headers = okayHeader
         data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
         return data, headers
@@ -95,7 +95,7 @@ class MqttControl(BasicModule):
         subscribe = unquote(params.get(b"subscribe", None))
         publish = unquote(params.get(b"publish", None))
         settings = (enable, server, subscribe, publish)
-        self.mqtt.settings(settings)
+        self.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 

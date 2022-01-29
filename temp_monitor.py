@@ -54,7 +54,7 @@ class TempMonitor(BasicModule):
         return self.lastTemp
 
     def gettemp(self, params):
-        tempVal = self.temp.currentTemp()
+        tempVal = self.currentTemp()
         headers = okayHeader
         data = b"{ \"temp\": %s }" % (tempVal)
         return data, headers            

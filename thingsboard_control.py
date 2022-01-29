@@ -133,7 +133,7 @@ class ThingsboardControl(BasicModule):
         subscribe = unquote(params.get(b"subscribe", None))
         publish = unquote(params.get(b"publish", None))
         settings = (enable, server, subscribe, publish)
-        self.tb.settings(settings)
+        self.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 

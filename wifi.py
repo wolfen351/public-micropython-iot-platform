@@ -3,7 +3,7 @@ import machine
 from serial_log import SerialLog
 import ubinascii
 import network
-from network_settings import NetSettings
+from wifi_settings import WifiSettings
 import time
 import uota
 from web_processor import okayHeader, unquote
@@ -67,7 +67,7 @@ class WifiHandler(BasicModule):
     # internal functions
 
     def loadnetsettings(self, params):
-        settings = NetSettings()
+        settings = WifiSettings()
         settings.load()
         headers = okayHeader
         data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (settings.Ssid, settings.Password, settings.Type, settings.Ip, settings.Netmask, settings.Gateway)
@@ -81,7 +81,7 @@ class WifiHandler(BasicModule):
         ip = unquote(params.get(b"Ip", None))
         netmask = unquote(params.get(b"Netmask", None))
         gateway = unquote(params.get(b"Gateway", None))
-        settings = NetSettings(ssid, password, type, ip, netmask, gateway)
+        settings = WifiSettings(ssid, password, type, ip, netmask, gateway)
         settings.write()
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         # Connect using the new settings
@@ -107,7 +107,7 @@ class WifiHandler(BasicModule):
                 self.sta_if.disconnect()
             self.sta_if.active(True)
             self.sta_if.config(dhcp_hostname=self.essid)
-            netSettings = NetSettings()
+            netSettings = WifiSettings()
             netSettings.load()
             SerialLog.log("Network: ", netSettings.Ssid)
             self.sta_if.connect(netSettings.Ssid, netSettings.Password)
