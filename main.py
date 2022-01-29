@@ -1,4 +1,6 @@
 # Main 
+
+
 try:
     # Turn on the LED to show we are alive
     from machine import Pin
@@ -14,7 +16,7 @@ try:
 
     # Import other modules needed
     SerialLog.log("Loading code..")
-    from mqtt_control import MQTTControl
+    from mqtt_control import MqttControl
     from homeassistant_control import HomeAssistantControl
     from thingsboard_control import ThingsboardControl
     from web_processor import WebProcessor
@@ -30,29 +32,12 @@ try:
         'ShortName': 'TempMon'
     }
 
-    SerialLog.log("Starting Wifi..")
-    wifi = WifiHandler()
-    wifi.start()
-
-    SerialLog.log("Starting Temperature..")
-    temp = TempMonitor()
-    temp.start()
-
-    SerialLog.log("Starting MQTT..")
-    mqtt = MQTTControl()
-    mqtt.start(temp)
-
-    SerialLog.log("Starting HA MQTT..")
-    ha = HomeAssistantControl(basicSettings)
-    ha.start()
-
-    SerialLog.log("Starting TB MQTT..")
-    tb = ThingsboardControl()
-    tb.start(temp)
-
-    SerialLog.log("Starting WebProcessor..")
-    web = WebProcessor()
-    web.start(mqtt, ha, tb, temp)
+    wifi = WifiHandler(basicSettings)
+    temp = TempMonitor(basicSettings)
+    mqtt = MqttControl(basicSettings)
+    homeassistant = HomeAssistantControl(basicSettings)
+    tb = ThingsboardControl(basicSettings)
+    web = WebProcessor(basicSettings)
     
     SerialLog.log("Cleanup..")
     gc.collect()
@@ -60,7 +45,10 @@ try:
     SerialLog.log()
     SerialLog.log("Ready!")
 
-    allModules = [ ha ]
+    allModules = [ wifi, temp, mqtt, homeassistant, tb, web ]
+    for mod in allModules:
+        SerialLog.log("Starting: ", mod)
+        mod.start()
 
     ledOn = True
 
@@ -102,14 +90,6 @@ try:
         # process all commands
         for mod in allModules:
             runSafe(mod.processCommands, commands)
-
-        # obsolete!
-        # tick all the modules
-        runSafe(wifi.tick)
-        runSafe(web.tick)
-        runSafe(mqtt.tick)
-        runSafe(tb.tick)
-        runSafe(temp.tick)
 
         # blink blue 
         ledOn = not ledOn

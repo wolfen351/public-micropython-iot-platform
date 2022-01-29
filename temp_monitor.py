@@ -7,7 +7,7 @@ class TempMonitor():
     lastTemp = 0
     lastConvert = 0
 
-    def __init__(self):
+    def __init__(self, basicSettings):
         pass
 
     def start(self):
@@ -17,9 +17,6 @@ class TempMonitor():
         SerialLog.log('Found DS devices: ', self.roms)
         self.ds_sensor.convert_temp()
         self.lastConvert = time.ticks_ms()
-
-    def currentTemp(self):
-        return self.lastTemp
 
     def tick(self):
         currentTime = time.ticks_ms()
@@ -32,4 +29,22 @@ class TempMonitor():
                     SerialLog.log("%s*C" % current)
             self.ds_sensor.convert_temp()
             self.lastConvert = time.ticks_ms()
+
+    def getTelemetry(self):
+        return { "temperature": self.lastTemp }
+
+    def processTelemetry(self, telemetry):
+        pass
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+    # Internal code here
+    def currentTemp(self):
+        return self.lastTemp
+
+
             

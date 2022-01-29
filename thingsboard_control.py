@@ -1,3 +1,4 @@
+from basic_module import BasicModule
 from mqtt import MQTTClient
 from serial_log import SerialLog
 from thingsboard_settings import ThingsboardSettings
@@ -6,70 +7,22 @@ import machine
 import network
 import time
 
-class ThingsboardControl():
-    def __init__(self):
+class ThingsboardControl(BasicModule):
+
+    def __init__(self, basicSettings):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
-        self.homeAssistantUrl = "homeassistant/sensor/%s" % self.client_id.decode('ascii')
+        self.thingsBoardTelemetryUrl = "thingsboard/sensor/%s" % self.client_id.decode('ascii')
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
+        self.basicSettings = basicSettings
+        self.telemetry = {}
+        self.enabled = b"N"
 
-    def sub_cb(self, topic, msg):
-        SerialLog.log("HA MQTT: ", topic, msg)
-
-    def connect_and_subscribe(self):
-        self.client = MQTTClient(self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_port)
-        self.client.set_callback(self.sub_cb)
-        self.client.connect()
-        self.client.subscribe(self.topic_sub)
-        SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
-        self.home_assistant_configure()
-
-    def home_assistant_configure(self):
-        self.client.publish("%s_temp/config" % self.homeAssistantUrl, '{"name":"Temperature Sensor %s Reading", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.temperature}}"}' % (self.client_id.decode('ascii'), self.homeAssistantUrl) )
-        self.client.publish("%s_rssi/config" % self.homeAssistantUrl, '{"name":"Temperature Sensor %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{{value_json.rssi}}"}' % (self.client_id.decode('ascii'), self.homeAssistantUrl) )
-        self.client.publish("%s_ip/config" % self.homeAssistantUrl, '{"name":"Temperature Sensor %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ip}}"}' % (self.client_id.decode('ascii'), self.homeAssistantUrl) )
-        self.client.publish("%s_ssid/config" % self.homeAssistantUrl, '{"name":"Temperature Sensor %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.client_id.decode('ascii'), self.homeAssistantUrl) )
-
-    def home_assistant_status(self, temperature, rssi, ip, ssid):
-        self.client.publish("%s/state" % self.homeAssistantUrl, '{"temperature":%s, "rssi":%s, "ip":"%s", "ssid": "%s"}' % ( str(temperature), str(rssi), ip, ssid ) )
-
-    def post_status(self):
-
-        updateHA = False
-
-        if (self.status == None):
-            self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None, None, None]
-
-        if (self.status[0] != "true"):
-            self.status[0] = "true"
-            updateHA = True
-
-        if (self.status[1] != self.sta_if.ifconfig()[0]):
-            self.status[1] = self.sta_if.ifconfig()[0]
-            updateHA = True
-
-        if (self.status[2] != self.sta_if.config('essid')):
-            self.status[2] = self.sta_if.config('essid')
-            updateHA = True
-
-        # Report RSSI every min
-        if (self.status[3] < time.time()):
-            self.status[3] = time.time() + 60
-            updateHA = True
-
-        if (self.status[4] != self.temp.currentTemp()):
-            self.status[4] = self.temp.currentTemp()
-            updateHA = True
-
-        if updateHA:
-            self.home_assistant_status(self.temp.currentTemp(), self.sta_if.status('rssi'), self.sta_if.ifconfig()[0], self.sta_if.config('essid'))
-
-    def start(self, temp):
-
+    def start(self):
         settings = ThingsboardSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -77,14 +30,67 @@ class ThingsboardControl():
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
         else:
-            self.topic_sub = b'homeassistant/sensor/%s/command/#' % (self.client_id)
+            self.topic_sub = b'thingsboard/sensor/%s/command/#' % (self.client_id)
 
         if (settings.Publish != b""):
             self.topic_pub = settings.Publish
         else:
-            self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
+            self.topic_pub = b'thingsboard/sensor/%s/state' % (self.client_id)
         
-        self.temp = temp
+    def tick(self):
+        if (self.enabled == b"Y"):
+            if (self.sta_if.isconnected()):
+                try:
+                    if (not self.init):
+                        self.init = True
+                        self.connect_and_subscribe()
+                    self.client.check_msg()
+                except Exception as e:
+                    self.connect_and_subscribe()
+                    raise
+
+    def getTelemetry(self):
+        return {}
+
+    def processTelemetry(self, telemetry):
+
+        stuffToPost = []
+        
+        for attr, value in self.telemetry.items():
+            if (telemetry[attr] != self.telemetry[attr]):
+                stuffToPost.append({attr, value})
+
+        if (len(stuffToPost) > 0):
+            messageStr = "{ "
+            for bit in stuffToPost:
+                messageStr += '"' + bit.attr + '": '
+                if (stuffToPost is int):
+                    messageStr += str(bit.value) +', '
+                else:
+                    messageStr += '"' + bit.value + '", '
+            SerialLog.log("Sending TB MQTT: ", messageStr)
+            self.client.publish("%s/state" % self.thingsBoardTelemetryUrl, messageStr)
+
+        self.telemetry = telemetry
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+    # Internal Code 
+
+    def sub_cb(self, topic, msg):
+        SerialLog.log("TB MQTT Command Received: ", topic, msg)
+
+    def connect_and_subscribe(self):
+        self.client = MQTTClient(self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_port)
+        self.client.set_callback(self.sub_cb)
+        self.client.connect()
+        self.client.subscribe(self.topic_sub)
+        SerialLog.log('Connected to %s TB MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+
 
     def settings(self, settingsVals):
         # Apply the new settings
@@ -94,12 +100,12 @@ class ThingsboardControl():
         if (settingsVals[2] != b""):
             self.topic_sub = settingsVals[2]
         else:
-            self.topic_sub = b'homeassistant/sensor/%s/command/#' % (self.client_id)
+            self.topic_sub = b'thingsboard/sensor/%s/command/#' % (self.client_id)
 
         if (settingsVals[3] != b""):
             self.topic_pub = settingsVals[3]
         else: 
-            self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
+            self.topic_pub = b'thingsboard/sensor/%s/state' % (self.client_id)
 
         # Save the settings to disk
         settings = ThingsboardSettings()
@@ -113,15 +119,5 @@ class ThingsboardControl():
         s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
         return s
 
-    def tick(self):
-        if (self.enabled == b"Y"):
-            if (self.sta_if.isconnected()):
-                try:
-                    if (not self.init):
-                        self.init = True
-                        self.connect_and_subscribe()
-                    self.client.check_msg()
-                    self.post_status()
-                except Exception as e:
-                    self.connect_and_subscribe()
-                    raise
+
+    

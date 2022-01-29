@@ -1,13 +1,14 @@
+from basic_module import BasicModule
 from mqtt import MQTTClient
 from mqtt_settings import MqttSettings
 from serial_log import SerialLog
 import ubinascii
 import machine
 import network
-import time
 
-class MQTTControl():
-    def __init__(self):
+class MqttControl(BasicModule):
+
+    def __init__(self, basicSettings):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None
@@ -15,44 +16,10 @@ class MQTTControl():
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
+        self.basicSettings = basicSettings
+        self.telemetry = {}
 
-    def sub_cb(self, topic, msg):
-        SerialLog.log("MQTT: ", topic, msg)
-
-    def connect_and_subscribe(self):
-        self.client = MQTTClient(self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
-        self.client.set_callback(self.sub_cb)
-        self.client.connect()
-        self.client.subscribe(self.topic_sub)
-        SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
-
-    def post_status(self):
-        if (self.status == None):
-            self.status = [None, None, None, time.time(), None, None, None, None, None, None, None, None, None, None]
-
-        if (self.status[0] != "true"):
-            self.client.publish(self.topic_pub + b"/wifi/up", "true")
-            self.status[0] = "true"
-
-        if (self.status[1] != self.sta_if.ifconfig()[0]):
-            self.client.publish(self.topic_pub + b"/wifi/ip", self.sta_if.ifconfig()[0])
-            self.status[1] = self.sta_if.ifconfig()[0]
-
-        if (self.status[2] != self.sta_if.config('essid')):
-            self.client.publish(self.topic_pub + b"/wifi/ssid", self.sta_if.config('essid'))
-            self.status[2] = self.sta_if.config('essid')
-
-        # Report RSSI every min
-        if (self.status[3] < time.time()):
-            self.client.publish(self.topic_pub + b"/wifi/rssi", str(self.sta_if.status('rssi')))
-            self.status[3] = time.time() + 60
-
-        if (self.status[4] != self.temp.currentTemp()):
-            self.client.publish(self.topic_pub + b"/temp/current", str(self.temp.currentTemp()))
-            self.status[4] = self.temp.currentTemp()
-
-    def start(self, temp):
-
+    def start(self):
         settings = MqttSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -60,14 +27,62 @@ class MQTTControl():
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
         else:
-            self.topic_sub = b'tempMon/%s/command/#' % (self.client_id)
+            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['ShortName'], self.client_id)
 
         if (settings.Publish != b""):
             self.topic_pub = settings.Publish
         else:
-            self.topic_pub = b'tempMon/%s/status' % (self.client_id)
+            self.topic_pub = b'%s/%s/status' % (self.basicSettings['ShortName'], self.client_id)
+
+    def tick(self):
+        if (self.enabled == b"Y"):
+            if (self.sta_if.isconnected()):
+                try:
+                    if (not self.init):
+                        self.init = True
+                        self.connect_and_subscribe()
+                    self.client.check_msg()
+                except Exception as e:
+                    self.connect_and_subscribe()
+                    raise
+
+
+    def getTelemetry(self):
+        return {}
+
+    def processTelemetry(self, telemetry):
+
+        stuffToPost = []
         
-        self.temp = temp
+        for attr, value in self.telemetry.items():
+            if (telemetry[attr] != self.telemetry[attr]):
+                stuffToPost.append({attr, value})
+
+        if (len(stuffToPost) > 0):
+            for bit in stuffToPost:
+                SerialLog.log("Sending MQTT: ", bit)
+                self.client.publish(self.topic_pub + b"/" % bit["attr"], bit["value"])
+
+        self.telemetry = telemetry
+
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+    # Internal Code 
+
+    def sub_cb(self, topic, msg):
+        SerialLog.log("MQTT Command Received: ", topic, msg)
+
+    def connect_and_subscribe(self):
+        self.client = MQTTClient(self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+        self.client.set_callback(self.sub_cb)
+        self.client.connect()
+        self.client.subscribe(self.topic_sub)
+        SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))        
 
     def settings(self, settingsVals):
         # Apply the new settings
@@ -77,12 +92,12 @@ class MQTTControl():
         if (settingsVals[2] != b""):
             self.topic_sub = settingsVals[2]
         else:
-            self.topic_sub = b'tempMon/%s/command/#' % (self.client_id)
+            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['ShortName'], self.client_id)
 
         if (settingsVals[3] != b""):
             self.topic_pub = settingsVals[3]
         else: 
-            self.topic_pub = b'tempMon/%s/status' % (self.client_id)
+            self.topic_pub = b'%s/%s/status' % (self.basicSettings['ShortName'], self.client_id)
 
         # Save the settings to disk
         settings = MqttSettings()
@@ -96,15 +111,3 @@ class MQTTControl():
         s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
         return s
 
-    def tick(self):
-        if (self.enabled == b"Y"):
-            if (self.sta_if.isconnected()):
-                try:
-                    if (not self.init):
-                        self.init = True
-                        self.connect_and_subscribe()
-                    self.client.check_msg()
-                    self.post_status()
-                except Exception as e:
-                    self.connect_and_subscribe()
-                    raise
