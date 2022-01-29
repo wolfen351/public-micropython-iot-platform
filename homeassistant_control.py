@@ -21,6 +21,7 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_password = None
         self.basicSettings = basicSettings
         self.telemetry = {}
+        self.client = None
 
     def start(self):
         settings = HomeAssistantSettings()
@@ -54,25 +55,26 @@ class HomeAssistantControl(BasicModule):
 
     def processTelemetry(self, telemetry):
 
-        stuffToPost = []
-        
-        for attr, value in self.telemetry.items():
-            if (telemetry[attr] != self.telemetry[attr]):
-                stuffToPost.append({attr, value})
+        if (self.client != None):
+            stuffToPost = []
+            
+            for attr, value in self.telemetry.items():
+                if (value != telemetry[attr]):
+                    stuffToPost.append([attr, telemetry[attr]])
 
-        if (len(stuffToPost) > 0):
-            messageStr = "{ "
-            for bit in stuffToPost:
-                messageStr += '"' + bit.attr + '": '
-                if (stuffToPost is int):
-                    messageStr += str(bit.value) +', '
-                else:
-                    messageStr += '"' + bit.value + '", '
-            SerialLog.log("Sending HA MQTT: ", messageStr)
-            self.client.publish("%s/state" % self.homeAssistantUrl, messageStr)
+            if (len(stuffToPost) > 0):
+                messageStr = "{ "
+                for bit in stuffToPost:
+                    messageStr += '"' + bit[0] + '": '
+                    if (isinstance(bit[1],int) or isinstance(bit[1],float)):
+                        messageStr += str(bit[1]) +', '
+                    else:
+                        messageStr += '"' + bit[1] + '", '
+                messageStr = messageStr[0: -2] + "}" # remove final comma and add }
+                SerialLog.log("Sending HA MQTT: ", messageStr)
+                self.client.publish("%s/state" % self.homeAssistantUrl, messageStr)
 
-        self.telemetry = telemetry
-
+            self.telemetry = telemetry.copy()
 
     def getCommands(self):
         return []
