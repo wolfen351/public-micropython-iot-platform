@@ -43,13 +43,15 @@ try:
     }
 
     # register all the modules
-    wifi = WifiHandler(basicSettings)
-    temp = TempMonitor(basicSettings)
-    mqtt = MqttControl(basicSettings)
-    homeassistant = HomeAssistantControl(basicSettings)
-    tb = ThingsboardControl(basicSettings)
     web = WebProcessor(basicSettings)
-    allModules = [ wifi, temp, mqtt, homeassistant, tb, web ]
+    allModules = [ 
+        WifiHandler(basicSettings), 
+        TempMonitor(basicSettings), 
+        #MqttControl(basicSettings), 
+        #HomeAssistantControl(basicSettings), 
+        #ThingsboardControl(basicSettings), 
+        web
+    ]
     
     # start all the modules up
     routes = {}
