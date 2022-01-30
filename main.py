@@ -34,6 +34,7 @@ try:
     import sys
     import gc
     from temp_monitor import TempMonitor
+    from builtin_button_control import BuiltinButtonControl
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
@@ -45,6 +46,7 @@ try:
     # register all the modules
     web = WebProcessor(basicSettings)
     allModules = [ 
+        BuiltinButtonControl(basicSettings),
         WifiHandler(basicSettings), 
         TempMonitor(basicSettings), 
         MqttControl(basicSettings), 

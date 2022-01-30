@@ -3,10 +3,11 @@ import ds18x20, onewire, machine
 from serial_log import SerialLog
 import time
 from web_processor import okayHeader
+import ubinascii
 
 class TempMonitor(BasicModule):
 
-    lastTemp = 0
+    lastTemp = {}
     lastConvert = 0
 
     def __init__(self, basicSettings):
@@ -19,6 +20,8 @@ class TempMonitor(BasicModule):
         SerialLog.log('Found DS devices: ', self.roms)
         self.ds_sensor.convert_temp()
         self.lastConvert = time.ticks_ms()
+        for rom in self.roms:
+            self.lastTemp[str(rom)] = -127
 
     def tick(self):
         currentTime = time.ticks_ms()
@@ -26,14 +29,19 @@ class TempMonitor(BasicModule):
         if (diff > 750): 
             for rom in self.roms:
                 current = self.ds_sensor.read_temp(rom)
-                if (current != self.lastTemp):
-                    self.lastTemp = current
-                    SerialLog.log("%s*C" % current)
+                if (current != self.lastTemp[str(rom)]):
+                    self.lastTemp[str(rom)] = current
+                    SerialLog.log("%s = %s*C" % (ubinascii.hexlify(rom).decode('ascii'), current))
             self.ds_sensor.convert_temp()
             self.lastConvert = time.ticks_ms()
 
     def getTelemetry(self):
-        return { "temperature": self.lastTemp }
+        telemetry = {}
+        for rom in self.roms:
+            sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))
+            current = self.lastTemp[str(rom)]
+            telemetry.update({sensorName:current})
+        return telemetry
 
     def processTelemetry(self, telemetry):
         pass
