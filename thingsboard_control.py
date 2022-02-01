@@ -52,6 +52,9 @@ class ThingsboardControl(BasicModule):
 
     def processTelemetry(self, telemetry):
 
+        if (self.enabled != b"Y"):
+            return
+
         if (self.client != None):
             stuffToPost = {}
             

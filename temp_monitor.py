@@ -4,6 +4,7 @@ from serial_log import SerialLog
 import time
 from web_processor import okayHeader
 import ubinascii
+import json
 
 class TempMonitor(BasicModule):
 
@@ -62,7 +63,7 @@ class TempMonitor(BasicModule):
         return self.lastTemp
 
     def gettemp(self, params):
-        tempVal = self.currentTemp()
+        telemetry = self.getTelemetry()
         headers = okayHeader
-        data = b"{ \"temp\": %s }" % (tempVal)
+        data = json.dumps(telemetry)
         return data, headers            

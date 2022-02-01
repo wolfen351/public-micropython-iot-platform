@@ -100,7 +100,12 @@ fetch('/temp')
         .then(response => response.json())
         .then(data => {
           s = data;
-          $('#tempdisplay').html(s.temp);
+          html = "";
+          for (let key of Object.keys(s)) {
+            html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " *C </p>"
+          }
+          $('#tempdisplay').html(html);
+
 
         })
 

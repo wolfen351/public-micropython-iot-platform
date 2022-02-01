@@ -15,7 +15,7 @@ class MqttSettings:
         """Write settings to settings_file if valid input found."""
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
-                f.write(",".join([self.Enable, self.Server, self.Subscribe, self.Publish]))
+                f.write(b",".join([self.Enable, self.Server, self.Subscribe, self.Publish]))
             SerialLog.log("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
@@ -56,13 +56,13 @@ class MqttSettings:
 
     def is_valid(self):
         # Ensure the credentials are entered as bytes
-        if not isinstance(self.Enable, str):
+        if not isinstance(self.Enable, bytes):
             return False
-        if not isinstance(self.Server, str):
+        if not isinstance(self.Server, bytes):
             return False
-        if not isinstance(self.Subscribe, str):
+        if not isinstance(self.Subscribe, bytes):
             return False
-        if not isinstance(self.Publish, str):
+        if not isinstance(self.Publish, bytes):
             return False
 
         return True
