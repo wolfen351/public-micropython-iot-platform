@@ -37,6 +37,8 @@ class ThingsboardControl(BasicModule):
             self.topic_pub = settings.Publish
         else:
             self.topic_pub = b"v1/devices/me/telemetry"
+        self.mqtt_port = settings.Port
+        self.access_token = settings.AccessToken
         
     def tick(self):
         if (self.enabled == b"Y"):
@@ -88,11 +90,11 @@ class ThingsboardControl(BasicModule):
         SerialLog.log("TB MQTT Command Received: ", topic, msg)
 
     def connect_and_subscribe(self):
-        self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token)
+        self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         self.client.subscribe(self.topic_sub)
-        SerialLog.log('Connected to %s TB MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        SerialLog.log('Connected to %s : %s TB MQTT broker, subscribed to %s topic' % (self.mqtt_server, str(self.mqtt_port), self.topic_sub))
 
 
     def settings(self, settingsVals):

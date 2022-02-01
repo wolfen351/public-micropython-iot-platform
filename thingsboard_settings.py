@@ -17,15 +17,17 @@ class ThingsboardSettings:
         """Write settings to settings_file if valid input found."""
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
-                f.write(",".join([self.Enable, self.Server, self.Subscribe, self.Publish, str(self.Port), self.AccessToken]))
+                f.write(b",".join([self.Enable, self.Server, self.Subscribe, self.Publish, str(self.Port).encode('ascii'), self.AccessToken]))
             SerialLog.log("Wrote settings to {:s}".format(self.SETTINGS_FILE))
+        else:
+            SerialLog.log("Invalid!")
 
     def load(self):
         try:
             with open(self.SETTINGS_FILE, "rb") as f:
                 contents = f.read().split(b",")
             SerialLog.log("Loaded settings from {:s}".format(self.SETTINGS_FILE))
-            if len(contents) == 4:
+            if len(contents) == 6:
                 self.Enable = contents[0]
                 self.Server = contents[1]
                 self.Subscribe = contents[2]
@@ -62,17 +64,17 @@ class ThingsboardSettings:
 
     def is_valid(self):
         # Ensure the credentials are entered as bytes
-        if not isinstance(self.Enable, str):
+        if not isinstance(self.Enable, bytes):
             return False
-        if not isinstance(self.Server, str):
+        if not isinstance(self.Server, bytes):
             return False
-        if not isinstance(self.Subscribe, str):
+        if not isinstance(self.Subscribe, bytes):
             return False
-        if not isinstance(self.Publish, str):
+        if not isinstance(self.Publish, bytes):
             return False
         if not isinstance(self.Port, int):
             return False
-        if not isinstance(self.AccessToken, str):
+        if not isinstance(self.AccessToken, bytes):
             return False
 
         return True
