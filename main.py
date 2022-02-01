@@ -51,7 +51,7 @@ try:
         TempMonitor(basicSettings), 
         MqttControl(basicSettings), 
         HomeAssistantControl(basicSettings), 
-        #ThingsboardControl(basicSettings), 
+        ThingsboardControl(basicSettings), 
         web
     ]
     
