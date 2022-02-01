@@ -86,7 +86,6 @@
         <span class="lbl">Server:</span><input type="text" name="server" value="mqtt.wolfen.za.net" id="Server"><br />
         <span class="lbl">Port:</span><input type="text" name="port" value="1883" id="Port"><br />
         <span class="lbl">Access Token:</span><input type="password" name="accesstoken" value="***" id="AccessToken"><br />
-        <span class="lbl">Subscribe To:</span><input type="text" name="subscribe" value="temp/qweqwewqe/command" id="Subscribe"><br />
         <span class="lbl">Publish To:</span><input type="text" name="publish" value="temp/qweqwewqe/command" id="Publish"><br />
         <input type="hidden" name="enable" value="Y" id="hide" />
         <button type="submit" class="btn">Save</button>
@@ -132,7 +131,6 @@
         }
         $("#hide").val(s.enable);
         $("#Server").val(s.server);
-        $("#Subscribe").val(s.subscribe);
         $("#Publish").val(s.publish);
         $("#Port").val(s.port);
         $("#AccessToken").val(s.accesstoken);
