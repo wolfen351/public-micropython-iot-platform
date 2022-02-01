@@ -46,7 +46,11 @@ class WifiHandler(BasicModule):
                 self.ap()
 
     def getTelemetry(self):
-        return {}
+        return { 
+            "ssid": self.sta_if.config('essid'), 
+            "ip": self.sta_if.ifconfig()[0],
+            "rssi": self.sta_if.status('rssi')
+        }
 
     def processTelemetry(self, telemetry):
         pass
