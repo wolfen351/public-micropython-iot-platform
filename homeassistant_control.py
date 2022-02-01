@@ -24,6 +24,7 @@ class HomeAssistantControl(BasicModule):
         self.basicSettings = basicSettings
         self.telemetry = {}
         self.client = None
+        self.configuredKeys = []
 
     def start(self):
         settings = HomeAssistantSettings()
@@ -70,6 +71,8 @@ class HomeAssistantControl(BasicModule):
             if (len(stuffToPost) > 0):
                 messageStr = "{ "
                 for bit in stuffToPost:
+                    self.home_assistant_configure(bit[0])
+
                     messageStr += '"' + bit[0] + '": '
                     if (isinstance(bit[1],int) or isinstance(bit[1],float)):
                         messageStr += str(bit[1]) +', '
@@ -122,14 +125,26 @@ class HomeAssistantControl(BasicModule):
         self.client.connect()
         self.client.subscribe(self.topic_sub)
         SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
-        self.home_assistant_configure()
 
-    def home_assistant_configure(self):
-        self.client.publish("%s_temp/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Reading", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.temperature}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
-        self.client.publish("%s_rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{{value_json.rssi}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
-        self.client.publish("%s_ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ip}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
-        self.client.publish("%s_ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
-        self.client.publish("%s_onboard_button/config" % self.homeAssistantButtonUrl, '{"name":"%s %s Onboard Button", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantButtonUrl) )
+    def home_assistant_configure(self, key):
+        
+        if key not in self.configuredKeys:
+            self.configuredKeys.append(key)
+            if (key.startswith(b'temperature/')):
+                id = key.replace("temperature/","")
+                self.client.publish("%s_temp/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Reading - %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.%s}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, key) )
+        
+            if (key.startswith(b'rssi')):
+                self.client.publish("%s_rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{{value_json.rssi}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+
+            if (key.startswith(b'ip')):
+                self.client.publish("%s_ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ip}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+
+            if (key.startswith(b'ssid')):
+                self.client.publish("%s_ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+
+            if (key.startswith(b'button')):
+                self.client.publish("%s_onboard_button/config" % self.homeAssistantButtonUrl, '{"name":"%s %s Onboard Button", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['Name'], self.client_id.decode('ascii'), self.homeAssistantButtonUrl) )
 
     def settings(self, settingsVals):
         # Apply the new settings
