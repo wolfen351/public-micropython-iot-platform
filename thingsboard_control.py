@@ -87,7 +87,7 @@ class ThingsboardControl(BasicModule):
     def connect(self):
         self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
         self.client.connect()
-        SerialLog.log('Connected to %s : %s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
+        SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
 
 
     def settings(self, settingsVals):

@@ -38,10 +38,13 @@ try:
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
+    # some storage
     basicSettings = { 
         'Name': 'Temperature Sensor',
         'ShortName': 'TempMon'
     }
+    ledOn = True
+    telemetry = dict()
 
     # register all the modules
     web = WebProcessor(basicSettings)
@@ -49,9 +52,9 @@ try:
         BuiltinButtonControl(basicSettings),
         WifiHandler(basicSettings), 
         TempMonitor(basicSettings), 
-        MqttControl(basicSettings), 
+        #MqttControl(basicSettings), 
         HomeAssistantControl(basicSettings), 
-        ThingsboardControl(basicSettings), 
+        #ThingsboardControl(basicSettings), 
         web
     ]
     
@@ -63,10 +66,7 @@ try:
         routes.update(runSafe(mod.getRoutes))
 
     web.setRoutes(routes)
-
-    # some storage
-    ledOn = True
-    telemetry = dict()
+    web.setTelemetry(telemetry)
 
     while True:
 

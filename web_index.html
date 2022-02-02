@@ -94,23 +94,21 @@
 
     var intervalId = setInterval(function() {
 
-      url = 'http://10.10.10.3/temp'
-
-fetch('/temp')
+      fetch('/telemetry')
         .then(response => response.json())
         .then(data => {
           s = data;
           html = "";
           for (let key of Object.keys(s)) {
-            html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " *C </p>"
+            if (key.includes("temperature"))
+              html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
+            else if (key.includes("rssi"))
+              html += "<p>" + key + ": " + s[key] + " dbm </p>"
+            else
+              html += "<p>" + key + ": " + s[key] + "</p>"
           }
           $('#tempdisplay').html(html);
-
-
         })
-
-
-
     }, 2000);
 
   </script>

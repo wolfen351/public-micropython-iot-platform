@@ -1,5 +1,6 @@
 from basic_module import BasicModule
 from web_server import WebServer
+import json
 
 #public static code
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
@@ -31,9 +32,9 @@ def unquote(string):
 
 
 class WebProcessor(BasicModule):
-
+   
     def __init__(self, basicSettings):
-        pass
+        self.telemetry = {}
 
     def start(self):
         self.server = WebServer()
@@ -56,15 +57,23 @@ class WebProcessor(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/": b"./web_index.html"
+            b"/": b"./web_index.html",
+            b"/telemetry": self.webTelemetry
         }
 
     # special code called from main to set ALL routes
     def setRoutes(self, routes):
         self.server.setRoutes(routes)
 
+    # special code called from main to set ALL telemetry
+    def setTelemetry(self, telemetry):
+        self.telemetry = telemetry
 
-
+    # return json telemetry to ui
+    def webTelemetry(self, params):
+        headers = okayHeader
+        data = json.dumps(self.telemetry)
+        return data, headers  
 
 
 
