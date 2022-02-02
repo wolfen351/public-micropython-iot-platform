@@ -18,6 +18,8 @@ class WifiHandler(BasicModule):
         self.ap_if = network.WLAN(network.AP_IF)
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.essid = "%s-%s" % (basicSettings['ShortName'], self.client_id.decode('ascii'))
+        self.rssi = 0
+        self.lastrssitime = 0
 
     def start(self):
         self.station()
@@ -45,11 +47,19 @@ class WifiHandler(BasicModule):
                 # Never connected, run an AP after 30s of downtime
                 self.ap()
 
+            if (self.sta_if.isconnected() and self.connected):
+                # Ongoing connection
+                now = time.ticks_ms()
+                diff = time.ticks_diff(now, self.lastrssitime)
+                if (diff > 50000):
+                    self.rssi = self.sta_if.status('rssi')
+                    self.lastrssitime = now
+
     def getTelemetry(self):
         return { 
             "ssid": self.sta_if.config('essid'), 
             "ip": self.sta_if.ifconfig()[0],
-            "rssi": self.sta_if.status('rssi')
+            "rssi": self.rssi
         }
 
     def processTelemetry(self, telemetry):
