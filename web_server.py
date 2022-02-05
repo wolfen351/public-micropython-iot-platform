@@ -21,8 +21,8 @@ class WebServer(Server):
         self.conns = dict()
         self.ssid = None
 
-        # queue up to 3 connection requests before refusing
-        self.sock.listen(3)
+        # queue up to 5 connection requests before refusing
+        self.sock.listen(5)
         self.sock.setblocking(False)
 
     #@micropython.native
@@ -41,6 +41,8 @@ class WebServer(Server):
     def accept(self, server_sock):
         try:
             client_sock, addr = server_sock.accept()
+            SerialLog.log("Accepting connection from", addr)
+            client_sock.settimeout(1)
             client_sock.setblocking(False)
             client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.poller.register(client_sock, select.POLLIN)
@@ -99,26 +101,29 @@ class WebServer(Server):
         return uio.BytesIO(b""), headers
 
     def read(self, s):
-        data = s.read()
-        if not data:
-            # no data in the TCP stream, so close the socket
+        try:
+            data = s.read()
+            if not data:
+                # no data in the TCP stream, so close the socket
+                self.close(s)
+                return
+
+            # add new data to the full request
+            sid = id(s)
+            self.request[sid] = self.request.get(sid, b"") + data
+
+            # check if additional data expected
+            if data[-4:] != b"\r\n\r\n":
+                # HTTP request is not finished if no blank line at the end
+                # wait for next read event on this socket instead
+                return
+
+            # get the completed request
+            req = self.parse_request(self.request.pop(sid))
+            body, headers = self.get_response(req)
+            self.prepare_write(s, body, headers)
+        except:
             self.close(s)
-            return
-
-        # add new data to the full request
-        sid = id(s)
-        self.request[sid] = self.request.get(sid, b"") + data
-
-        # check if additional data expected
-        if data[-4:] != b"\r\n\r\n":
-            # HTTP request is not finished if no blank line at the end
-            # wait for next read event on this socket instead
-            return
-
-        # get the completed request
-        req = self.parse_request(self.request.pop(sid))
-        body, headers = self.get_response(req)
-        self.prepare_write(s, body, headers)
 
     def prepare_write(self, s, body, headers):
         # add newline to headers to signify transition to body
@@ -170,6 +175,7 @@ class WebServer(Server):
             c.write_range[0] += bytes_written
 
     def close(self, s):
+        SerialLog.log("Closing connection %s" % (s))
         s.close()
         self.poller.unregister(s)
         sid = id(s)
