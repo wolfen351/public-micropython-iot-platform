@@ -41,13 +41,13 @@ class WebServer(Server):
     def accept(self, server_sock):
         try:
             client_sock, addr = server_sock.accept()
+            client_sock.setblocking(False)
+            client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.poller.register(client_sock, select.POLLIN)
         except OSError as e:
             if e.args[0] == uerrno.EAGAIN:
                 return
 
-        client_sock.setblocking(False)
-        client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.poller.register(client_sock, select.POLLIN)
 
     def parse_request(self, req):
         req_lines = req.split(b"\r\n")
