@@ -80,6 +80,7 @@ class HomeAssistantControl(BasicModule):
                     else:
                         messageStr += '"' + bit[1] + '", '
                 messageStr = messageStr[0: -2] + "}" # remove final comma and add }
+
                 SerialLog.log("Sending HA MQTT: ", messageStr)
                 self.client.publish("%s/state" % self.homeAssistantSensorUrl, messageStr)
 
@@ -134,19 +135,19 @@ class HomeAssistantControl(BasicModule):
             if (key.startswith(b'temperature/')):
                 id = key.replace("temperature/","")
                 j = key.replace("/","_")
-                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{{value_json.%s}}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j) )
+                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
         
             if (key.startswith(b'rssi')):
-                self.client.publish("%s/rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{{value_json.rssi}}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                self.client.publish("%s/rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{%% if value_json.rssi %%} {{value_json.rssi}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'ip')):
-                self.client.publish("%s/ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ip}}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                self.client.publish("%s/ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.ip %%} {{value_json.ip}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'ssid')):
-                self.client.publish("%s/ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                self.client.publish("%s/ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.ssid %%} {{value_json.sdis}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'button')):
-                self.client.publish("%s/onboard_button/config" % self.homeAssistantButtonUrl, '{"name":"%s %s Onboard Button", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{{value_json.ssid}}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantButtonUrl) )
+                self.client.publish("%s/onboard_button/config" % self.homeAssistantButtonUrl, '{"name":"%s %s Onboard Button", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.onboard_button %%} {{value_json.onboard_button}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantButtonUrl) )
 
     def settings(self, settingsVals):
         # Apply the new settings
