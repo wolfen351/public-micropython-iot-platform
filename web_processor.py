@@ -1,3 +1,4 @@
+import machine
 from basic_module import BasicModule
 from web_server import WebServer
 import json
@@ -58,7 +59,8 @@ class WebProcessor(BasicModule):
     def getRoutes(self):
         return {
             b"/": b"./web_index.html",
-            b"/telemetry": self.webTelemetry
+            b"/telemetry": self.webTelemetry,
+            b"/reboot": self.webReboot
         }
 
     # special code called from main to set ALL routes
@@ -75,6 +77,9 @@ class WebProcessor(BasicModule):
         data = json.dumps(self.telemetry)
         return data, headers  
 
+    # Simple reboot
+    def webReboot(self, params):
+        machine.reset()
 
 
     
