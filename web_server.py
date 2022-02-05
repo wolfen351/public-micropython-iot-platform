@@ -41,15 +41,12 @@ class WebServer(Server):
     def accept(self, server_sock):
         try:
             client_sock, addr = server_sock.accept()
-            SerialLog.log("Accepting connection from", addr)
-            client_sock.settimeout(1)
             client_sock.setblocking(False)
             client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.poller.register(client_sock, select.POLLIN)
         except OSError as e:
             if e.args[0] == uerrno.EAGAIN:
                 return
-
 
     def parse_request(self, req):
         req_lines = req.split(b"\r\n")
@@ -111,11 +108,15 @@ class WebServer(Server):
             # add new data to the full request
             sid = id(s)
             self.request[sid] = self.request.get(sid, b"") + data
+            if (len(self.request[sid]) > 1000):
+                self.close(s)
+                return
 
             # check if additional data expected
             if data[-4:] != b"\r\n\r\n":
                 # HTTP request is not finished if no blank line at the end
                 # wait for next read event on this socket instead
+                SerialLog.log("Waiting for more data...", data)
                 return
 
             # get the completed request
@@ -150,7 +151,11 @@ class WebServer(Server):
             # write next 536 bytes (max) into the socket
             try:
                 bytes_written = sock.write(c.buffmv[c.write_range[0] : c.write_range[1]])
-            except OSError:
+            except OSError as e:
+                if (e.errno == 128): # Not connected anymore
+                    self.close(sock)
+                if (e.errno == 104): # Connection Reset
+                    self.close(sock)
                 return
             if not bytes_written or c.write_range[1] < 536:
                 # either we wrote no bytes, or we wrote < TCP MSS of bytes
@@ -175,7 +180,6 @@ class WebServer(Server):
             c.write_range[0] += bytes_written
 
     def close(self, s):
-        SerialLog.log("Closing connection %s" % (s))
         s.close()
         self.poller.unregister(s)
         sid = id(s)
