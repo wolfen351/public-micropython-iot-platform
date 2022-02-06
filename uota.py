@@ -106,7 +106,9 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
             SerialLog.log('not enough free space for the new firmware')
             return False
 
-        response = urequests.get(ota_config['url'] + remote_filename)
+        downloadUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/' + remote_filename
+        SerialLog.log("Fetching update updates on: ", downloadUrl)
+        response = urequests.get(downloadUrl)
         with open(ota_config['tmp_filename'], 'wb') as f:
             while True:
                 chunk = response.raw.read(512)
