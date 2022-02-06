@@ -39,23 +39,20 @@ try:
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
     # some storage
-    basicSettings = { 
-        'Name': 'Temperature Sensor',
-        'ShortName': 'TempMon',
-        'codever': 'tempmon'
-    }
+    import all_starts_here as Basic
+    
     ledOn = True
     telemetry = dict()
 
     # register all the modules
-    web = WebProcessor(basicSettings)
+    web = WebProcessor(Basic.Settings)
     allModules = [ 
-        BuiltinButtonControl(basicSettings),
-        WifiHandler(basicSettings), 
-        TempMonitor(basicSettings), 
-        MqttControl(basicSettings), 
-        HomeAssistantControl(basicSettings), 
-        ThingsboardControl(basicSettings), 
+        BuiltinButtonControl(Basic.Settings),
+        WifiHandler(Basic.Settings), 
+        TempMonitor(Basic.Settings), 
+        MqttControl(Basic.Settings), 
+        HomeAssistantControl(Basic.Settings), 
+        ThingsboardControl(Basic.Settings), 
         web
     ]
     
