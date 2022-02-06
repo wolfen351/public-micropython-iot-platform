@@ -41,7 +41,8 @@ try:
     # some storage
     basicSettings = { 
         'Name': 'Temperature Sensor',
-        'ShortName': 'TempMon'
+        'ShortName': 'TempMon',
+        'codever': 'tempmon'
     }
     ledOn = True
     telemetry = dict()
