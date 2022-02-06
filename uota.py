@@ -11,6 +11,7 @@ import uzlib
 import upip_utarfile as tarfile
 from micropython import const
 from serial_log import SerialLog
+import all_starts_here as Basic
 
 GZDICT_SZ = const(31)
 ota_config = {}
@@ -79,7 +80,9 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
 
-    response = urequests.get(ota_config['url'] + 'latest')
+    latestUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/latest'
+    SerialLog.log("Checking for updates on: ", latestUrl)
+    response = urequests.get(latestUrl)
     SerialLog.log("Update Response:", response.text)
     remote_version, remote_filename, *optional = response.text.strip().rstrip(';').split(';')
     min_free_space, *remote_hash = optional if optional else (0, '')
