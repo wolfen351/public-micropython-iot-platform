@@ -19,22 +19,24 @@ class TempMonitor(BasicModule):
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         self.roms = self.ds_sensor.scan()
         SerialLog.log('Found DS devices: ', self.roms)
-        self.ds_sensor.convert_temp()
-        self.lastConvert = time.ticks_ms()
-        for rom in self.roms:
-            self.lastTemp[str(rom)] = -127
-
-    def tick(self):
-        currentTime = time.ticks_ms()
-        diff = time.ticks_diff(currentTime, self.lastConvert)
-        if (diff > 750): 
-            for rom in self.roms:
-                current = self.ds_sensor.read_temp(rom)
-                if (current != self.lastTemp[str(rom)]):
-                    self.lastTemp[str(rom)] = current
-                    SerialLog.log("%s = %s*C" % (ubinascii.hexlify(rom).decode('ascii'), current))
+        if (len(self.roms) > 0):
             self.ds_sensor.convert_temp()
             self.lastConvert = time.ticks_ms()
+            for rom in self.roms:
+                self.lastTemp[str(rom)] = -127
+
+    def tick(self):
+        if (len(self.roms) > 0):
+            currentTime = time.ticks_ms()
+            diff = time.ticks_diff(currentTime, self.lastConvert)
+            if (diff > 750): 
+                for rom in self.roms:
+                    current = self.ds_sensor.read_temp(rom)
+                    if (current != self.lastTemp[str(rom)]):
+                        self.lastTemp[str(rom)] = current
+                        SerialLog.log("%s = %s*C" % (ubinascii.hexlify(rom).decode('ascii'), current))
+                self.ds_sensor.convert_temp()
+                self.lastConvert = time.ticks_ms()
 
     def getTelemetry(self):
         telemetry = {}
