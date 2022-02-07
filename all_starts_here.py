@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Temperature Sensor',
-    'ShortName': 'TempMon',
+    'Name': 'Master Template',
+    'ShortName': 'Master',
 }
