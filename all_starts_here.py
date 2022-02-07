@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Master Template',
-    'ShortName': 'Master',
+    'Name': 'Temperature Sensor DHT11',
+    'ShortName': 'DHT11',
 }

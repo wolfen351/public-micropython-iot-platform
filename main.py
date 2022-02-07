@@ -48,6 +48,7 @@ try:
     allModules = [ 
         BuiltinButtonControl(Basic.Settings),
         WifiHandler(Basic.Settings), 
+        Dht11Monitor(Basic.Settings),
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
