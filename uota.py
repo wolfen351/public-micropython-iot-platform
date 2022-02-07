@@ -66,6 +66,14 @@ def check_free_space(min_free_space: int) -> bool:
     free_kb = block_sz * free_blocks / 1024
     return free_kb >= min_free_space
 
+def local_version():
+    try:
+        with open('version', 'r') as f:
+            local_version = f.read().strip()
+            return local_version
+    except OSError:
+            return "unknown!"
+
 
 def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     """

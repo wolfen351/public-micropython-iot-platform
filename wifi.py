@@ -20,9 +20,11 @@ class WifiHandler(BasicModule):
         self.essid = "%s-%s" % (basicSettings['ShortName'], self.client_id.decode('ascii'))
         self.rssi = 0
         self.lastrssitime = 0
+        self.version = "unknown"
 
     def start(self):
         self.station()
+        self.version = uota.local_version()
 
     def tick(self):
         if (not self.apMode):
@@ -59,7 +61,8 @@ class WifiHandler(BasicModule):
         return { 
             "ssid": self.sta_if.config('essid'), 
             "ip": self.sta_if.ifconfig()[0],
-            "rssi": self.rssi
+            "rssi": self.rssi,
+            "version": self.version
         }
 
     def processTelemetry(self, telemetry):
