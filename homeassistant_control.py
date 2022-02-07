@@ -135,8 +135,13 @@ class HomeAssistantControl(BasicModule):
             if (key.startswith(b'temperature/')):
                 id = key.replace("temperature/","")
                 j = key.replace("/","_")
-                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"C","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
-        
+                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"°C","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
+
+            if (key.startswith(b'humidity/')):
+                id = key.replace("humidity/","")
+                j = key.replace("/","_")
+                self.client.publish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"humidity","stat_t":"%s/state","unit_of_meas":"%%RH","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
+
             if (key.startswith(b'rssi')):
                 self.client.publish("%s/rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{%% if value_json.rssi %%} {{value_json.rssi}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 

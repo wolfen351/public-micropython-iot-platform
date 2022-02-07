@@ -16,6 +16,7 @@ echo "Processing project $SHORTNAME"
 
 BASEFOLDER=/stuff/code/wolfen-iot-firmware-archive
 
+mkdir $BASEFOLDER/firmware/${SHORTNAME,,}
 cp version $BASEFOLDER/firmware/${SHORTNAME,,}
 cp latest $BASEFOLDER/firmware/${SHORTNAME,,}
 cp firmware.tar.gz $BASEFOLDER/firmware/${SHORTNAME,,}
