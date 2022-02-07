@@ -60,7 +60,7 @@ try:
     routes = {}
     for mod in allModules:
         SerialLog.log("Starting: ", mod)
-        mod.start()
+        runSafe(mod.start)
         routes.update(runSafe(mod.getRoutes))
 
     web.setRoutes(routes)
