@@ -11,10 +11,13 @@ fi
 read MAX < lastedit.dat
 echo "Last sync for this board was at $MAX"
 
-for f in *.py *.html *.sh *.js *.cfg
+# increment the version
+./bump_version.sh
+
+# send all files to the device
+for f in *.py *.html *.sh *.js *.cfg version
 do
   THIS=$(stat -c %Y $f)
-#  echo $f was edited at $THIS
   if [ $THIS -gt $MAX ]
   then
     echo Sending $f
@@ -25,17 +28,6 @@ do
     fi
   fi
 done
-
-# make firmware archive for ota
-cat version | perl -ne 'chomp; print join(".", splice(@{[split/\./,$_]}, 0, -1), map {++$_} pop @{[split/\./,$_]}), "\n";' > version_new
-rm version
-mv version_new version
-echo "Version is now:"
-ampy --port /dev/ttyACM0 put version
-tar -czf firmware.tar.gz *.py *.html *.sh *.js *.cfg version
-V="$(cat version);firmware.tar.gz;30;$(sha256sum firmware.tar.gz | cut -d " " -f 1)"
-echo $V
-echo $V > latest
 
 # record the last time a file was edited
 stat -c %Y *.py *.html *.sh *.js *.cfg version | sort -r | head -n 1 > lastedit.dat
