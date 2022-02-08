@@ -33,6 +33,7 @@ try:
     from wifi import WifiHandler
     import sys
     import gc
+    from temp_monitor import TempMonitor
     from builtin_button_control import BuiltinButtonControl
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
@@ -48,6 +49,7 @@ try:
     allModules = [ 
         BuiltinButtonControl(Basic.Settings),
         WifiHandler(Basic.Settings), 
+        TempMonitor(Basic.Settings), 
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
