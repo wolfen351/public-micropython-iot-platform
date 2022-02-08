@@ -6,11 +6,11 @@
   <title>Temperature Monitor</title>
   <style>
     body {
-      font-family: sans-serif;
       background: #3498db;
       width: 100%;
       text-align: center;
-      margin: 20px 0px 20px 0px;
+      margin: 2rem;
+      font: 14px system-ui;
     }
 
     span {
@@ -34,7 +34,7 @@
 
     .navbtn {
       margin-top: 25px;
-      height:50px;
+      height: 50px;
       width: 130px;
     }
 
@@ -53,7 +53,7 @@
     .sett input[type="radio"] {
       width: 20px;
       margin-left: 2px;
-      margin-top:15px;
+      margin-top: 15px;
     }
 
     .sett button {
@@ -68,20 +68,103 @@
     .status {
       display: flex;
       width: 100px;
-      margin-left:auto;
+      margin-left: auto;
       margin-right: auto;
     }
 
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
 
+    .grid>div {
+      background: #adbeee;
+      padding: 1.5rem;
+      border-radius: 1rem;
+    }
+
+    .grid>div>.title {
+      font-weight: bold;
+      padding-bottom: 20px;
+    }
+
+    .line {
+      display: flex;
+    }
+
+    .lineitem {
+      width: 50%;
+      padding-left: 20%;
+      text-align: left;
+    }
   </style>
   <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <h1>Temperature Monitor</h1>
+  <h1>Sensor Display</h1>
 
   <br />
-  <div id='tempdisplay'></div>
+  <div id='panels' class="grid">
+    <div class="panel" id="wifi">
+      <div class="title">WiFi</div>
+
+      <div class="line">
+        <div class="lineitem">SSID</div>
+        <div dataitem="ssid"></div>
+      </div>
+
+      <div class="line">
+        <div class="lineitem">IP Address</div>
+        <div dataitem="ip"></div>
+      </div>
+
+      <div class="line">
+        <div class="lineitem">RSSI</div>
+        <div dataitem="rssi"></div>
+        <div>dBm</div>
+      </div>
+    </div>
+    <div class="panel" id="system">
+      <div class="title">System</div>
+
+      <div class="line">
+        <div class="lineitem">Version</div>
+        <div dataitem="version"></div>
+      </div>
+    </div>
+    <div class="panel" id="mosfet">
+      <div class="title">MOSFET</div>
+
+      <div class="line">
+        <div class="lineitem">Switch 1</div>
+        <div dataitem="mosfet/S1"></div>
+      </div>
+      <div class="line">
+        <div class="lineitem">Switch 2</div>
+        <div dataitem="mosfet/S2"></div>
+      </div>
+      <div class="line">
+        <div class="lineitem">Switch 3</div>
+        <div dataitem="mosfet/S3"></div>
+      </div>
+      <div class="line">
+        <div class="lineitem">Switch 4</div>
+        <div dataitem="mosfet/S4"></div>
+      </div>
+    </div>
+    <div class="panel" id="button">
+      <div class="title">Button</div>
+
+      <div class="line">
+        <div class="lineitem">Onboard</div>
+        <div dataitem="button/onboard"></div>
+      </div>
+    </div>
+
+  </div>
+  <div id='rawdisplay'></div>
 
   <div class="nav">
     <input type="button" class="navbtn" value="Home Assistant" onclick="window.location='/ha'"></input>
@@ -93,7 +176,7 @@
 
   <script type="text/javascript">
 
-    var intervalId = setInterval(function() {
+    var intervalId = setInterval(function () {
 
       fetch('/telemetry')
         .then(response => response.json())
@@ -101,14 +184,22 @@
           s = data;
           html = "";
           for (let key of Object.keys(s)) {
-            if (key.includes("temperature"))
-              html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
-            else if (key.includes("rssi"))
-              html += "<p>" + key + ": " + s[key] + " dbm </p>"
-            else
-              html += "<p>" + key + ": " + s[key] + "</p>"
+
+            panelItem = $(`div[dataitem="${key}"]`)
+            if (panelItem[0]) {
+              panelItem.html(s[key]);
+            }
+            else {
+
+              if (key.includes("temperature"))
+                html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
+              else if (key.includes("rssi"))
+                html += "<p>" + key + ": " + s[key] + " dbm </p>"
+              else
+                html += "<p>" + key + ": " + s[key] + "</p>"
+            }
           }
-          $('#tempdisplay').html(html);
+          $('#rawdisplay').html(html);
         })
     }, 2000);
 
