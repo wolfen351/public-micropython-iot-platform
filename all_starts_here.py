@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Master Template',
-    'ShortName': 'Master',
+    'Name': 'Mosfet Controller',
+    'ShortName': 'Mosfet',
 }

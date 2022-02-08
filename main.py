@@ -1,4 +1,7 @@
 # Main 
+from mosfet_control import MosfetControl
+
+
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
@@ -51,7 +54,8 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        web
+        web,
+        MosfetControl(Basic.Settings)
     ]
     
     # start all the modules up

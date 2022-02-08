@@ -1,6 +1,7 @@
 from machine import Pin
 
 class MosfetControl:
+
     # Switch Pins
     S1 = Pin(12, Pin.OUT)
     S2 = Pin(11, Pin.OUT)
@@ -8,19 +9,41 @@ class MosfetControl:
     S4 = Pin(7, Pin.OUT)
     Switches = [S1, S2, S3, S4]
 
-    # Actual of the lights (0=Off, 1=On)
+    # Actual of the switches (0=Off, 1=On)
     States = [0, 0, 0, 0]
 
-    def status(self):
-        return self.States
+    def __init__(self, basicSettings):
+        pass
 
     def start(self):
         # Default all the switches to off
-        self.S1.off()
-        self.S2.off()
-        self.S3.off()
-        self.S4.off()
+        self.allOff()
 
+    def tick(self):
+        pass
+
+    def getTelemetry(self):
+        return {
+            "mosfet/S1" : self.States[0],
+            "mosfet/S2" : self.States[0],
+            "mosfet/S3" : self.States[0],
+            "mosfet/S4" : self.States[0]
+        }
+
+    def processTelemetry(self, telemetry):
+        pass
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+    def getRoutes(self):
+        return {}
+
+
+    # internal code
     def allOn(self): # num is 1-4, but arrays are 0-3
         for num in range(4):
             self.States[num] = 1
@@ -51,6 +74,4 @@ class MosfetControl:
         if (onOff == 1): 
             self.on(num)
 
-    def tick(self):
-        # Do what is needed each tick
-        pass
+
