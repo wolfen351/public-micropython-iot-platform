@@ -89,10 +89,16 @@ class WebServer(Server):
 
         if callable(route):
             # call a function, which may or may not return a response
-            response = route(req.params)
-            body = response[0] or b""
-            headers = response[1]
-            return uio.BytesIO(body), headers
+            try:
+                response = route(req.params)
+                body = response[0] or b""
+                headers = response[1]
+                return uio.BytesIO(body), headers
+            except Exception as e:
+                import sys
+                sys.print_exception(e)
+                headers = b"HTTP/1.1 500 Function failed\r\n"
+                return uio.BytesIO(b""), headers
 
         headers = b"HTTP/1.1 404 Not Found\r\n"
         return uio.BytesIO(b""), headers

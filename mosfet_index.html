@@ -4,18 +4,22 @@
     <div class="line">
       <div class="lineitem">Switch 1</div>
       <div dataitem="mosfet/S1" datadisplay="onoff"></div>
+      <input type="button" value="Switch" onclick="post('/flip?sw=1')"></input>
     </div>
     <div class="line">
       <div class="lineitem">Switch 2</div>
       <div dataitem="mosfet/S2" datadisplay="onoff"></div>
+      <input type="button" value="Switch" onclick="post('/flip?sw=2')"></input>
     </div>
     <div class="line">
       <div class="lineitem">Switch 3</div>
       <div dataitem="mosfet/S3" datadisplay="onoff"></div>
+      <input type="button" value="Switch" onclick="post('/flip?sw=3')"></input>
     </div>
     <div class="line">
       <div class="lineitem">Switch 4</div>
       <div dataitem="mosfet/S4" datadisplay="onoff"></div>
+      <input type="button" value="Switch" onclick="post('/flip?sw=4')"></input>
     </div>
 
     <input type="button" class="navbtn" value="Off" onclick="post('/alloff')"></input>

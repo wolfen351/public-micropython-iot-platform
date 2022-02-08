@@ -1,6 +1,7 @@
 from basic_module import BasicModule
 from machine import Pin
-from web_processor import redirectHomeHeader
+from serial_log import SerialLog
+from web_processor import okayHeader, unquote
 
 class MosfetControl(BasicModule):
 
@@ -44,7 +45,9 @@ class MosfetControl(BasicModule):
     def getRoutes(self):
         return { 
             b"/alloff" : self.webAllOff,
-            b"/allon" : self.webAllOn 
+            b"/allon" : self.webAllOn,
+            b"/flip" : self.webFlip 
+
         }
 
     def getIndexFileName(self):
@@ -54,16 +57,22 @@ class MosfetControl(BasicModule):
     # internal code
     def webAllOn(self, params): 
         self.allOn()
-        headers = redirectHomeHeader
+        headers = okayHeader
         data = b""
         return data, headers        
 
     def webAllOff(self, params): 
         self.allOff()
-        headers = redirectHomeHeader
+        headers = okayHeader
         data = b""
         return data, headers        
 
+    def webFlip(self, params): 
+        sw = unquote(params.get(b"sw", None))
+        self.flip(int(sw))
+        headers = okayHeader
+        data = b""
+        return data, headers  
 
     def allOn(self): # num is 1-4, but arrays are 0-3
         for num in range(4):
@@ -85,9 +94,9 @@ class MosfetControl(BasicModule):
 
     def flip(self, num): # num is 1-4, but arrays are 0-3
         if (self.States[num - 1] == 0):
-            self.on(self.num)
+            self.on(num)
         else:
-            self.off(self.num)
+            self.off(num)
 
     def command(self, num, onOff): # num is 1-4, OnOff=0 for off and 1 for on
         if (onOff == 0): 
