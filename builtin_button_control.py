@@ -25,3 +25,6 @@ class BuiltinButtonControl(BasicModule):
 
     def getRoutes(self):
         return {}
+
+    def getIndexFileName(self):
+        return { "builtinbutton" : "builtin_button_index.html" }

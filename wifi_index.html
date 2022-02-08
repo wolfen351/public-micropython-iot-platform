@@ -1,0 +1,34 @@
+<div class="panel" id="wifi">
+    <div class="title">WiFi</div>
+
+    <div class="line">
+        <div class="lineitem">SSID</div>
+        <div dataitem="ssid"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">IP Address</div>
+        <div dataitem="ip"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">RSSI</div>
+        <div dataitem="rssi"></div>
+        <div>dBm</div>
+    </div>
+
+    <input type="button" class="navbtn" value="Settings" onclick="window.location='/network'"></input>
+
+</div>
+
+<div class="panel" id="system">
+    <div class="title">System</div>
+
+    <div class="line">
+      <div class="lineitem">Version</div>
+      <div dataitem="version"></div>
+    </div>
+
+    <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
+
+</div>

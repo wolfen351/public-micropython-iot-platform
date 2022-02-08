@@ -81,6 +81,9 @@ class WifiHandler(BasicModule):
             b"/netsavesettings": self.savenetsettings
         }
 
+    def getIndexFileName(self):
+        return { "wifi" : "wifi_index.html" }
+
     # internal functions
 
     def loadnetsettings(self, params):

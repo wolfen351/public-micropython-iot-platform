@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Temperature Monitor</title>
+  <title>Main Status</title>
   <style>
     body {
-      font-family: sans-serif;
       background: #3498db;
       width: 100%;
       text-align: center;
-      margin: 20px 0px 20px 0px;
+      margin: 2rem;
+      font: 14px system-ui;
     }
 
     span {
@@ -34,7 +34,7 @@
 
     .navbtn {
       margin-top: 25px;
-      height:50px;
+      height: 50px;
       width: 130px;
     }
 
@@ -53,7 +53,7 @@
     .sett input[type="radio"] {
       width: 20px;
       margin-left: 2px;
-      margin-top:15px;
+      margin-top: 15px;
     }
 
     .sett button {
@@ -68,32 +68,70 @@
     .status {
       display: flex;
       width: 100px;
-      margin-left:auto;
+      margin-left: auto;
       margin-right: auto;
     }
 
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-right: 1rem;
+      max-width: 90%;
+    }
 
+    .grid>div {
+      background: #adbeee;
+      padding: 1.5rem;
+      border-radius: 1rem;
+    }
+
+    .grid>div>.title {
+      font-weight: bold;
+      padding-bottom: 20px;
+    }
+
+    .line {
+      display: flex;
+    }
+
+    .lineitem {
+      width: 50%;
+      padding-left: 20%;
+      text-align: left;
+    }
   </style>
   <script src="cash.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <h1>Temperature Monitor</h1>
+  <h1>Main Status</h1>
 
   <br />
-  <div id='tempdisplay'></div>
+  <div id='panels' class="grid">
+  </div>
+  <div id='rawdisplay'></div>
 
   <div class="nav">
     <input type="button" class="navbtn" value="Home Assistant" onclick="window.location='/ha'"></input>
     <input type="button" class="navbtn" value="Thingsboard" onclick="window.location='/tb'"></input>
     <input type="button" class="navbtn" value="MQTT" onclick="window.location='/mqtt'"></input>
-    <input type="button" class="navbtn" value="Network" onclick="window.location='/network'"></input>
-    <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
   </div>
 
   <script type="text/javascript">
 
-    var intervalId = setInterval(function() {
+    fetch('/panels')
+      .then(response => response.json())
+      .then(files => {
+        for (let f of Object.keys(files)) {
+          fetch(files[f])
+            .then(panel => {
+              panel.text().then(t => $("#panels").append(t));
+            })
+        }
+      });
+
+    var intervalId = setInterval(function () {
 
       fetch('/telemetry')
         .then(response => response.json())
@@ -101,17 +139,38 @@
           s = data;
           html = "";
           for (let key of Object.keys(s)) {
-            if (key.includes("temperature"))
-              html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
-            else if (key.includes("rssi"))
-              html += "<p>" + key + ": " + s[key] + " dbm </p>"
-            else
-              html += "<p>" + key + ": " + s[key] + "</p>"
+
+            panelItem = $(`div[dataitem="${key}"]`);
+            if (panelItem[0]) {
+              if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+                if (s[key] == 1)
+                  panelItem.html("ON");
+                else
+                  panelItem.html("OFF");
+              }
+              else {
+                panelItem.html(s[key]);
+              }
+            }
+            else {
+
+              if (key.includes("temperature"))
+                html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
+              else if (key.includes("rssi"))
+                html += "<p>" + key + ": " + s[key] + " dbm </p>"
+              else
+                html += "<p>" + key + ": " + s[key] + "</p>"
+            }
           }
-          $('#tempdisplay').html(html);
+          $('#rawdisplay').html(html);
         })
     }, 2000);
 
+
+    function post(url) {
+      fetch(url, { method: 'GET' })
+        .then(response => response.text())
+    }
   </script>
 
 </body>
