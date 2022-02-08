@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Temperature Monitor</title>
+  <title>Sensor Display</title>
   <style>
     body {
       background: #3498db;
@@ -109,62 +109,6 @@
 
   <br />
   <div id='panels' class="grid">
-    <div class="panel" id="wifi">
-      <div class="title">WiFi</div>
-
-      <div class="line">
-        <div class="lineitem">SSID</div>
-        <div dataitem="ssid"></div>
-      </div>
-
-      <div class="line">
-        <div class="lineitem">IP Address</div>
-        <div dataitem="ip"></div>
-      </div>
-
-      <div class="line">
-        <div class="lineitem">RSSI</div>
-        <div dataitem="rssi"></div>
-        <div>dBm</div>
-      </div>
-    </div>
-    <div class="panel" id="system">
-      <div class="title">System</div>
-
-      <div class="line">
-        <div class="lineitem">Version</div>
-        <div dataitem="version"></div>
-      </div>
-    </div>
-    <div class="panel" id="mosfet">
-      <div class="title">MOSFET</div>
-
-      <div class="line">
-        <div class="lineitem">Switch 1</div>
-        <div dataitem="mosfet/S1" datadisplay="onoff"></div>
-      </div>
-      <div class="line">
-        <div class="lineitem">Switch 2</div>
-        <div dataitem="mosfet/S2" datadisplay="onoff"></div>
-      </div>
-      <div class="line">
-        <div class="lineitem">Switch 3</div>
-        <div dataitem="mosfet/S3" datadisplay="onoff"></div>
-      </div>
-      <div class="line">
-        <div class="lineitem">Switch 4</div>
-        <div dataitem="mosfet/S4" datadisplay="onoff"></div>
-      </div>
-    </div>
-    <div class="panel" id="button">
-      <div class="title">Button</div>
-
-      <div class="line">
-        <div class="lineitem">Onboard</div>
-        <div dataitem="button/onboard"></div>
-      </div>
-    </div>
-
   </div>
   <div id='rawdisplay'></div>
 
@@ -172,8 +116,6 @@
     <input type="button" class="navbtn" value="Home Assistant" onclick="window.location='/ha'"></input>
     <input type="button" class="navbtn" value="Thingsboard" onclick="window.location='/tb'"></input>
     <input type="button" class="navbtn" value="MQTT" onclick="window.location='/mqtt'"></input>
-    <input type="button" class="navbtn" value="Network" onclick="window.location='/network'"></input>
-    <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
   </div>
 
   <script type="text/javascript">
@@ -198,9 +140,17 @@
           html = "";
           for (let key of Object.keys(s)) {
 
-            panelItem = $(`div[dataitem="${key}"]`)
+            panelItem = $(`div[dataitem="${key}"]`);
             if (panelItem[0]) {
-              panelItem.html(s[key]);
+              if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+                if (s[key] == 1)
+                  panelItem.html("ON");
+                else
+                  panelItem.html("OFF");
+              }
+              else {
+                panelItem.html(s[key]);
+              }
             }
             else {
 
@@ -216,6 +166,11 @@
         })
     }, 2000);
 
+
+    function post(url) {
+      fetch(url, { method: 'GET' })
+        .then(response => response.text())
+    }
   </script>
 
 </body>

@@ -5,6 +5,7 @@ import json
 
 #public static code
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
 def unquote(string):
     if not string:

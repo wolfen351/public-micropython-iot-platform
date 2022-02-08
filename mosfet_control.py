@@ -1,5 +1,6 @@
 from basic_module import BasicModule
 from machine import Pin
+from web_processor import redirectHomeHeader
 
 class MosfetControl(BasicModule):
 
@@ -41,10 +42,29 @@ class MosfetControl(BasicModule):
         pass
 
     def getRoutes(self):
-        return {}
+        return { 
+            b"/alloff" : self.webAllOff,
+            b"/allon" : self.webAllOn 
+        }
+
+    def getIndexFileName(self):
+        return { "mosfet" : "mosfet_index.html" }
 
 
     # internal code
+    def webAllOn(self, params): 
+        self.allOn()
+        headers = redirectHomeHeader
+        data = b""
+        return data, headers        
+
+    def webAllOff(self, params): 
+        self.allOff()
+        headers = redirectHomeHeader
+        data = b""
+        return data, headers        
+
+
     def allOn(self): # num is 1-4, but arrays are 0-3
         for num in range(4):
             self.States[num] = 1

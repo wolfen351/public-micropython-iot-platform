@@ -24,4 +24,4 @@ class BasicModule:
         return {}
 
     def getIndexFileName(self):
-        return { "basic" : "basic_index.html" }
+        return { }
