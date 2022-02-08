@@ -74,8 +74,10 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1rem;
+      margin-right: 1rem;
+      max-width: 90%;
     }
 
     .grid>div {
@@ -139,19 +141,19 @@
 
       <div class="line">
         <div class="lineitem">Switch 1</div>
-        <div dataitem="mosfet/S1"></div>
+        <div dataitem="mosfet/S1" datadisplay="onoff"></div>
       </div>
       <div class="line">
         <div class="lineitem">Switch 2</div>
-        <div dataitem="mosfet/S2"></div>
+        <div dataitem="mosfet/S2" datadisplay="onoff"></div>
       </div>
       <div class="line">
         <div class="lineitem">Switch 3</div>
-        <div dataitem="mosfet/S3"></div>
+        <div dataitem="mosfet/S3" datadisplay="onoff"></div>
       </div>
       <div class="line">
         <div class="lineitem">Switch 4</div>
-        <div dataitem="mosfet/S4"></div>
+        <div dataitem="mosfet/S4" datadisplay="onoff"></div>
       </div>
     </div>
     <div class="panel" id="button">
@@ -175,6 +177,17 @@
   </div>
 
   <script type="text/javascript">
+
+    fetch('/panels')
+      .then(response => response.json())
+      .then(files => {
+        for (let f of Object.keys(files)) {
+          fetch(files[f])
+            .then(panel => {
+              panel.text().then(t => $("#panels").append(t));
+            })
+        }
+      });
 
     var intervalId = setInterval(function () {
 

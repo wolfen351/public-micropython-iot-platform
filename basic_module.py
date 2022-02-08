@@ -22,3 +22,6 @@ class BasicModule:
 
     def getRoutes(self):
         return {}
+
+    def getIndexFileName(self):
+        return { "basic" : "basic_index.html" }

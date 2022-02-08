@@ -36,6 +36,7 @@ class WebProcessor(BasicModule):
    
     def __init__(self, basicSettings):
         self.telemetry = {}
+        self.panels = {}
 
     def start(self):
         self.server = WebServer()
@@ -60,7 +61,8 @@ class WebProcessor(BasicModule):
         return {
             b"/": b"./web_index.html",
             b"/telemetry": self.webTelemetry,
-            b"/reboot": self.webReboot
+            b"/reboot": self.webReboot,
+            b"/panels": self.webPanels,
         }
 
     # special code called from main to set ALL routes
@@ -71,10 +73,20 @@ class WebProcessor(BasicModule):
     def setTelemetry(self, telemetry):
         self.telemetry = telemetry
 
+    # special code called from main to set ALL panels
+    def setPanels(self, panels):
+        self.panels = panels
+
     # return json telemetry to ui
     def webTelemetry(self, params):
         headers = okayHeader
         data = json.dumps(self.telemetry)
+        return data, headers  
+
+    # return json panel list to ui
+    def webPanels(self, params):
+        headers = okayHeader
+        data = json.dumps(self.panels)
         return data, headers  
 
     # Simple reboot

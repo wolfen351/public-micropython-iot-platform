@@ -1,6 +1,7 @@
+from basic_module import BasicModule
 from machine import Pin
 
-class MosfetControl:
+class MosfetControl(BasicModule):
 
     # Switch Pins
     S1 = Pin(12, Pin.OUT)

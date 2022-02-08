@@ -60,13 +60,16 @@ try:
     
     # start all the modules up
     routes = {}
+    panels = {}
     for mod in allModules:
         SerialLog.log("Starting: ", mod)
         runSafe(mod.start)
         routes.update(runSafe(mod.getRoutes))
+        panels.update(runSafe(mod.getIndexFileName))
 
     web.setRoutes(routes)
     web.setTelemetry(telemetry)
+    web.setPanels(panels)
 
     while True:
 
