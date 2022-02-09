@@ -28,9 +28,9 @@ class MosfetControl(BasicModule):
     def getTelemetry(self):
         return {
             "mosfet/S1" : self.States[0],
-            "mosfet/S2" : self.States[0],
-            "mosfet/S3" : self.States[0],
-            "mosfet/S4" : self.States[0]
+            "mosfet/S2" : self.States[1],
+            "mosfet/S3" : self.States[2],
+            "mosfet/S4" : self.States[3]
         }
 
     def processTelemetry(self, telemetry):
@@ -40,14 +40,15 @@ class MosfetControl(BasicModule):
         return []
 
     def processCommands(self, commands):
-        pass
+        for c in commands:
+            if (c.startswith(b"/mosfet/")):
+                SerialLog.log("Got command", c)
 
     def getRoutes(self):
         return { 
-            b"/alloff" : self.webAllOff,
-            b"/allon" : self.webAllOn,
-            b"/flip" : self.webFlip 
-
+            b"/mosfet/alloff" : self.webAllOff,
+            b"/mosfet/allon" : self.webAllOn,
+            b"/mosfet/flip" : self.webFlip 
         }
 
     def getIndexFileName(self):

@@ -94,6 +94,8 @@ class WebServer(Server):
                 body = response[0] or b""
                 headers = response[1]
                 return uio.BytesIO(body), headers
+            except KeyboardInterrupt:
+                raise
             except Exception as e:
                 import sys
                 sys.print_exception(e)

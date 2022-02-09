@@ -3,6 +3,7 @@ from light_settings import LightSettings
 from machine import Pin
 import time
 from serial_log import SerialLog
+from web_processor import okayHeader, unquote
 
 class LightControl(BasicModule):
 
@@ -12,6 +13,10 @@ class LightControl(BasicModule):
     Delay1Setting = 1000
     Delay2Setting = 3000
     Delay3Setting = 3000
+    lastrun = time.ticks_ms()
+
+    # CommandCache
+    commands = []
 
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
@@ -30,12 +35,11 @@ class LightControl(BasicModule):
     Triggers = [1, 1]
 
     def __init__(self, basicSettings):
-        #self.Mosfet = mosfet
         self.calculateTimes()
 
     def start(self):
         # Default all the lights to off
-        self.Mosfet.allOff()
+        self.commands.append(b"/mosfet/alloff")
         
         lightSettings = LightSettings()
         lightSettings.load()
@@ -55,11 +59,11 @@ class LightControl(BasicModule):
 
         if (self.Triggers[0] != Trigger1):
             self.Triggers[0] = Trigger1
-            SerialLog.log("Light: Trigger 1")
+            SerialLog.log(b"Light: Trigger 1")
 
         if (self.Triggers[1] != Trigger2):
             self.Triggers[1] = Trigger2
-            SerialLog.log("Light: Trigger 2")
+            SerialLog.log(b"Light: Trigger 2")
 
         diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
         self.lastrun = time.ticks_ms()
@@ -90,15 +94,42 @@ class LightControl(BasicModule):
         return []
 
     def processCommands(self, commands):
-        pass
+        var = self.commands
+        self.commands = []
+        return var
 
     def getRoutes(self):
-        return {}
+        return {
+            b"/4light/on": self.webCommandOn,
+            b"/4light/off": self.webCommandOff,
+            b"/4light/auto": self.webCommandAuto,
+        }
 
     def getIndexFileName(self):
-        return { }
+        return { "lights4": "light_index.html" }
 
     # Internal Methods
+
+    def webCommandOn(self, params):
+        headers = okayHeader
+        data = b""
+        val = unquote(params.get(b"sw", None))
+        self.command(1, val)
+        return data, headers  
+
+    def webCommandOff(self, params):
+        headers = okayHeader
+        data = b""
+        val = unquote(params.get(b"sw", None))
+        self.command(0, val)
+        return data, headers  
+
+    def webCommandAuto(self, params):
+        headers = okayHeader
+        data = b""
+        val = unquote(params.get(b"sw", None))
+        self.command(2, val)
+        return data, headers  
 
     def calculateTimes(self):
         # Convert to number of loops using a timefactor
@@ -123,9 +154,6 @@ class LightControl(BasicModule):
     def triggers(self):
         return self.Triggers
 
-    def mosfetstatus(self):
-        return self.Mosfet.status()
-
     def convert(self, value):
         if (value == b"1"):
             return 0
@@ -140,12 +168,12 @@ class LightControl(BasicModule):
     # override normal behaviour
     def command(self, function, value):
         num = self.convert(value)
-        if (function == 1):
-            self.Modes[num] = 1
         if (function == 0):
-            self.Modes[num] = 0
+            self.Modes[num] = 0 #off
+        if (function == 1):
+            self.Modes[num] = 1 #on
         if (function == 2):
-            self.Modes[num] = 2
+            self.Modes[num] = 2 #auto
 
     def settings(self, settingsVals):
         self.TimeOnSetting = settingsVals[0]
@@ -194,15 +222,15 @@ class LightControl(BasicModule):
     # If a timer reaches 0 then set the light on or off
     def setLight(self, OnAt, OffAt, Light, Mode):
         if (Mode == 0): # off
-            self.Mosfet.off(Light)
+            self.commands.append(b"/mosfet/off/" + str(Light))
         if (Mode == 1): # on
-            self.Mosfet.on(Light)
+            self.commands.append(b"/mosfet/on/" + str(Light))
         if (Mode == 2): # auto
             if (OnAt == 0): # Switch the light on, and stay on at least the TimeOn
-                self.Mosfet.on(Light)
+                self.commands.append(b"/mosfet/on/" + str(Light))
                 self.LightOffAt[Light-1] = self.atLeast(self.LightOffAt[Light-1], self.TimeOn)
             if (OffAt == 0):
-                self.Mosfet.off(Light)
+                self.commands.append(b"/mosfet/off/" + str(Light))
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
     def subtract(self, OnAt, OffAt, diff):

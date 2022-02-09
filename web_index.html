@@ -147,9 +147,17 @@
               // FORMAT AS ONOFF
               if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
                 if (s[key] == 1)
+                {
                   panelItem.html("ON");
+                  panelItem.addClass("on")
+                  panelItem.removeClass("off")
+                }
                 else
+                {
                   panelItem.html("OFF");
+                  panelItem.removeClass("on")
+                  panelItem.addClass("off")
+                }
               }
               else {
                 // JUST DISPLAY IT
@@ -166,7 +174,7 @@
           }
           $('#rawdisplay').html(html);
         })
-    }, 2000);
+    }, 1000);
 
 
     function post(url) {
