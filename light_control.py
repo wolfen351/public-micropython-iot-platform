@@ -13,21 +13,6 @@ class LightControl(BasicModule):
     Delay2Setting = 3000
     Delay3Setting = 3000
 
-    def calculateTimes(self):
-        # Convert to number of loops using a timefactor
-        self.TimeOn = self.TimeOnSetting
-        self.Delay0 = self.Delay0Setting
-        self.Delay1 = self.Delay1Setting
-        self.Delay2 = self.Delay2Setting
-        self.Delay3 = self.Delay3Setting
-
-        # Periods
-        self.Period0 = self.Delay0
-        self.Period1 = self.Delay0 + self.Delay1
-        self.Period2 = self.Delay0 + self.Delay1 + self.Delay2
-        self.Period3 = self.Delay0 + self.Delay1 + self.Delay2 + self.Delay3
-        self.Periods = [self.Period0, self.Period1, self.Period2, self.Period3]
-
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
 
@@ -44,18 +29,9 @@ class LightControl(BasicModule):
     # State of the triggers
     Triggers = [1, 1]
 
-    def __init__(self, mosfet):
-        self.Mosfet = mosfet
+    def __init__(self, basicSettings):
+        #self.Mosfet = mosfet
         self.calculateTimes()
-
-    def status(self):
-        return self.Modes
-
-    def triggers(self):
-        return self.Triggers
-
-    def mosfetstatus(self):
-        return self.Mosfet.status()
 
     def start(self):
         # Default all the lights to off
@@ -71,6 +47,84 @@ class LightControl(BasicModule):
 
         self.lastrun = time.ticks_ms()
         self.calculateTimes()
+
+    def tick(self):
+        # Main Loop
+        Trigger1 = self.T1.value()
+        Trigger2 = self.T2.value()
+
+        if (self.Triggers[0] != Trigger1):
+            self.Triggers[0] = Trigger1
+            SerialLog.log("Light: Trigger 1")
+
+        if (self.Triggers[1] != Trigger2):
+            self.Triggers[1] = Trigger2
+            SerialLog.log("Light: Trigger 2")
+
+        diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
+        self.lastrun = time.ticks_ms()
+
+        for l in range(4):
+            # If trigger 1 is set, then go upwards (connected to ground)
+            if (Trigger1 == 0):
+                self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[l])
+
+            # If trigger 2 is set, then go downwards (connected to ground)
+            if (Trigger2 == 0):
+                self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
+
+            self.setLight(self.LightOnAt[l], self.LightOffAt[l], l+1, self.Modes[l])
+            self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l], diff)
+
+        # Debug output
+        #SerialLog.log("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
+        #sleep(100)
+
+    def getTelemetry(self):
+        return {}
+
+    def processTelemetry(self, telemetry):
+        pass
+
+    def getCommands(self):
+        return []
+
+    def processCommands(self, commands):
+        pass
+
+    def getRoutes(self):
+        return {}
+
+    def getIndexFileName(self):
+        return { }
+
+    # Internal Methods
+
+    def calculateTimes(self):
+        # Convert to number of loops using a timefactor
+        self.TimeOn = self.TimeOnSetting
+        self.Delay0 = self.Delay0Setting
+        self.Delay1 = self.Delay1Setting
+        self.Delay2 = self.Delay2Setting
+        self.Delay3 = self.Delay3Setting
+
+        # Periods
+        self.Period0 = self.Delay0
+        self.Period1 = self.Delay0 + self.Delay1
+        self.Period2 = self.Delay0 + self.Delay1 + self.Delay2
+        self.Period3 = self.Delay0 + self.Delay1 + self.Delay2 + self.Delay3
+        self.Periods = [self.Period0, self.Period1, self.Period2, self.Period3]
+
+
+
+    def status(self):
+        return self.Modes
+
+    def triggers(self):
+        return self.Triggers
+
+    def mosfetstatus(self):
+        return self.Mosfet.status()
 
     def convert(self, value):
         if (value == b"1"):
@@ -155,34 +209,3 @@ class LightControl(BasicModule):
         return self.clampTo(OnAt, OnAt - diff), self.clampTo(OffAt, OffAt - diff)
 
 
-    def tick(self):
-        # Main Loop
-        Trigger1 = self.T1.value()
-        Trigger2 = self.T2.value()
-
-        if (self.Triggers[0] != Trigger1):
-            self.Triggers[0] = Trigger1
-            SerialLog.log("Light: Trigger 1")
-
-        if (self.Triggers[1] != Trigger2):
-            self.Triggers[1] = Trigger2
-            SerialLog.log("Light: Trigger 2")
-
-        diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
-        self.lastrun = time.ticks_ms()
-
-        for l in range(4):
-            # If trigger 1 is set, then go upwards (connected to ground)
-            if (Trigger1 == 0):
-                self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[l])
-
-            # If trigger 2 is set, then go downwards (connected to ground)
-            if (Trigger2 == 0):
-                self.LightOnAt[l] = self.atMost(self.LightOnAt[l], self.Periods[3-l])
-
-            self.setLight(self.LightOnAt[l], self.LightOffAt[l], l+1, self.Modes[l])
-            self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l], diff)
-
-        # Debug output
-        #SerialLog.log("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
-        #sleep(100)
