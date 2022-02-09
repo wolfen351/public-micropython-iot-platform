@@ -1,0 +1,46 @@
+<style>
+    .status .light {
+      width: 25px;
+      height: 15px;
+      border: 1px solid black;
+      padding: 5px;
+      margin: 10px;
+      background-color: grey;
+    }
+  </style>
+
+
+<form action="/command" method="get">
+    <span>On:</span>
+    <button type="submit" name="on" value="1" class="btn on1">L1</button>
+    <button type="submit" name="on" value="2" class="btn on2">L2</button>
+    <button type="submit" name="on" value="3" class="btn on3">L3</button>
+    <button type="submit" name="on" value="4" class="btn on4">L4</button>
+  </form>
+  <form action="/command" method="get">
+    <span>Off:</span>
+    <button type="submit" name="off" value="1" class="btn off1">L1</button>
+    <button type="submit" name="off" value="2" class="btn off2">L2</button>
+    <button type="submit" name="off" value="3" class="btn off3">L3</button>
+    <button type="submit" name="off" value="4" class="btn off4">L4</button>
+  </form>
+  <form action="/command" method="get">
+    <span>Auto:</span>
+    <button type="submit" name="auto" value="1" class="btn auto1">L1</button>
+    <button type="submit" name="auto" value="2" class="btn auto2">L2</button>
+    <button type="submit" name="auto" value="3" class="btn auto3">L3</button>
+    <button type="submit" name="auto" value="4" class="btn auto4">L4</button>
+  </form>
+
+  <div class="status">
+    <div class="light light1">1</div>
+    <div class="light light2">2</div>
+    <div class="light light3">3</div>
+    <div class="light light4">4</div>
+  </div>
+
+  <div class="nav">
+    <input type="button" class="navbtn" value="Light Settings" onclick="window.location='/light'"></input>
+    <input type="button" class="navbtn" value="MQTT Settings" onclick="window.location='/mqtt'"></input>
+    <input type="button" class="navbtn" value="Network Settings" onclick="window.location='/network'"></input>
+  </div>
