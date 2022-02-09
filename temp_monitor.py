@@ -60,6 +60,9 @@ class TempMonitor(BasicModule):
             b"/temp": self.gettemp,
         }
 
+    def getIndexFileName(self):
+        return { "temp" : "temp_index.html" }
+
     # Internal code here
     def currentTemp(self):
         return self.lastTemp

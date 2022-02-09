@@ -96,8 +96,8 @@
     }
 
     .lineitem {
-      width: 50%;
-      padding-left: 20%;
+      width: 65%;
+      padding-left: 0%;
       text-align: left;
     }
   </style>
@@ -119,6 +119,8 @@
   </div>
 
   <script type="text/javascript">
+
+    window.telHandlers = [];
 
     fetch('/panels')
       .then(response => response.json())
@@ -142,6 +144,7 @@
 
             panelItem = $(`div[dataitem="${key}"]`);
             if (panelItem[0]) {
+              // FORMAT AS ONOFF
               if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
                 if (s[key] == 1)
                   panelItem.html("ON");
@@ -149,16 +152,15 @@
                   panelItem.html("OFF");
               }
               else {
+                // JUST DISPLAY IT
                 panelItem.html(s[key]);
               }
             }
             else {
-
-              if (key.includes("temperature"))
-                html += "<p>" + key.replace("temperature/", "Sensor ") + ": " + s[key] + " °C </p>"
-              else if (key.includes("rssi"))
-                html += "<p>" + key + ": " + s[key] + " dbm </p>"
-              else
+                // FALLBACK FOR UNHANDLED
+                for (const h of window.telHandlers) {
+                  h(key);
+                }
                 html += "<p>" + key + ": " + s[key] + "</p>"
             }
           }
