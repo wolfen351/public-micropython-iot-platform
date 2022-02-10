@@ -21,6 +21,9 @@ class LightControl(BasicModule):
     # Mode of the lights (0=Off, 1=On, 2=Auto)
     Modes = [2, 2, 2, 2]
 
+    # Actual Light State
+    Lights = [0, 0, 0, 0]
+
     # Trigger Pins by connecting D1 or D2 to ground
     T1 = Pin(35, Pin.IN) 
     T2 = Pin(33, Pin.IN)
@@ -91,12 +94,12 @@ class LightControl(BasicModule):
         pass
 
     def getCommands(self):
-        return []
-
-    def processCommands(self, commands):
         var = self.commands
         self.commands = []
         return var
+
+    def processCommands(self, commands):
+        pass
 
     def getRoutes(self):
         return {
@@ -146,8 +149,6 @@ class LightControl(BasicModule):
         self.Period3 = self.Delay0 + self.Delay1 + self.Delay2 + self.Delay3
         self.Periods = [self.Period0, self.Period1, self.Period2, self.Period3]
 
-
-
     def status(self):
         return self.Modes
 
@@ -170,8 +171,14 @@ class LightControl(BasicModule):
         num = self.convert(value)
         if (function == 0):
             self.Modes[num] = 0 #off
+            if (self.Lights[num] != 0):
+                self.commands.append(b"/mosfet/off/" + str(num))
+                self.Lights[num] = 0
         if (function == 1):
             self.Modes[num] = 1 #on
+            if (self.Lights[num] != 1):
+                self.commands.append(b"/mosfet/on/" + str(num))
+                self.Lights[num] = 1
         if (function == 2):
             self.Modes[num] = 2 #auto
 
@@ -222,12 +229,18 @@ class LightControl(BasicModule):
     # If a timer reaches 0 then set the light on or off
     def setLight(self, OnAt, OffAt, Light, Mode):
         if (Mode == 0): # off
-            self.commands.append(b"/mosfet/off/" + str(Light))
+            if (self.Lights[Light-1] != 0):
+                self.commands.append(b"/mosfet/off/" + str(Light))
+                self.Lights[Light-1] = 0
         if (Mode == 1): # on
-            self.commands.append(b"/mosfet/on/" + str(Light))
+            if (self.Lights[Light-1] != 1):
+                self.commands.append(b"/mosfet/on/" + str(Light))
+                self.Lights[Light-1] = 1
         if (Mode == 2): # auto
             if (OnAt == 0): # Switch the light on, and stay on at least the TimeOn
-                self.commands.append(b"/mosfet/on/" + str(Light))
+                if (self.Lights[Light-1] != 1):
+                    self.commands.append(b"/mosfet/on/" + str(Light))
+                    self.Lights[Light-1] = 1
                 self.LightOffAt[Light-1] = self.atLeast(self.LightOffAt[Light-1], self.TimeOn)
             if (OffAt == 0):
                 self.commands.append(b"/mosfet/off/" + str(Light))

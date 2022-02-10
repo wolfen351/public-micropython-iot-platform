@@ -41,8 +41,12 @@ class MosfetControl(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/mosfet/")):
-                SerialLog.log("Got command", c)
+            if (c.startswith(b"/mosfet/on/")):
+                s = int(c.replace(b"/mosfet/on/", b""))
+                self.on(s)
+            if (c.startswith(b"/mosfet/off/")):
+                s = int(c.replace(b"/mosfet/off/", b""))
+                self.off(s)
 
     def getRoutes(self):
         return { 
