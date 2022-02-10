@@ -1,4 +1,7 @@
 # Main 
+from mosfet_control import MosfetControl
+
+
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
@@ -34,6 +37,7 @@ try:
     import sys
     import gc
     from builtin_button_control import BuiltinButtonControl
+    from light_control import LightControl
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
@@ -51,7 +55,9 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        web
+        web,
+        LightControl(Basic.Settings),
+        MosfetControl(Basic.Settings)
     ]
     
     # start all the modules up
