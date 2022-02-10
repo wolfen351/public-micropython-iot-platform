@@ -89,8 +89,10 @@ try:
             commands.extend(runSafe(mod.getCommands))
 
         # process all commands
-        for mod in allModules:
-            runSafe(mod.processCommands, commands)
+        if len(commands) > 0:
+            SerialLog.log("Commands: ", commands)
+            for mod in allModules:
+                runSafe(mod.processCommands, commands)
 
         # blink blue 
         ledOn = not ledOn
