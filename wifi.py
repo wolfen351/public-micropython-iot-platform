@@ -7,6 +7,7 @@ from wifi_settings import WifiSettings
 import time
 import uota
 from web_processor import okayHeader, unquote
+import gc
 
 class WifiHandler(BasicModule):
 
@@ -21,6 +22,7 @@ class WifiHandler(BasicModule):
         self.rssi = 0
         self.lastrssitime = 0
         self.version = "unknown"
+        self.freeram = 0
 
     def start(self):
         self.station()
@@ -56,13 +58,15 @@ class WifiHandler(BasicModule):
                 if (diff > 50000):
                     self.rssi = self.sta_if.status('rssi')
                     self.lastrssitime = now
+                    self.freeram = gc.mem_free()
 
     def getTelemetry(self):
         return { 
             "ssid": self.sta_if.config('essid'), 
             "ip": self.sta_if.ifconfig()[0],
             "rssi": self.rssi,
-            "version": self.version
+            "version": self.version,
+            "freeram": self.freeram
         }
 
     def processTelemetry(self, telemetry):

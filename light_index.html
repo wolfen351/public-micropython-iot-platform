@@ -8,9 +8,22 @@
     background-color: grey;
   }
 
+  .status .trigger {
+    width: 25px;
+    height: 15px;
+    border: 1px dashed black;
+    padding: 5px;
+    margin: 10px;
+    background-color: grey;
+  }
 
   .light.on {
     background-color: #8e1f1f;
+    color: white;
+  }
+
+  .trigger.on {
+    background-color: #304280;
     color: white;
   }
 
@@ -48,10 +61,21 @@
   </div>
 
   <div class="status">
-    <div class="light light1" dataitem="mosfet/S1" datadisplay="onoff">1</div>
-    <div class="light light2" dataitem="mosfet/S2" datadisplay="onoff">2</div>
-    <div class="light light3" dataitem="mosfet/S3" datadisplay="onoff">3</div>
-    <div class="light light4" dataitem="mosfet/S4" datadisplay="onoff">4</div>
+    <div class="trigger" dataitem="trigger1" datadisplay="onoff">T1</div>
+
+    <div class="light" dataitem="mosfet/S1" datadisplay="onoff">1</div>
+    <div class="light" dataitem="mosfet/S2" datadisplay="onoff">2</div>
+    <div class="light" dataitem="mosfet/S3" datadisplay="onoff">3</div>
+    <div class="light" dataitem="mosfet/S4" datadisplay="onoff">4</div>
+
+    <div class="trigger" dataitem="trigger2" datadisplay="onoff">T2</div>
+  </div>
+
+  <div class="hidden">
+    <div class="light" dataitem="light1" datadisplay="onoff">1</div>
+    <div class="light" dataitem="light2" datadisplay="onoff">2</div>
+    <div class="light" dataitem="light3" datadisplay="onoff">3</div>
+    <div class="light" dataitem="light4" datadisplay="onoff">4</div>
   </div>
 
   <div class="nav">

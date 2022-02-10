@@ -25,7 +25,7 @@ class LightControl(BasicModule):
     Lights = [0, 0, 0, 0]
 
     # Trigger Pins by connecting D1 or D2 to ground
-    T1 = Pin(35, Pin.IN) 
+    T1 = Pin(35, Pin.IN)
     T2 = Pin(33, Pin.IN)
 
     # When to change a light to ON
@@ -34,7 +34,7 @@ class LightControl(BasicModule):
     # When to change a light to OFF
     LightOffAt = [-1, -1, -1, -1]
 
-    # State of the triggers
+    # State of the triggers (1=off)
     Triggers = [1, 1]
 
     def __init__(self, basicSettings):
@@ -84,11 +84,18 @@ class LightControl(BasicModule):
             self.LightOnAt[l], self.LightOffAt[l] = self.subtract(self.LightOnAt[l], self.LightOffAt[l], diff)
 
         # Debug output
-        #SerialLog.log("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
+        #print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
         #sleep(100)
 
     def getTelemetry(self):
-        return {}
+        return { 
+            "light1" : self.Modes[0], 
+            "light2" : self.Modes[1], 
+            "light3" : self.Modes[2], 
+            "light4" : self.Modes[3], 
+            "trigger1" : 1-self.Triggers[0], 
+            "trigger2" : 1-self.Triggers[1], 
+            }
 
     def processTelemetry(self, telemetry):
         pass
@@ -106,12 +113,34 @@ class LightControl(BasicModule):
             b"/4light/on": self.webCommandOn,
             b"/4light/off": self.webCommandOff,
             b"/4light/auto": self.webCommandAuto,
+            b"/light": b"web_light.html",
+            b"/lightsavesettings": self.webSaveSettings,
+            b"/lightloadsettings": self.webLoadSettings
         }
 
     def getIndexFileName(self):
         return { "lights4": "light_index.html" }
 
     # Internal Methods
+
+    def webLoadSettings(self, params):
+        settings =  self.getsettings()
+        headers = okayHeader
+        data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
+        return data, headers
+
+    def webSaveSettings(self, params):
+        # Read form params
+        TimeOn = unquote(params.get(b"TimeOn", None))
+        Delay1 = unquote(params.get(b"Delay1", None))
+        Delay2 = unquote(params.get(b"Delay2", None))
+        Delay3 = unquote(params.get(b"Delay3", None))
+        Delay4 = unquote(params.get(b"Delay4", None))
+        settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
+        self.settings(settings)
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers
+
 
     def webCommandOn(self, params):
         headers = okayHeader
@@ -244,6 +273,7 @@ class LightControl(BasicModule):
                 self.LightOffAt[Light-1] = self.atLeast(self.LightOffAt[Light-1], self.TimeOn)
             if (OffAt == 0):
                 self.commands.append(b"/mosfet/off/" + str(Light))
+                self.Lights[Light-1] = 0
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
     def subtract(self, OnAt, OffAt, diff):
