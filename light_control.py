@@ -145,21 +145,21 @@ class LightControl(BasicModule):
     def webCommandOn(self, params):
         headers = okayHeader
         data = b""
-        val = unquote(params.get(b"sw", None))
+        val = int(unquote(params.get(b"sw", None))) - 1
         self.command(1, val)
         return data, headers  
 
     def webCommandOff(self, params):
         headers = okayHeader
         data = b""
-        val = unquote(params.get(b"sw", None))
+        val = int(unquote(params.get(b"sw", None))) - 1
         self.command(0, val)
         return data, headers  
 
     def webCommandAuto(self, params):
         headers = okayHeader
         data = b""
-        val = unquote(params.get(b"sw", None))
+        val = int(unquote(params.get(b"sw", None))) - 1
         self.command(2, val)
         return data, headers  
 
@@ -184,29 +184,17 @@ class LightControl(BasicModule):
     def triggers(self):
         return self.Triggers
 
-    def convert(self, value):
-        if (value == b"1"):
-            return 0
-        if (value == b"2"):
-            return 1
-        if (value == b"3"):
-            return 2
-        if (value == b"4"):
-            return 3
-        return -1
-
-    # override normal behaviour
-    def command(self, function, value):
-        num = self.convert(value)
+    # override normal behaviour Function=0-Off 1-On 2-Auto; Num  is 0-3
+    def command(self, function, num):
         if (function == 0):
             self.Modes[num] = 0 #off
             if (self.Lights[num] != 0):
-                self.commands.append(b"/mosfet/off/" + str(num))
+                self.commands.append(b"/mosfet/off/" + str(num+1))
                 self.Lights[num] = 0
         if (function == 1):
             self.Modes[num] = 1 #on
             if (self.Lights[num] != 1):
-                self.commands.append(b"/mosfet/on/" + str(num))
+                self.commands.append(b"/mosfet/on/" + str(num+1))
                 self.Lights[num] = 1
         if (function == 2):
             self.Modes[num] = 2 #auto
