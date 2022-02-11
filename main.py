@@ -31,11 +31,9 @@ try:
     from modules.thingsboard.thingsboard_control import ThingsboardControl
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
+    from modules.builtin_button.builtin_button_control import BuiltinButtonControl
     import sys
     import gc
-    from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.fourlights.light_control import LightControl
-    from modules.mosfet.mosfet_control import MosfetControl
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
