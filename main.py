@@ -32,8 +32,10 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.tempmon.temp_monitor import TempMonitor
     import sys
     import gc
+
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
