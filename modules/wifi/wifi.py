@@ -1,12 +1,12 @@
-from basic_module import BasicModule
+from modules.basic.basic_module import BasicModule
 import machine
 from serial_log import SerialLog
 import ubinascii
 import network
-from wifi_settings import WifiSettings
+from modules.wifi.wifi_settings import WifiSettings
 import time
-import uota
-from web_processor import okayHeader, unquote
+import modules.ota.uota as uota
+from modules.web.web_processor import okayHeader, unquote
 import gc
 
 class WifiHandler(BasicModule):
@@ -80,13 +80,13 @@ class WifiHandler(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/network": b"./web_network.html", 
+            b"/network": b"/modules/wifi/web_network.html", 
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings
         }
 
     def getIndexFileName(self):
-        return { "wifi" : "wifi_index.html" }
+        return { "wifi" : "/modules/wifi/wifi_index.html" }
 
     # internal functions
 

@@ -1,4 +1,4 @@
-from basic_module import BasicModule
+from modules.basic.basic_module import BasicModule
 from machine import Pin
 
 class BuiltinButtonControl(BasicModule):
@@ -27,4 +27,4 @@ class BuiltinButtonControl(BasicModule):
         return {}
 
     def getIndexFileName(self):
-        return { "builtinbutton" : "builtin_button_index.html" }
+        return { "builtinbutton" : "/modules/builtin_button/builtin_button_index.html" }

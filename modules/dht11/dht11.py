@@ -1,4 +1,4 @@
-from basic_module import BasicModule
+from modules.basic.basic_module import BasicModule
 import machine
 import dht
 import time

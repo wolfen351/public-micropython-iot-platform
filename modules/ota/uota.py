@@ -6,7 +6,7 @@ MIT license; Copyright (c) 2021 Martin Komon
 
 import gc
 import uos
-import urequests
+import modules.ota.urequests as urequests
 import uzlib
 import upip_utarfile as tarfile
 from micropython import const

@@ -26,14 +26,16 @@ try:
 
     # Import other modules needed
     SerialLog.log("Loading code..")
-    from mqtt_control import MqttControl
-    from homeassistant_control import HomeAssistantControl
-    from thingsboard_control import ThingsboardControl
-    from web_processor import WebProcessor
-    from wifi import WifiHandler
+    from modules.mqtt.mqtt_control import MqttControl
+    from modules.homeassistant.homeassistant_control import HomeAssistantControl
+    from modules.thingsboard.thingsboard_control import ThingsboardControl
+    from modules.web.web_processor import WebProcessor
+    from modules.wifi.wifi import WifiHandler
     import sys
     import gc
-    from builtin_button_control import BuiltinButtonControl
+    from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.fourlights.light_control import LightControl
+    from modules.mosfet.mosfet_control import MosfetControl
     
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 

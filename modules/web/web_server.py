@@ -8,7 +8,7 @@ from collections import namedtuple
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
 ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
 
-from server import Server
+from modules.web.server import Server
 
 class WebServer(Server):
     def __init__(self):

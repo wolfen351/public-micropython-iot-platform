@@ -1,6 +1,6 @@
 import machine
-from basic_module import BasicModule
-from web_server import WebServer
+from modules.basic.basic_module import BasicModule
+from modules.web.web_server import WebServer
 import json
 
 #public static code
@@ -60,7 +60,8 @@ class WebProcessor(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/": b"./web_index.html",
+            b"/": b"/modules/web/web_index.html",
+            b"/cash.min.js": b"/cash.min.js",
             b"/telemetry": self.webTelemetry,
             b"/reboot": self.webReboot,
             b"/panels": self.webPanels,
