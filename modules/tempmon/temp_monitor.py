@@ -1,8 +1,8 @@
-from basic_module import BasicModule
+from modules.basic.basic_module import BasicModule
 import ds18x20, onewire, machine
 from serial_log import SerialLog
 import time
-from web_processor import okayHeader
+from modules.web.web_processor import okayHeader
 import ubinascii
 import json
 
@@ -61,7 +61,7 @@ class TempMonitor(BasicModule):
         }
 
     def getIndexFileName(self):
-        return { "temp" : "temp_index.html" }
+        return { "temp" : "/modules/tempmon/temp_index.html" }
 
     # Internal code here
     def currentTemp(self):

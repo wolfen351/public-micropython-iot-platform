@@ -1,9 +1,9 @@
-from basic_module import BasicModule
-from light_settings import LightSettings
+from modules.basic.basic_module import BasicModule
+from modules.fourlights.light_settings import LightSettings
 from machine import Pin
 import time
 from serial_log import SerialLog
-from web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 
 class LightControl(BasicModule):
 
@@ -113,13 +113,13 @@ class LightControl(BasicModule):
             b"/4light/on": self.webCommandOn,
             b"/4light/off": self.webCommandOff,
             b"/4light/auto": self.webCommandAuto,
-            b"/light": b"web_light.html",
+            b"/light": b"/modules/fourlights/web_light.html",
             b"/lightsavesettings": self.webSaveSettings,
             b"/lightloadsettings": self.webLoadSettings
         }
 
     def getIndexFileName(self):
-        return { "lights4": "light_index.html" }
+        return { "lights4": "/modules/fourlights/light_index.html" }
 
     # Internal Methods
 

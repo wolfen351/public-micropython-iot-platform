@@ -1,11 +1,11 @@
-from basic_module import BasicModule
-from mqtt import MQTTClient
-from mqtt_settings import MqttSettings
+from modules.basic.basic_module import BasicModule
+from modules.mqtt.mqtt import MQTTClient
+from modules.mqtt.mqtt_settings import MqttSettings
 from serial_log import SerialLog
 import ubinascii
 import machine
 import network
-from web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 
 class MqttControl(BasicModule):
 
@@ -79,7 +79,7 @@ class MqttControl(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/mqtt": b"./web_mqtt.html", 
+            b"/mqtt": b"/modules/mqtt/web_mqtt.html", 
             b"/mqttloadsettings": self.loadmqttsettings,
             b"/mqttsavesettings": self.savemqttsettings,
         }

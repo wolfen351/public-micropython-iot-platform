@@ -1,11 +1,11 @@
-from basic_module import BasicModule
-from mqtt import MQTTClient
+from modules.basic.basic_module import BasicModule
+from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
-from thingsboard_settings import ThingsboardSettings
+from modules.thingsboard.thingsboard_settings import ThingsboardSettings
 import ubinascii
 import machine
 import network
-from web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 import json
 
 class ThingsboardControl(BasicModule):
@@ -77,7 +77,7 @@ class ThingsboardControl(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/tb": b"./web_tb.html", 
+            b"/tb": b"/modules/thingsboard/web_tb.html", 
             b"/tbloadsettings": self.loadtbsettings,
             b"/tbsavesettings": self.savetbsettings,
         }

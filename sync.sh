@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ampy --port /dev/ttyACM0 get lastedit.dat > lastedit.dat
 
 if [ $? -ne 0 ];
@@ -8,6 +7,15 @@ then
     echo 0 > lastedit.dat
 fi
 
+# CLI Args
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --force|-d) echo 0 > lastedit.dat; echo "All files will be copied!"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 read MAX < lastedit.dat
 echo "Last sync for this board was at $MAX"
 
@@ -15,13 +23,25 @@ echo "Last sync for this board was at $MAX"
 ./bump_version.sh
 
 # send all files to the device
-for f in *.py *.html *.sh *.js *.cfg version
+shopt -s extglob nullglob globstar
+for f in **/*.py **/*.html **/*.sh **/*.js **/*.cfg version
 do
   THIS=$(stat -c %Y $f)
-  if [ $THIS -gt $MAX ]
+  if [[ $THIS -gt $MAX ]]
   then
     echo Sending $f
-    ampy --port /dev/ttyACM0 put $f
+
+    # MAKE SURE PATH EXISTS ON DEVICE
+    dir=
+    while read -r -d/ e; do
+      if [ -n "$e" ]; then
+        dir+="/$e"
+        ampy --port /dev/ttyACM0 mkdir $dir > /dev/null 2>&1
+      fi
+    done <<<"$f"    
+
+    # SEND THE FILE
+    ampy --port /dev/ttyACM0 put $f $f
     if [ $? -ne 0 ]; then
         echo "Failed."
         exit 3
@@ -30,7 +50,7 @@ do
 done
 
 # record the last time a file was edited
-stat -c %Y *.py *.html *.sh *.js *.cfg version | sort -r | head -n 1 > lastedit.dat
+stat -c %Y **/*.py **/*.html **/*.sh **/*.js **/*.cfg version | sort -r | head -n 1 > lastedit.dat
 ampy --port /dev/ttyACM0 put lastedit.dat
 
 echo "Rebooting..."

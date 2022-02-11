@@ -1,12 +1,12 @@
-from basic_module import BasicModule
-from homeassistant_settings import HomeAssistantSettings
-from mqtt import MQTTClient
+from modules.basic.basic_module import BasicModule
+from modules.homeassistant.homeassistant_settings import HomeAssistantSettings
+from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 import ubinascii
 import machine
 import network
 import time
-from web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 
 class HomeAssistantControl(BasicModule):
 
@@ -94,7 +94,7 @@ class HomeAssistantControl(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/ha": b"./web_ha.html", 
+            b"/ha": b"/modules/homeassistant/web_ha.html", 
             b"/haloadsettings": self.loadhasettings,
             b"/hasavesettings": self.savehasettings,
         }

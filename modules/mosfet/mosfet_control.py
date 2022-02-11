@@ -1,7 +1,7 @@
-from basic_module import BasicModule
+from modules.basic.basic_module import BasicModule
 from machine import Pin
 from serial_log import SerialLog
-from web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 
 class MosfetControl(BasicModule):
 
@@ -56,7 +56,7 @@ class MosfetControl(BasicModule):
         }
 
     def getIndexFileName(self):
-        return { "mosfet" : "mosfet_index.html" }
+        return { "mosfet" : "/modules/mosfet/mosfet_index.html" }
 
 
     # internal code
