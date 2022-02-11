@@ -51,7 +51,9 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        web
+        web,
+        LightControl(Basic.Settings),
+        MosfetControl(Basic.Settings)
     ]
     
     # start all the modules up
