@@ -4,33 +4,60 @@ import uio
 import uselect as select
 import usocket as socket
 from collections import namedtuple
+import ussl
+import gc
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
 ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
 
 from modules.web.server import Server
 
-class WebServer(Server):
+class WebServer():
     def __init__(self):
 
         self.poller = select.poll()
 
-        super().__init__(self.poller, 80, socket.SOCK_STREAM, "WebHTTP Server")
+        self.httpServer = Server(self.poller, 80, socket.SOCK_STREAM, "WebHTTP Server")
 
         self.request = dict()
         self.conns = dict()
-        self.ssid = None
 
-        # queue up to 5 connection requests before refusing
-        self.sock.listen(5)
-        self.sock.setblocking(False)
+        # queue up to 1 connection requests before refusing
+        self.httpServer.sock.listen(5)
+        self.httpServer.sock.setblocking(False)
+
+        self.httpsServer = Server(self.poller, 443, socket.SOCK_STREAM, "WebHTTPS Server")
+        self.httpsServer.sock.listen(5)
+        self.httpsServer.sock.setblocking(False)
 
     #@micropython.native
     def handle(self, sock, event, others):
-        if sock is self.sock:
+        if sock is self.httpServer.sock:
             # client connecting on port 80, so spawn off a new
             # socket to handle this connection
             self.accept(sock)
+        elif sock is self.httpsServer.sock:
+            # client connecting on port 443, so spawn off a new
+            # socket to handle this connection
+            try:
+                gc.collect()
+                connection, addr = sock.accept()
+
+                KEY_PATH = 'ssl.key'
+                CERT_PATH = 'ssl.crt'
+                with open(KEY_PATH, 'rb') as f:
+                    key = f.read()
+
+                with open(CERT_PATH, 'rb') as f:
+                    cert = f.read()
+                scl = ussl.wrap_socket(connection, server_side=True, cert=cert, key=key)
+                SerialLog.log(scl)
+                scl.setblocking(False)
+                self.poller.register(scl, select.POLLIN)
+            except OSError as e:
+                self.close(connection)
+                return
+
         elif event & select.POLLIN:
             # socket has data to read in
             self.read(sock)
@@ -40,10 +67,10 @@ class WebServer(Server):
 
     def accept(self, server_sock):
         try:
-            client_sock, addr = server_sock.accept()
-            client_sock.setblocking(False)
-            client_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.poller.register(client_sock, select.POLLIN)
+            connection, addr = server_sock.accept()
+            connection.setblocking(False)
+            connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.poller.register(connection, select.POLLIN)
         except OSError as e:
             if e.args[0] == uerrno.EAGAIN:
                 return

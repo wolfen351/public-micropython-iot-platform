@@ -24,7 +24,7 @@ echo "Last sync for this board was at $MAX"
 
 # send all files to the device
 shopt -s extglob nullglob globstar
-for f in **/*.py **/*.html **/*.sh **/*.js **/*.cfg version
+for f in **/*.py **/*.html **/*.sh **/*.js **/*.cfg version **/*.crt **/*.key
 do
   THIS=$(stat -c %Y $f)
   if [[ $THIS -gt $MAX ]]
@@ -50,7 +50,7 @@ do
 done
 
 # record the last time a file was edited
-stat -c %Y **/*.py **/*.html **/*.sh **/*.js **/*.cfg version | sort -r | head -n 1 > lastedit.dat
+stat -c %Y **/*.py **/*.html **/*.sh **/*.js **/*.cfg version **/*.crt **/*.key | sort -r | head -n 1 > lastedit.dat
 ampy --port /dev/ttyACM0 put lastedit.dat
 
 echo "Rebooting..."
