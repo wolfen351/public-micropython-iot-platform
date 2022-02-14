@@ -121,6 +121,7 @@
   <script type="text/javascript">
 
     window.telHandlers = [];
+    inhibitTelemetry = 1;
 
     fetch('/panels')
       .then(response => response.json())
@@ -131,10 +132,13 @@
               panel.text().then(t => $("#panels").append(t));
             })
         }
+
+        inhibitTelemetry = 0;
       });
 
     var intervalId = setInterval(function () {
 
+      if (!inhibitTelemetry)
       fetch('/telemetry')
         .then(response => response.json())
         .then(data => {
