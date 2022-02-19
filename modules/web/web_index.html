@@ -121,8 +121,6 @@
   <script type="text/javascript">
 
     window.telHandlers = [];
-    inhibitTelemetry = 1;
-
     fetch('/panels')
       .then(response => response.json())
       .then(files => {
@@ -132,58 +130,55 @@
               panel.text().then(t => $("#panels").append(t));
             })
         }
-
-        inhibitTelemetry = 0;
+        getTelemetry();
       });
 
-    var intervalId = setInterval(function () {
+    function getTelemetry() {
+      setTimeout(function () {
+        fetch('/telemetry')
+          .then(response => response.json())
+          .then(data => {
+            s = data;
+            html = "";
+            for (let key of Object.keys(s)) {
 
-      if (!inhibitTelemetry)
-      fetch('/telemetry')
-        .then(response => response.json())
-        .then(data => {
-          s = data;
-          html = "";
-          for (let key of Object.keys(s)) {
-
-            panelItem = $(`*[dataitem="${key}"]`);
-            if (panelItem[0]) {
-              // FORMAT AS ONOFF
-              if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
-                if (s[key] == 1)
-                {
-                  panelItem.html("ON");
-                  panelItem.addClass("on");
-                  panelItem.removeClass("off");
-                }
-                else
-                {
-                  panelItem.html("OFF");
-                  panelItem.removeClass("on");
-                  panelItem.addClass("off");
-                }
-              } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
+              panelItem = $(`*[dataitem="${key}"]`);
+              if (panelItem[0]) {
+                // FORMAT AS ONOFF
+                if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+                  if (s[key] == 1) {
+                    panelItem.html("ON");
+                    panelItem.addClass("on");
+                    panelItem.removeClass("off");
+                  }
+                  else {
+                    panelItem.html("OFF");
+                    panelItem.removeClass("on");
+                    panelItem.addClass("off");
+                  }
+                } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
                   val = panelItem.attr('data');
                   panelItem.removeClass('data_' + val);
                   panelItem.addClass('data_' + s[key]);
                   panelItem.attr("data", s[key]);
-              } else {
-                // JUST DISPLAY IT
-                panelItem.html(s[key]);
+                } else {
+                  // JUST DISPLAY IT
+                  panelItem.html(s[key]);
+                }
               }
-            }
-            else {
+              else {
                 // FALLBACK FOR UNHANDLED
                 for (const h of window.telHandlers) {
                   h(key);
                 }
                 html += "<p>" + key + ": " + s[key] + "</p>"
+              }
             }
-          }
-          $('#rawdisplay').html(html);
-        })
-    }, 1000);
-
+            $('#rawdisplay').html(html);
+            getTelemetry();
+          })
+      }, 1000);
+    }
 
     function post(url) {
       fetch(url, { method: 'GET' })
