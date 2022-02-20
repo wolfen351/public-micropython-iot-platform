@@ -77,8 +77,10 @@ class HomeAssistantControl(BasicModule):
                     messageStr += '"' + j + '": '
                     if (isinstance(bit[1],int) or isinstance(bit[1],float)):
                         messageStr += str(bit[1]) +', '
+                    elif (isinstance(bit[1],bytes)):
+                        messageStr += '"' + bit[1].decode('ascii') + '", '
                     else:
-                        messageStr += '"' + bit[1] + '", '
+                        messageStr += '"' + str(bit[1]) + '", '
                 messageStr = messageStr[0: -2] + "}" # remove final comma and add }
 
                 SerialLog.log("Sending HA MQTT: ", messageStr)
