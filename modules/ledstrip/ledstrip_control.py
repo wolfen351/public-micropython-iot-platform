@@ -119,7 +119,8 @@ class LedStripControl(BasicModule):
         return { 
             "ledaction": self.action,
             "ledprimary": self.primary,
-            "ledsecondary": self.secondary
+            "ledsecondary": self.secondary,
+            "ledbrightness": self.brightness
         }
 
     def processTelemetry(self, telemetry):
@@ -135,6 +136,7 @@ class LedStripControl(BasicModule):
         return { 
             b"/led/color" : self.ledcolor,
             b"/led/action" : self.ledaction,
+            b"/led/brightness" : self.ledbrightness,
             b"/ledstrip" : b"/modules/ledstrip/ledstrip.html"
         }
 
@@ -158,6 +160,10 @@ class LedStripControl(BasicModule):
     def setaction(self, action):
         self.prevaction = self.action
         self.action = action
+        self.saveSettings()
+
+    def setbrightness(self, brightness):
+        self.brightness = brightness
         self.saveSettings()
 
     def saveSettings(self):
@@ -190,4 +196,9 @@ class LedStripControl(BasicModule):
         headers = okayHeader
         action = unquote(params.get(b"action", None))
         self.setaction(action)
+        return b"", headers
+
+    def ledbrightness(self, params):
+        headers = okayHeader
+        self.brightness = int(unquote(params.get(b"brightness", None)))
         return b"", headers
