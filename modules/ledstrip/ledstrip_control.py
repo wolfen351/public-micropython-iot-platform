@@ -12,6 +12,7 @@ class LedStripControl(BasicModule):
     primary = "000000"
     secondary = "000000"
     duration = 5000
+    brightness = 255
 
     def __init__(self, basicSettings):
         pass
@@ -22,6 +23,7 @@ class LedStripControl(BasicModule):
         self.action = ledStripSettings.ledAction
         self.primary = ledStripSettings.ledColorPrimary
         self.secondary = ledStripSettings.ledColorSecondary
+        self.brightness = ledStripSettings.ledBrightness
 
     def tick(self):
         ms = time.ticks_ms()
@@ -164,13 +166,18 @@ class LedStripControl(BasicModule):
 
     def fullstrip(self, color):
         for i in range(self.ledCount):
-            self.np[i] = self.hex_to_rgb(color)
+            self.np[i] = self.applybrightness(self.hex_to_rgb(color))
         self.np.write()
 
     def fullstrip_tuple(self, color):
         for i in range(self.ledCount):
-            self.np[i] = color
+            self.np[i] = self.applybrightness(color)
         self.np.write()
+
+    def applybrightness(self, color):
+        handicap = self.brightness / 255.0
+        t1 = (int(color[0] * handicap), int(color[1] * handicap), int(color[2] * handicap))
+        return (t1[0], t1[1], t1[2])
 
     def ledcolor(self, params):
         headers = okayHeader
