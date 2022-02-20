@@ -114,7 +114,11 @@ class LedStripControl(BasicModule):
 
 
     def getTelemetry(self):
-        return {}
+        return { 
+            "ledaction": self.action,
+            "ledprimary": self.primary,
+            "ledsecondary": self.secondary
+        }
 
     def processTelemetry(self, telemetry):
         pass

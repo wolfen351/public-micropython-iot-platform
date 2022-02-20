@@ -674,7 +674,10 @@
       nanoajax.ajax({url:url}, function (code, responseText) { console.log("Response: ", responseText )})
     }
 
-    primary.addEventListener("input", colorChanged,/modules/ledstrip/
+    primary.addEventListener("input", colorChanged, false);
+    secondary.addEventListener("input", colorChanged, false);
+  </script>
+
 </body>
 
 </html>
