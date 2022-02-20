@@ -1,5 +1,6 @@
 from modules.basic.basic_module import BasicModule
 import machine, neopixel, time
+from modules.ledstrip.ledstrip_settings import LedStripSettings
 from modules.web.web_processor import okayHeader, unquote
 
 class LedStripControl(BasicModule):
@@ -16,7 +17,11 @@ class LedStripControl(BasicModule):
         pass
 
     def start(self):
-        pass
+        ledStripSettings = LedStripSettings()
+        ledStripSettings.load()
+        self.action = ledStripSettings.ledAction
+        self.primary = ledStripSettings.ledColorPrimary
+        self.secondary = ledStripSettings.ledColorSecondary
 
     def tick(self):
         ms = time.ticks_ms()
@@ -142,10 +147,16 @@ class LedStripControl(BasicModule):
         self.primary = primary
         self.secondary = secondary
         self.prevaction = b"color"
+        self.saveSettings()
 
     def setaction(self, action):
         self.prevaction = self.action
         self.action = action
+        self.saveSettings()
+
+    def saveSettings(self):
+        settings = LedStripSettings(self.action, self.primary, self.secondary)
+        settings.write()
 
     def fullstrip(self, color):
         for i in range(self.ledCount):
