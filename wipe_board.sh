@@ -24,8 +24,5 @@ print("Erasing..")
 for f in os.listdir():
     print(f)
     rm(f)
-
-import machine
-machine.reset()
 EOD
-} >> /dev/ttyACM0
+} | picocom -rx 1000 --omap lfcrlf -b 115200 /dev/ttyACM0
