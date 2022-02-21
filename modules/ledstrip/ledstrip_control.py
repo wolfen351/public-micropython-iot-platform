@@ -58,8 +58,8 @@ class LedStripControl(BasicModule):
 
         if (self.action == b"cycle"):
 
-            p = self.hex_to_rgb(self.primary)
-            s = self.hex_to_rgb(self.secondary)
+            p = self.applybrightness(self.hex_to_rgb(self.primary))
+            s = self.applybrightness(self.hex_to_rgb(self.secondary))
 
             offset = int(perc * self.ledCount)
             for j in range(self.ledCount):
@@ -69,8 +69,8 @@ class LedStripControl(BasicModule):
 
         if (self.action == b"bounce"):
 
-            p = self.hex_to_rgb(self.primary)
-            s = self.hex_to_rgb(self.secondary)
+            p = self.applybrightness(self.hex_to_rgb(self.primary))
+            s = self.applybrightness(self.hex_to_rgb(self.secondary))
 
             offset = int(perc * self.ledCount * 2)
             for j in range(self.ledCount):
@@ -171,13 +171,15 @@ class LedStripControl(BasicModule):
         settings.write()
 
     def fullstrip(self, color):
+        col = self.applybrightness(self.hex_to_rgb(color))
         for i in range(self.ledCount):
-            self.np[i] = self.applybrightness(self.hex_to_rgb(color))
+            self.np[i] = col
         self.np.write()
 
     def fullstrip_tuple(self, color):
+        col = self.applybrightness(color)
         for i in range(self.ledCount):
-            self.np[i] = self.applybrightness(color)
+            self.np[i] = col
         self.np.write()
 
     def applybrightness(self, color):
@@ -201,4 +203,5 @@ class LedStripControl(BasicModule):
     def ledbrightness(self, params):
         headers = okayHeader
         self.brightness = int(unquote(params.get(b"brightness", None)))
+        self.prevaction = b'brightness'
         return b"", headers
