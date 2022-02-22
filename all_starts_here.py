@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Master Template',
-    'ShortName': 'Master',
+    'Name': 'Led Strip Controller',
+    'ShortName': 'LedStrip',
 }

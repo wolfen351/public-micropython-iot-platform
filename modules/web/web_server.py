@@ -112,6 +112,7 @@ class WebServer():
 
         if type(route) is bytes:
             # expect a filename, so return contents of file
+            SerialLog("Returning file:", route)
             return open(route, "rb"), headers
 
         if callable(route):
