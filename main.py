@@ -32,6 +32,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.dht11.dht11 import Dht11Monitor
     import sys
     import gc
     
