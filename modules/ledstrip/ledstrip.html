@@ -7,10 +7,11 @@
     <style>
         body {
             font-family: sans-serif;
-            background: #3498db;
+            background: #48545b;
             width: 100%;
             text-align: center;
             margin: 20px 0px 20px 0px;
+            color:white;
         }
 
         span {
@@ -30,6 +31,12 @@
         .btn {
             width: 50px;
             height: 50px;
+        }
+
+
+        .btn.selected {
+            background-color: #453fff;
+            color: white;
         }
 
         .navbtn {
@@ -713,12 +720,12 @@
 
         <h2>Action:</h2>
         <div class="nav">
-            <button class="btn" name="action" onclick="clickAction('none')">None</button>
-            <button class="btn" name="action" onclick="clickAction('switch')">Switch</button>
-            <button class="btn" name="action" onclick="clickAction('fade')">Fade</button>
-            <button class="btn" name="action" onclick="clickAction('cycle')">Cycle</button>
-            <button class="btn" name="action" onclick="clickAction('bounce')">Bounce</button>
-            <button class="btn" name="action" onclick="clickAction('rainbow')">Rainbow</button>
+            <button class="btn actionbtn actionnone" name="action" onclick="clickAction('none')">None</button>
+            <button class="btn actionbtn actionswitch" name="action" onclick="clickAction('switch')">Switch</button>
+            <button class="btn actionbtn actionfade" name="action" onclick="clickAction('fade')">Fade</button>
+            <button class="btn actionbtn actioncycle" name="action" onclick="clickAction('cycle')">Cycle</button>
+            <button class="btn actionbtn actionbounce" name="action" onclick="clickAction('bounce')">Bounce</button>
+            <button class="btn actionbtn actionrainbow" name="action" onclick="clickAction('rainbow')">Rainbow</button>
         </div>
     </div>
 
@@ -767,6 +774,27 @@
 
         primary.addEventListener("input", colorChanged, false);
         secondary.addEventListener("input", colorChanged, false);
+
+        function getTelemetry() {
+            setTimeout(function () {
+                fetch('/telemetry')
+                    .then(response => response.json())
+                    .then(data => {
+                        $("#primary").val("#" + data.ledprimary);
+                        $("#secondary").val("#" + data.ledsecondary);
+                        $("#brightness").val(data.ledbrightness);
+
+                        $(".actionbtn").removeClass("selected");
+                        $(".actionbtn.action"+data.ledaction).addClass("selected");
+
+                        getTelemetry();
+                    })
+            }, 1000);
+        }
+
+        getTelemetry();
+
+
     </script>
 
 </body>

@@ -167,7 +167,7 @@ class LedStripControl(BasicModule):
         self.saveSettings()
 
     def saveSettings(self):
-        settings = LedStripSettings(self.action, self.primary, self.secondary)
+        settings = LedStripSettings(self.action, self.primary, self.secondary, self.brightness)
         settings.write()
 
     def fullstrip(self, color):
