@@ -32,6 +32,8 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.mosfet.mosfet_control import MosfetControl
+    from modules.fourlights.light_control import LightControl
     import sys
     import gc
     
