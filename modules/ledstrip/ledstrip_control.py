@@ -2,6 +2,7 @@ from modules.basic.basic_module import BasicModule
 import machine, neopixel, time
 from modules.ledstrip.ledstrip_settings import LedStripSettings
 from modules.web.web_processor import okayHeader, unquote
+from serial_log import SerialLog
 
 class LedStripControl(BasicModule):
 
@@ -167,7 +168,7 @@ class LedStripControl(BasicModule):
         self.saveSettings()
 
     def saveSettings(self):
-        settings = LedStripSettings(self.action, self.primary, self.secondary)
+        settings = LedStripSettings(self.action, self.primary, self.secondary, self.brightness)
         settings.write()
 
     def fullstrip(self, color):
@@ -202,6 +203,7 @@ class LedStripControl(BasicModule):
 
     def ledbrightness(self, params):
         headers = okayHeader
-        self.brightness = int(unquote(params.get(b"brightness", None)))
+        brightness = int(unquote(params.get(b"brightness", None)))
         self.prevaction = b'brightness'
+        self.setbrightness(brightness)
         return b"", headers
