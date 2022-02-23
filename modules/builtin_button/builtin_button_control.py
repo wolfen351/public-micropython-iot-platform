@@ -2,14 +2,22 @@ from modules.basic.basic_module import BasicModule
 from machine import Pin
 
 class BuiltinButtonControl(BasicModule):
+
+    # CommandCache
+    commands = []
+
     def __init__(self, basicSettings):
         self.buttonPin = Pin(0, Pin.IN)
+        self.value = 0
 
     def start(self):
-        self.value = 1 - self.buttonPin.value()
+        self.value = 0
 
     def tick(self):
-        self.value = 1 - self.buttonPin.value()
+        newValue = 1 - self.buttonPin.value()
+        if (self.value != newValue):
+            self.value = newValue
+            self.commands.append(b"/button/onboard/" + str(self.value))
 
     def getTelemetry(self):
         return { 'button/onboard': self.value }
@@ -18,7 +26,9 @@ class BuiltinButtonControl(BasicModule):
         pass
 
     def getCommands(self):
-        return []
+        var = self.commands
+        self.commands = []
+        return var
 
     def processCommands(self, commands):
         pass
