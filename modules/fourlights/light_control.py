@@ -27,6 +27,7 @@ class LightControl(BasicModule):
     # Trigger Pins by connecting D1 or D2 to ground
     T1 = Pin(35, Pin.IN)
     T2 = Pin(33, Pin.IN)
+    SoftT1 = 0
 
     # When to change a light to ON
     LightOnAt = [-1, -1, -1, -1]
@@ -60,13 +61,17 @@ class LightControl(BasicModule):
         Trigger1 = self.T1.value()
         Trigger2 = self.T2.value()
 
+        if (self.SoftT1 == 1):
+            Trigger1 = 0
+            self.SoftT1 = 0
+
         if (self.Triggers[0] != Trigger1):
             self.Triggers[0] = Trigger1
-            SerialLog.log(b"Light: Trigger 1")
+            SerialLog.log(b"Light: Trigger 1 - " + str(1 - Trigger1))
 
         if (self.Triggers[1] != Trigger2):
             self.Triggers[1] = Trigger2
-            SerialLog.log(b"Light: Trigger 2")
+            SerialLog.log(b"Light: Trigger 2 - " + str(1 - Trigger2))
 
         diff = time.ticks_diff(time.ticks_ms(), self.lastrun)
         self.lastrun = time.ticks_ms()
@@ -106,7 +111,9 @@ class LightControl(BasicModule):
         return var
 
     def processCommands(self, commands):
-        pass
+        for command in commands:
+            if (command == b"/button/onboard/1"):
+                self.SoftT1 = 1
 
     def getRoutes(self):
         return {
