@@ -17,7 +17,7 @@ class HomeAssistantControl(BasicModule):
         self.sta_if = network.WLAN(network.STA_IF)
         self.homeAssistantUrl = "homeassistant"
         self.homeAssistantSensorUrl = "%s/sensor/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
-        self.homeAssistantButtonUrl = "%s/button/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
+        self.homeAssistantLightUrl = "%s/light/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
@@ -66,6 +66,8 @@ class HomeAssistantControl(BasicModule):
             
             for attr, value in self.telemetry.items():
                 if (value != telemetry[attr]):
+                    stuffToPost.append([attr, telemetry[attr]])
+                elif (attr not in self.configuredKeys):
                     stuffToPost.append([attr, telemetry[attr]])
 
             if (len(stuffToPost) > 0):
@@ -128,11 +130,16 @@ class HomeAssistantControl(BasicModule):
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         self.client.subscribe(self.topic_sub)
+        # Wipe all existing telemetry so we send a full update on connect
+        self.telemetry = {} 
         SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
 
     def home_assistant_configure(self, key):
         
         if key not in self.configuredKeys:
+
+            SerialLog.log("Configuring home assistant for:", key)
+
             self.configuredKeys.append(key)
             if (key.startswith(b'temperature/')):
                 id = key.replace("temperature/","")
@@ -148,13 +155,19 @@ class HomeAssistantControl(BasicModule):
                 self.client.publish("%s/rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{%% if value_json.rssi %%} {{value_json.rssi}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'ip')):
-                self.client.publish("%s/ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.ip %%} {{value_json.ip}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                self.client.publish("%s/ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "stat_t":"%s/state","val_tpl":"{%% if value_json.ip %%} {{value_json.ip}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'ssid')):
-                self.client.publish("%s/ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.ssid %%} {{value_json.sdis}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                self.client.publish("%s/ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "stat_t":"%s/state","val_tpl":"{%% if value_json.ssid %%} {{value_json.ssid}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
 
             if (key.startswith(b'button')):
-                self.client.publish("%s/onboard_button/config" % self.homeAssistantButtonUrl, '{"name":"%s %s Onboard Button", "dev_cla":"None","stat_t":"%s/state","val_tpl":"{%% if value_json.onboard_button %%} {{value_json.onboard_button}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantButtonUrl) )
+                self.client.publish("%s/onboard_button/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Onboard Button", "stat_t":"%s/state","val_tpl":"{%% if value_json.button_onboard %%} {{value_json.button_onboard}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+
+            if (key.startswith(b'ledprimary')):
+                self.client.publish("%s/ledprimary/config" % self.homeAssistantLightUrl, '{"~":"%s", "name":"%s %s Primary LED Colour", "unique_id": "p_%s", "platform": "mqtt_json", "stat_t":"~/state", "command_topic":"~/command",                 "rgb_command_topic": "~/command",                 "rgb_state_topic": "~/state",                 "rgb_value_template": "{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}",                "val_tpl":"{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.homeAssistantLightUrl, self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.client_id.decode('ascii')) )            
+            if (key.startswith(b'ledsecondary')):
+                self.client.publish("%s/ledsecondary/config" % self.homeAssistantLightUrl, '{"~":"%s", "name":"%s %s Secondary LED Colour", "unique_id": "s_%s", "platform": "mqtt_json", "stat_t":"~/state", "command_topic":"~/command", "val_tpl":"{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.homeAssistantLightUrl, self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.client_id.decode('ascii')) )
+
 
     def settings(self, settingsVals):
         # Apply the new settings
