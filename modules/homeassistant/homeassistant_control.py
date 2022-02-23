@@ -5,8 +5,8 @@ from serial_log import SerialLog
 import ubinascii
 import machine
 import network
-import time
 from modules.web.web_processor import okayHeader, unquote
+import ujson
 
 class HomeAssistantControl(BasicModule):
 
@@ -132,7 +132,19 @@ class HomeAssistantControl(BasicModule):
         self.client.subscribe(self.topic_sub)
         # Wipe all existing telemetry so we send a full update on connect
         self.telemetry = {} 
+        self.configuredKeys = []
         SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+
+    def get_basic_payload(self, name, uniqueid, attr):
+        basicPayload = { 
+            "~": self.homeAssistantSensorUrl,
+            "name": "%s %s %s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), name),
+            "unique_id": uniqueid,
+            "stat_t": "~/state",
+            "val_tpl": "{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}" % (attr, attr)
+        }
+        return basicPayload
+
 
     def home_assistant_configure(self, key):
         
@@ -141,32 +153,62 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log("Configuring home assistant for:", key)
 
             self.configuredKeys.append(key)
+
+
+            attr = key.replace("/","_")
+            safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/')):
-                id = key.replace("temperature/","")
-                j = key.replace("/","_")
-                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"temperature","stat_t":"%s/state","unit_of_meas":"°C","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
+                payload = self.get_basic_payload("Temperature", safeid, attr) 
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'humidity/')):
-                id = key.replace("humidity/","")
-                j = key.replace("/","_")
-                self.client.publish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, id), '{"name":"%s %s %s", "dev_cla":"humidity","stat_t":"%s/state","unit_of_meas":"%%RH","val_tpl":"{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), id, self.homeAssistantSensorUrl, j, j) )
+                payload = self.get_basic_payload("Humidity", safeid, attr) 
+                payload.update({ "dev_cla": "humidity", "unit_of_meas": "%RH"})
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'rssi')):
-                self.client.publish("%s/rssi/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Wifi", "dev_cla":"signal_strength","stat_t":"%s/state","unit_of_meas":"dBm","val_tpl":"{%% if value_json.rssi %%} {{value_json.rssi}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
-
+                payload = self.get_basic_payload("RSSI", safeid, attr) 
+                payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                
             if (key.startswith(b'ip')):
-                self.client.publish("%s/ip/config" % self.homeAssistantSensorUrl, '{"name":"%s %s IP", "stat_t":"%s/state","val_tpl":"{%% if value_json.ip %%} {{value_json.ip}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                payload = self.get_basic_payload("IP", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ssid')):
-                self.client.publish("%s/ssid/config" % self.homeAssistantSensorUrl, '{"name":"%s %s SSID", "stat_t":"%s/state","val_tpl":"{%% if value_json.ssid %%} {{value_json.ssid}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                payload = self.get_basic_payload("SSID", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'button')):
-                self.client.publish("%s/onboard_button/config" % self.homeAssistantSensorUrl, '{"name":"%s %s Onboard Button", "stat_t":"%s/state","val_tpl":"{%% if value_json.button_onboard %%} {{value_json.button_onboard}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.homeAssistantSensorUrl) )
+                payload = self.get_basic_payload("Onboard Button", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ledprimary')):
-                self.client.publish("%s/ledprimary/config" % self.homeAssistantLightUrl, '{"~":"%s", "name":"%s %s Primary LED Colour", "unique_id": "p_%s", "platform": "mqtt_json", "stat_t":"~/state", "command_topic":"~/command",                 "rgb_command_topic": "~/command",                 "rgb_state_topic": "~/state",                 "rgb_value_template": "{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}",                "val_tpl":"{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.homeAssistantLightUrl, self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.client_id.decode('ascii')) )            
+                payload = self.get_basic_payload("Primary Colour", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                payload.update({ 
+                    "command_topic":"~/command", 
+                    "rgb_command_topic": "~/command", 
+                    "rgb_state_topic": "~/state", 
+                    "rgb_value_template": "{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}" })
+                self.client.publish("%s/ledprimary%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+
             if (key.startswith(b'ledsecondary')):
-                self.client.publish("%s/ledsecondary/config" % self.homeAssistantLightUrl, '{"~":"%s", "name":"%s %s Secondary LED Colour", "unique_id": "s_%s", "platform": "mqtt_json", "stat_t":"~/state", "command_topic":"~/command", "val_tpl":"{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}"}' % (self.homeAssistantLightUrl, self.basicSettings['ShortName'], self.client_id.decode('ascii'), self.client_id.decode('ascii')) )
+                payload = self.get_basic_payload("Primary Colour", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                payload.update({ 
+                    "command_topic":"~/command", 
+                    "rgb_command_topic": "~/command", 
+                    "rgb_state_topic": "~/state", 
+                    "rgb_value_template": "{%% if value_json.ledsecondary %%} {{value_json.ledsecondary}} {%% else %%} {{ state.state }} {%% endif %%}" })
+                self.client.publish("%s/ledsecondary%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
 
     def settings(self, settingsVals):
