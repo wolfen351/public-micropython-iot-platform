@@ -45,5 +45,8 @@ class Dht11Monitor(BasicModule):
         return {
         }
 
+    def getIndexFileName(self):
+        return { "dht11" : "/modules/dht11/dht11_index.html" }
+
     # Internal code here
 

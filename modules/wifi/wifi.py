@@ -81,8 +81,10 @@ class WifiHandler(BasicModule):
     def getRoutes(self):
         return {
             b"/network": b"/modules/wifi/web_network.html", 
+            b"/log": b"/modules/wifi/web_log.html", 
             b"/netloadsettings": self.loadnetsettings,
-            b"/netsavesettings": self.savenetsettings
+            b"/netsavesettings": self.savenetsettings,
+            b"/getlog": self.getlog
         }
 
     def getIndexFileName(self):
@@ -95,6 +97,11 @@ class WifiHandler(BasicModule):
         settings.load()
         headers = okayHeader
         data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (settings.Ssid, settings.Password, settings.Type, settings.Ip, settings.Netmask, settings.Gateway)
+        return data, headers
+
+    def getlog(self, params):
+        headers = okayHeader
+        data = SerialLog.logHistory()
         return data, headers
 
     def savenetsettings(self, params):
