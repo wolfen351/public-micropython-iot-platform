@@ -196,30 +196,42 @@ class HomeAssistantControl(BasicModule):
                 self.client.publish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ledprimaryrgb')):
-                payload = self.get_basic_payload("Primary Colour", safeid, attr) 
+                payload = {}
                 payload.update({ 
-                    "command_topic":"~/command", 
-                    "state_value_template": "{{ value_json.ledstate }}",
-                    "brightness_scale": 255,
-                    "brightness_state_topic": "~/state",
-                    "brightness_value_template": "{{ value_json.ledbrightness }}" ,
-                    "brightness_command_topic": "~/command/ledbrightness",
-                    "effect_command_topic": "~/command/ledeffect", 
-                    "effect_list": ["none", "switch", "fade", "bounce", "rainbow"],
-                    "effect_state_topic": "~/state",
-                    "effect_value_template": "{{ value_json.ledaction }}" ,
-                    "rgb_value_template": "{{ value_json.ledprimaryrgb }}",
-                    "rgb_command_topic": "~/command/ledprimaryrgb",
-                    "rgb_state_topic": "~/state", 
-                    "rgb_command_template": "{{ '%02x%02x%02x' | format(red, green, blue)}}",
-                    "color_mode_state_topic": "~/state",
-                    "color_mode_value_template": "{{ value_json.ledcolormode }}",
-                    "optimistic": False,
-                    "on_command_type": "brightness"
+	                    "brightness": True,
+	                    "brightness_scale": 254,
+	                    "color_mode": True,
+	                    "command_topic": "zigbee2mqtt/office_strip/set",
+                        "device": {
+                            "manufacturer": "Wolfen",
+                            "name": self.basicSettings["Name"],
+                            "sw_version": self.version,
+                            "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["ShortName"], self.basicSettings["Name"] ],
+                            #"configuration_url": "http://" + self.ip,
+                        },
+	                    "effect": True,
+	                    "effect_list": ["blink", "breathe", "okay", "channel_change", "finish_effect", "stop_effect"],
+	                    "json_attributes_topic": "zigbee2mqtt/office_strip",
+	                    "max_mireds": 500,
+	                    "min_mireds": 150,
+	                    "name": "office_strip",
+	                    "schema": "json",
+	                    "state_topic": "zigbee2mqtt/office_strip",
+	                    "supported_color_modes": ["xy", "color_temp"],
+	                    "unique_id": "0x842e14fffe1414d6_light_zigbee2mqtt"
+                    
+
                 })
-                payload.pop('val_tpl')
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
                 self.client.publish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+
+                state = {
+                    "state": "ON",
+                    "transition": 10.0,
+                    "brightness": 41,
+                    "color_temp": 500
+                }
+                self.client.publish("zigbee2mqtt/office_strip", ujson.dumps(state))
 
             # if (key.startswith(b'ledsecondary')):
             #     payload = self.get_basic_payload("Primary Colour", safeid, attr) 
