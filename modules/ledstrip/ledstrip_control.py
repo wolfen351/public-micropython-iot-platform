@@ -117,11 +117,17 @@ class LedStripControl(BasicModule):
 
 
     def getTelemetry(self):
+        p = self.hex_to_rgb(self.primary)
+        s = self.hex_to_rgb(self.secondary)
         return { 
             "ledaction": self.action,
             "ledprimary": self.primary,
+            "ledprimaryrgb": ",".join([str(p[0]), str(p[1]), str(p[2])]),
             "ledsecondary": self.secondary,
-            "ledbrightness": self.brightness
+            "ledsecondaryrgb": ",".join([str(s[0]), str(s[1]), str(s[2])]),
+            "ledbrightness": self.brightness,
+            "ledcolormode": "rgb",
+            "ledstate": "on"
         }
 
     def processTelemetry(self, telemetry):
@@ -131,7 +137,10 @@ class LedStripControl(BasicModule):
         return []
 
     def processCommands(self, commands):
-        pass
+        for c in commands:
+            if (b"/ledbrightness/" in c):
+                brightness = int(c.rsplit(b'/', 1)[-1])
+                self.setbrightness(brightness)
 
     def getRoutes(self):
         return { 
