@@ -25,6 +25,10 @@ class HomeAssistantControl(BasicModule):
         self.telemetry = {}
         self.client = None
         self.configuredKeys = []
+        self.version = b"1.0.0"
+        self.ip = b"0.0.0.0"
+        self.messageStr = b""
+        self.commands = []
 
     def start(self):
         settings = HomeAssistantSettings()
@@ -62,36 +66,56 @@ class HomeAssistantControl(BasicModule):
             return
 
         if (self.client != None):
-            stuffToPost = []
             
             for attr, value in self.telemetry.items():
-                if (value != telemetry[attr]):
-                    stuffToPost.append([attr, telemetry[attr]])
-                elif (attr not in self.configuredKeys):
-                    stuffToPost.append([attr, telemetry[attr]])
+                if (attr == "ip"):
+                    self.ip = value
+                if (attr == "version"):
+                    self.version = value
+                if (attr not in self.configuredKeys):
+                    self.home_assistant_configure(attr)
 
-            if (len(stuffToPost) > 0):
-                messageStr = "{ "
-                for bit in stuffToPost:
-                    self.home_assistant_configure(bit[0])
-
-                    j = bit[0].replace("/","_")
-                    messageStr += '"' + j + '": '
-                    if (isinstance(bit[1],int) or isinstance(bit[1],float)):
-                        messageStr += str(bit[1]) +', '
-                    elif (isinstance(bit[1],bytes)):
-                        messageStr += '"' + bit[1].decode('ascii') + '", '
-                    else:
-                        messageStr += '"' + str(bit[1]) + '", '
-                messageStr = messageStr[0: -2] + "}" # remove final comma and add }
-
+            messageStr = ujson.dumps(telemetry)
+            messageStr = messageStr.replace("/","_")
+            # dont send duplicate messages
+            if (self.messageStr != messageStr):
                 SerialLog.log("Sending HA MQTT: ", messageStr)
                 self.client.publish("%s/state" % self.homeAssistantSensorUrl, messageStr)
+                self.messageStr = messageStr
 
+                if ("ledprimary" in telemetry):
+                    state = {
+                        "state": telemetry["ledstate"],
+                        "brightness": telemetry["ledbrightness"],
+                        "color_mode": "rgb",
+                        "color": {
+                            "r": telemetry["ledprimaryr"],
+                            "g": telemetry["ledprimaryg"],
+                            "b": telemetry["ledprimaryb"]
+                        },
+                        "effect": telemetry["ledaction"]
+                    }
+                    self.client.publish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
+
+                if ("ledsecondary" in telemetry):
+                    state = {
+                        "state": telemetry["ledstate"],
+                        "brightness": telemetry["ledbrightness"],
+                        "color_mode": "rgb",
+                        "color": {
+                            "r": telemetry["ledsecondaryr"],
+                            "g": telemetry["ledsecondaryg"],
+                            "b": telemetry["ledsecondaryb"]
+                        },
+                        "effect": telemetry["ledaction"]
+                    }
+                    self.client.publish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
             self.telemetry = telemetry.copy()
 
     def getCommands(self):
-        return []
+        c = self.commands
+        self.commands = []
+        return c
 
     def processCommands(self, commands):
         pass
@@ -124,6 +148,7 @@ class HomeAssistantControl(BasicModule):
 
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
+        self.commands.append(topic + b"/" + msg)
 
     def connect_and_subscribe(self):
         self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_port)
@@ -140,8 +165,15 @@ class HomeAssistantControl(BasicModule):
             "~": self.homeAssistantSensorUrl,
             "name": "%s %s %s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), name),
             "unique_id": uniqueid,
+            "device": {
+                "manufacturer": "Wolfen",
+                "name": self.basicSettings["Name"],
+                "sw_version": self.version,
+                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["ShortName"], self.basicSettings["Name"] ],
+                #"configuration_url": "http://" + self.ip,
+            },
             "stat_t": "~/state",
-            "val_tpl": "{%% if value_json.%s %%} {{value_json.%s}} {%% else %%} {{ state.state }} {%% endif %%}" % (attr, attr)
+            "val_tpl": "{{ value_json.%s }}" % (attr)
         }
         return basicPayload
 
@@ -190,25 +222,49 @@ class HomeAssistantControl(BasicModule):
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
                 self.client.publish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
-            if (key.startswith(b'ledprimary')):
+            if (key.startswith(b'ledprimaryb')):
                 payload = self.get_basic_payload("Primary Colour", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                payload.pop("val_tpl")
                 payload.update({ 
-                    "command_topic":"~/command", 
-                    "rgb_command_topic": "~/command", 
-                    "rgb_state_topic": "~/state", 
-                    "rgb_value_template": "{%% if value_json.ledprimary %%} {{value_json.ledprimary}} {%% else %%} {{ state.state }} {%% endif %%}" })
-                self.client.publish("%s/ledprimary%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+	                    "brightness": True,
+	                    "brightness_scale": 255,
+	                    "color_mode": True,
+	                    "command_topic": "~/command/ledprimary",
+	                    "effect": True,
+	                    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
+	                    "json_attributes_topic": "~/ledprimaryrgbstate",
+	                    "schema": "json",
+	                    "supported_color_modes": ["rgb"],
+	                    "unique_id": safeid,
+                        "stat_t": "~/ledprimaryrgbstate",
+                })
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+            if (key.startswith(b'ledsecondaryb')):
+                payload = self.get_basic_payload("Secondary Colour", safeid, attr) 
+                payload.pop("val_tpl")
+                payload.update({ 
+	                    "brightness": True,
+	                    "brightness_scale": 255,
+	                    "color_mode": True,
+	                    "command_topic": "~/command/ledsecondary",
+	                    "effect": True,
+	                    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
+	                    "json_attributes_topic": "~/ledprimaryrgbstate",
+	                    "schema": "json",
+	                    "supported_color_modes": ["rgb"],
+	                    "unique_id": safeid,
+                        "stat_t": "~/ledsecondaryrgbstate",
+                })
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.client.publish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
 
-            if (key.startswith(b'ledsecondary')):
-                payload = self.get_basic_payload("Primary Colour", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                payload.update({ 
-                    "command_topic":"~/command", 
-                    "rgb_command_topic": "~/command", 
-                    "rgb_state_topic": "~/state", 
-                    "rgb_value_template": "{%% if value_json.ledsecondary %%} {{value_json.ledsecondary}} {%% else %%} {{ state.state }} {%% endif %%}" })
-                self.client.publish("%s/ledsecondary%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+
+
+            # if (key.startswith(b'ledsecondary')):
+            #     payload = self.get_basic_payload("Primary Colour", safeid, attr) 
+            #     SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+            #     self.client.publish("%s/ledsecondary%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
 
 
     def settings(self, settingsVals):
