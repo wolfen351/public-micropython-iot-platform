@@ -3,6 +3,7 @@ import machine, neopixel, time
 from modules.ledstrip.ledstrip_settings import LedStripSettings
 from modules.web.web_processor import okayHeader, unquote
 from serial_log import SerialLog
+import ujson
 
 class LedStripControl(BasicModule):
 
@@ -122,12 +123,16 @@ class LedStripControl(BasicModule):
         return { 
             "ledaction": self.action,
             "ledprimary": self.primary,
-            "ledprimaryrgb": ",".join([str(p[0]), str(p[1]), str(p[2])]),
+            "ledprimaryr": p[0], 
+            "ledprimaryg": p[1], 
+            "ledprimaryb": p[2], 
             "ledsecondary": self.secondary,
-            "ledsecondaryrgb": ",".join([str(s[0]), str(s[1]), str(s[2])]),
+            "ledsecondaryr": s[0], 
+            "ledsecondaryg": s[1], 
+            "ledsecondaryb": s[2], 
             "ledbrightness": self.brightness,
             "ledcolormode": "rgb",
-            "ledstate": "on"
+            "ledstate": "ON" if self.brightness > 0 else "OFF"
         }
 
     def processTelemetry(self, telemetry):
@@ -138,9 +143,37 @@ class LedStripControl(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (b"/ledbrightness/" in c):
-                brightness = int(c.rsplit(b'/', 1)[-1])
-                self.setbrightness(brightness)
+            # this decodes and executes home assistant comands
+            if (b"/ledprimary/" in c):
+                command = c.rsplit(b'/', 1)[-1]
+                bits = ujson.loads(command)
+                for cc in bits:
+                    val = bits[cc]
+                    if (cc=="state"):
+                        if (val == "OFF"):
+                            self.setbrightness(0)
+                    elif (cc == "brightness"):
+                        self.setbrightness(int(val))
+                    elif (cc == "color"):
+                        newSecondary = self.rgb_to_hex(val["r"], val["g"], val["b"])
+                        self.setcolor(newSecondary, self.secondary)
+                    elif (cc == "effect"):
+                        self.setaction(bytes(val, 'ascii'))
+            if (b"/ledsecondary/" in c):
+                command = c.rsplit(b'/', 1)[-1]
+                bits = ujson.loads(command)
+                for cc in bits:
+                    val = bits[cc]
+                    if (cc=="state"):
+                        if (val == "OFF"):
+                            self.setbrightness(0)
+                    elif (cc == "brightness"):
+                        self.setbrightness(int(val))
+                    elif (cc == "color"):
+                        newSecondary = self.rgb_to_hex(val["r"], val["g"], val["b"])
+                        self.setcolor(self.primary, newSecondary)
+                    elif (cc == "effect"):
+                        self.setaction(bytes(val, 'ascii'))                    
 
     def getRoutes(self):
         return { 
@@ -160,6 +193,9 @@ class LedStripControl(BasicModule):
         lv = len(value)
         t1 = tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
         return (t1[0], t1[1], t1[2])
+
+    def rgb_to_hex(self, r, g, b):
+        return ''.join('%02x'%i for i in (r,g,b))
     
     def setcolor(self, primary, secondary):
         self.primary = primary
@@ -174,6 +210,7 @@ class LedStripControl(BasicModule):
 
     def setbrightness(self, brightness):
         self.brightness = brightness
+        self.prevaction = b"brightness"
         self.saveSettings()
 
     def saveSettings(self):
