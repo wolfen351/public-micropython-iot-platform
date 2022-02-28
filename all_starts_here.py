@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Four Lights',
-    'ShortName': 'FourLights',
+    'Name': 'GPS',
+    'ShortName': 'GPS',
 }

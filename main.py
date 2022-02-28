@@ -32,8 +32,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.mosfet.mosfet_control import MosfetControl
-    from modules.fourlights.light_control import LightControl
+    from modules.gps.gps_control import GPSControl
     import sys
     import gc
     
@@ -54,8 +53,7 @@ try:
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
         web,
-        LightControl(Basic.Settings),
-        MosfetControl(Basic.Settings)
+        GPSControl(Basic.Settings),
     ]
     
     # start all the modules up
