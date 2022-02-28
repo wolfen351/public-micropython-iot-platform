@@ -16,10 +16,19 @@ class GPSControl:
         if (gpsData != None):
             for c in gpsData.decode('ascii'): #bytes to string
                 self.myGPS.update(c)
-            SerialLog.log("GPS:", gpsData, self.myGPS.latitude_string() + " " + self.myGPS.longitude_string() + " " + self.myGPS.date_string('s_dmy') + " " + str(self.myGPS.satellites_in_use))
+            #SerialLog.log("GPS:", gpsData, self.myGPS.latitude_string() + " " + self.myGPS.longitude_string() + " " + self.myGPS.date_string('s_dmy') + " " + str(self.myGPS.satellites_in_use))
 
     def getTelemetry(self):
-        return {}
+        return { 
+            "latitude": self.myGPS.latitude,
+            "longitude": self.myGPS.longitude,
+            "altitude": self.myGPS.altitude,
+            "gpsdate": self.myGPS.date,
+            "gpstime": self.myGPS.timestamp,
+            "satellites": self.myGPS.satellites_in_use,
+            "speed": self.myGPS.speed,
+            "gpsaccuracy": self.myGPS.pdop
+        }
 
     def processTelemetry(self, telemetry):
         pass
