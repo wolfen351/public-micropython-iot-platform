@@ -7,7 +7,6 @@ import json
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
-@micropython.native 
 def unquote(string):
     if not string:
         return b''
@@ -40,72 +39,72 @@ class WebProcessor(BasicModule):
         self.telemetry = {}
         self.panels = {}
 
-    @micropython.native 
+    #@micropython.native 
     def start(self):
         self.server = WebServer()
         self.server.start()
 
-    @micropython.native 
+    #@micropython.native 
     def tick(self):
         self.server.tick()
 
-    @micropython.native 
+    #@micropython.native 
     def getTelemetry(self):
         return {}
 
-    @micropython.native 
+    #@micropython.native 
     def processTelemetry(self, telemetry):
         pass
 
-    @micropython.native 
+    #@micropython.native 
     def getCommands(self):
         return []
 
-    @micropython.native 
+    #@micropython.native 
     def processCommands(self, commands):
         pass
 
-    @micropython.native 
+    #@micropython.native 
     def getRoutes(self):
         return {
             b"/": b"/modules/web/web_index.html",
-            b"/cash.min.js": b"/cash.min.js",
+            b"/cash.min.js": b"/modules/web/cash.min.js",
             b"/telemetry": self.webTelemetry,
             b"/reboot": self.webReboot,
             b"/panels": self.webPanels,
         }
 
     # special code called from main to set ALL routes
-    @micropython.native 
+    #@micropython.native 
     def setRoutes(self, routes):
         self.server.setRoutes(routes)
 
     # special code called from main to set ALL telemetry
-    @micropython.native 
+    #@micropython.native 
     def setTelemetry(self, telemetry):
         self.telemetry = telemetry
 
     # special code called from main to set ALL panels
-    @micropython.native 
+    #@micropython.native 
     def setPanels(self, panels):
         self.panels = panels
 
     # return json telemetry to ui
-    @micropython.native 
+    #@micropython.native 
     def webTelemetry(self, params):
         headers = okayHeader
         data = json.dumps(self.telemetry)
         return data, headers  
 
     # return json panel list to ui
-    @micropython.native 
+    #@micropython.native 
     def webPanels(self, params):
         headers = okayHeader
         data = json.dumps(self.panels)
         return data, headers  
 
     # Simple reboot
-    @micropython.native 
+    #@micropython.native 
     def webReboot(self, params):
         machine.reset()
 
