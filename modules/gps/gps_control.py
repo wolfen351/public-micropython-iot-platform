@@ -26,7 +26,8 @@ class GPSControl:
             "gpsdate": self.myGPS.date,
             "gpstime": self.myGPS.timestamp,
             "satellites": self.myGPS.satellites_in_use,
-            "speed": self.myGPS.speed,
+            "course": self.myGPS.course,
+            "speed": self.myGPS.speed[2],
             "gpsaccuracy": self.myGPS.pdop
         }
 
@@ -43,4 +44,4 @@ class GPSControl:
         return {}
 
     def getIndexFileName(self):
-        return { }
+        return { "gps" : "/modules/gps/gps_index.html" }
