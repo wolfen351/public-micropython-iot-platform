@@ -6,7 +6,7 @@ MIT license; Copyright (c) 2021 Martin Komon
 
 import gc
 import uos
-import modules.ota.urequests as urequests
+import modules.ota.requests as requests
 import uzlib
 import upip_utarfile as tarfile
 from micropython import const
@@ -90,7 +90,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
 
     latestUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
-    response = urequests.get(latestUrl)
+    response = requests.get(latestUrl)
     SerialLog.log("Update Response:", response.text)
     remote_version, remote_filename, *optional = response.text.strip().rstrip(';').split(';')
     min_free_space, *remote_hash = optional if optional else (0, '')
@@ -116,7 +116,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
 
         downloadUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/' + remote_filename
         SerialLog.log("Fetching update updates on: ", downloadUrl)
-        response = urequests.get(downloadUrl)
+        response = requests.get(downloadUrl)
         with open(ota_config['tmp_filename'], 'wb') as f:
             while True:
                 chunk = response.raw.read(512)
