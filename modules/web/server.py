@@ -20,6 +20,7 @@ class Server:
 
         SerialLog.log(self.name, "listening on", addr)
 
+    #@micropython.native
     def stop(self, poller):
         poller.unregister(self.sock)
         self.sock.close()

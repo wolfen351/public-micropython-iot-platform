@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom-map-control-button {
+            background-color: #fff;
+            border: 0;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+            margin: 10px;
+            padding: 0 0.5em;
+            font: 400 18px Roboto, Arial, sans-serif;
+            overflow: hidden;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .custom-map-control-button:hover {
+            background: #ebebeb;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA081x7VYanbmIzHt9fDhbIzZ0t10bYyiM&callback=initMap&v=weekly"
+        async></script>
+    <script>
+
+        let map, infoWindow, marker ;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 6,
+            });
+
+            const myLatLng = { lat: 0, lng: 0};
+            marker = new google.maps.Marker({
+                                position: myLatLng,
+                                map,
+                                title: "Position",
+                            });
+        }
+
+
+        function getTelemetry() {
+            setTimeout(function () {
+                fetch('/telemetry')
+                    .then(response => response.json())
+                    .then(data => {
+
+                        if (data.latitude && data.longitude && marker) {
+                            marker.setPosition(new google.maps.LatLng( data.latitude, data.longitude ));
+                        }
+                        getTelemetry();
+                    })
+            }, 1000);
+        }
+
+        getTelemetry();
+
+
+    </script>
+</body>
+
+</html>
