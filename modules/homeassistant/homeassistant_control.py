@@ -178,7 +178,7 @@ class HomeAssistantControl(BasicModule):
             "unique_id": uniqueid,
             "device": {
                 "manufacturer": "Wolfen",
-                "name": self.basicSettings["Name"],
+                "name": self.basicSettings["Name"] + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
                 "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["ShortName"], self.basicSettings["Name"] ],
                 #"configuration_url": "http://" + self.ip,
