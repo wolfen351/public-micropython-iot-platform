@@ -5,7 +5,7 @@ import ubinascii
 import network
 from modules.wifi.wifi_settings import WifiSettings
 import time
-import modules.ota.uota as uota
+import modules.ota.ota as ota
 from modules.web.web_processor import okayHeader, unquote
 import gc
 
@@ -28,7 +28,7 @@ class WifiHandler(BasicModule):
 
     def start(self):
         self.station()
-        self.version = uota.local_version()
+        self.version = ota.local_version()
 
     def tick(self):
         if (not self.apMode):
@@ -41,8 +41,8 @@ class WifiHandler(BasicModule):
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
                 # Check for update and update if needed
-                if uota.check_for_updates():
-                    uota.install_new_firmware()
+                if ota.check_for_updates():
+                    ota.install_new_firmware()
                     machine.reset()
 
             if (not self.sta_if.isconnected() and self.connected):
