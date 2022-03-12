@@ -2,26 +2,26 @@ from modules.basic.basic_module import BasicModule
 import machine
 import dht
 import time
+from serial_log import SerialLog
 
 class Dht11Monitor(BasicModule):
 
-    lastConvert = 0
     currentT = 0
     currentH = 0
 
     def __init__(self, basicSettings):
-        pass
+        self.lastConvert = time.ticks_ms()
 
     @micropython.native 
     def start(self):
         self.ts_pin = machine.Pin(16)
-        self.dht = dht.DHT11(self.ts_pin)
+        self.dht = dht.DHT22(self.ts_pin)
 
     @micropython.native 
     def tick(self):
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastConvert)
-        if (diff > 2100): 
+        if (diff > 2500): 
             self.dht.measure()
             self.currentT = self.dht.temperature()
             self.currentH = self.dht.humidity()
