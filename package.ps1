@@ -6,9 +6,10 @@ $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg
 tar -zcf firmware.tar.gz $files
 
 $vers = Get-Content -Path .\version -Raw
-V="$vers;firmware.tar.gz;30;$(sha256sum firmware.tar.gz | cut -d " " -f 1)"
-echo "Firmware latest: $V"
-echo $V > latest
+$h256 = Get-FileHash .\firmware.tar.gz
+$V="${$vers};firmware.tar.gz;30;${$h256}"
+Write-Output "Firmware latest: $V"
+Write-Output $V > latest
 
 echo 1
 
