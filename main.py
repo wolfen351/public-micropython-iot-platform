@@ -32,7 +32,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.dht11.dht11 import Dht11Monitor
+    from modules.dht22.dht22 import Dht22Monitor
     import sys
     import gc
     
@@ -52,7 +52,7 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        Dht11Monitor(Basic.Settings),
+        Dht22Monitor(Basic.Settings),
         web
     ]
     

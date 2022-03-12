@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Temperature Sensor DHT11',
-    'ShortName': 'DHT11',
+    'Name': 'Temperature Sensor DHT22',
+    'ShortName': 'DHT22',
 }
