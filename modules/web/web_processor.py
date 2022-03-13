@@ -3,6 +3,8 @@ from modules.basic.basic_module import BasicModule
 from modules.web.web_server import WebServer
 import json
 
+from modules.web.web_settings import WebSettings
+
 #public static code
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
@@ -43,6 +45,8 @@ class WebProcessor(BasicModule):
     def start(self):
         self.server = WebServer()
         self.server.start()
+        self.webSettings = WebSettings()
+        self.webSettings.load()
 
     #@micropython.native 
     def tick(self):
@@ -50,7 +54,7 @@ class WebProcessor(BasicModule):
 
     #@micropython.native 
     def getTelemetry(self):
-        return {}
+        return { "name": self.webSettings.Name }
 
     #@micropython.native 
     def processTelemetry(self, telemetry):
@@ -72,6 +76,7 @@ class WebProcessor(BasicModule):
             b"/telemetry": self.webTelemetry,
             b"/reboot": self.webReboot,
             b"/panels": self.webPanels,
+            b"/saveName": self.webSaveName
         }
 
     # special code called from main to set ALL routes
@@ -108,6 +113,13 @@ class WebProcessor(BasicModule):
     def webReboot(self, params):
         machine.reset()
 
+    def webSaveName(self, params):
+        name = unquote(params.get(b"name", None))
+        self.webSettings.Name = name
+        self.webSettings.write()
+        headers = okayHeader
+        data = name
+        return data, headers  
 
     
 
