@@ -1,11 +1,17 @@
-function read-com {
-    $port= new-Object System.IO.Ports.SerialPort COM5,115200,None,8,one
-    $port.Open()
-    do {
-        $line = $port.ReadLine()
-        Write-Host $line # Do stuff here
+Write-Output "Any key to exit"
+$port= new-Object System.IO.Ports.SerialPort COM3,115200,None,8,one
+$port.open()
+while (![Console]::KeyAvailable) {
+    try {
+        $line = $port.ReadExisting()
+        if ($line)
+        {
+            Write-Host -NoNewLine $line
+        }
     }
-    while ($port.IsOpen)
+    catch {
+        $port.Close()
+        $port.Open()
+    }
 }
-
-read-com
+$port.Close()
