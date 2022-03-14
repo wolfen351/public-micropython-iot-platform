@@ -69,6 +69,8 @@ try:
     web.setTelemetry(telemetry)
     web.setPanels(panels)
 
+    # Switch off the led before the loop, it will flash if it needs to
+    led.off()
     while True:
 
         # tick all modules
@@ -97,6 +99,7 @@ try:
                 runSafe(mod.processCommands, commands)
 
         # blink blue 
+        if (web.getLedEnabled()):
         ledOn = not ledOn
         if (ledOn):
             led.on()
