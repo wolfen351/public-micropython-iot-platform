@@ -175,7 +175,11 @@
                 }
                 // FORMAT AS SWITCH
                 else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
-                  panelItem.html('<input type="checkbox" id="scales" name="scales" checked>');
+                  if (s[key] == 'Enabled') {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales" checked="checked">');
+                  } else {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales">');
+                  }
                 }
                 // JUST DISPLAY IT
                 else {

@@ -100,11 +100,11 @@ try:
 
         # blink blue 
         if (web.getLedEnabled()):
-        ledOn = not ledOn
-        if (ledOn):
-            led.on()
-        else:
-            led.off()
+            ledOn = not ledOn
+            if (ledOn):
+                led.on()
+            else:
+                led.off()
 
 except KeyboardInterrupt:
     raise
