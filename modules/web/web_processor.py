@@ -54,7 +54,10 @@ class WebProcessor(BasicModule):
 
     #@micropython.native 
     def getTelemetry(self):
-        return { "name": self.webSettings.Name }
+        return { 
+            "name": self.webSettings.Name,
+            "onboard/led": self.webSettings.Led
+        }
 
     #@micropython.native 
     def processTelemetry(self, telemetry):
@@ -76,7 +79,8 @@ class WebProcessor(BasicModule):
             b"/telemetry": self.webTelemetry,
             b"/reboot": self.webReboot,
             b"/panels": self.webPanels,
-            b"/saveName": self.webSaveName
+            b"/saveName": self.webSaveName,
+            b"/switchLed": self.switchLed
         }
 
     # special code called from main to set ALL routes
@@ -93,6 +97,11 @@ class WebProcessor(BasicModule):
     #@micropython.native 
     def setPanels(self, panels):
         self.panels = panels
+
+    # special code called from main to see if Led must be on
+    #@micropython.native 
+    def getLedEnabled(self):
+        return self.webSettings.Led != b"Disabled"
 
     # return json telemetry to ui
     #@micropython.native 
@@ -121,7 +130,15 @@ class WebProcessor(BasicModule):
         data = name
         return data, headers  
 
-    
+    def switchLed(self, params):
+        headers = okayHeader
+        data = "ok"
+        if (self.webSettings.Led == b"Enabled"):
+            self.webSettings.Led = b"Disabled"
+        else:
+            self.webSettings.Led = b"Enabled"
+        self.webSettings.write()
+        return data, headers    
 
 
 

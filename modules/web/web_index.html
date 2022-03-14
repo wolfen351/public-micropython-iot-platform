@@ -166,13 +166,19 @@
                     panelItem.removeClass("on");
                     panelItem.addClass("off");
                   }
+                  // FORMAT AS CLASS
                 } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
                   val = panelItem.attr('data');
                   panelItem.removeClass('data_' + val);
                   panelItem.addClass('data_' + s[key]);
                   panelItem.attr("data", s[key]);
-                } else {
-                  // JUST DISPLAY IT
+                }
+                // FORMAT AS SWITCH
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
+                  panelItem.html('<input type="checkbox" id="scales" name="scales" checked>');
+                }
+                // JUST DISPLAY IT
+                else {
                   panelItem.html(s[key]);
                 }
 
