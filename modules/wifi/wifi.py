@@ -62,6 +62,8 @@ class WifiHandler(BasicModule):
                     self.rssi = self.sta_if.status('rssi')
                     self.lastrssitime = now
                     self.freeram = gc.mem_free()
+        #else:
+        #    SerialLog.log(self.ap_if.status('stations'))
 
     def getTelemetry(self):
         if (self.apMode):
