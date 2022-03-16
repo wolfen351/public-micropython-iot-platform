@@ -84,7 +84,8 @@ class HomeAssistantControl(BasicModule):
             # dont send duplicate messages
             if (self.messageStr != messageStr):
                 SerialLog.log("Sending HA MQTT: ", messageStr)
-                self.client.publish("%s/state" % self.homeAssistantSensorUrl, messageStr)
+                self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageStr)
+
                 self.messageStr = messageStr
 
                 if ("ledprimary" in telemetry):
@@ -99,7 +100,7 @@ class HomeAssistantControl(BasicModule):
                         },
                         "effect": telemetry["ledaction"]
                     }
-                    self.client.publish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
+                    self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
 
                 if ("ledsecondary" in telemetry):
                     state = {
@@ -113,7 +114,7 @@ class HomeAssistantControl(BasicModule):
                         },
                         "effect": telemetry["ledaction"]
                     }
-                    self.client.publish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
+                    self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
             self.telemetry = telemetry.copy()
 
     #@micropython.native
@@ -204,34 +205,34 @@ class HomeAssistantControl(BasicModule):
                 payload = self.get_basic_payload("Temperature", safeid, attr) 
                 payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr) 
                 payload.update({ "dev_cla": "humidity", "unit_of_meas": "%RH"})
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'rssi')):
                 payload = self.get_basic_payload("RSSI", safeid, attr) 
                 payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
                 
             if (key.startswith(b'ip')):
                 payload = self.get_basic_payload("IP", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ssid')):
                 payload = self.get_basic_payload("SSID", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ledprimaryb')):
                 payload = self.get_basic_payload("Primary Colour", safeid, attr) 
@@ -250,7 +251,7 @@ class HomeAssistantControl(BasicModule):
                         "stat_t": "~/ledprimaryrgbstate",
                 })
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
             if (key.startswith(b'ledsecondaryb')):
                 payload = self.get_basic_payload("Secondary Colour", safeid, attr) 
                 payload.pop("val_tpl")
@@ -268,7 +269,7 @@ class HomeAssistantControl(BasicModule):
                         "stat_t": "~/ledsecondaryrgbstate",
                 })
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-                self.client.publish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
 
 
 
@@ -305,6 +306,14 @@ class HomeAssistantControl(BasicModule):
     def getsettings(self):
         s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
         return s
+
+    def safePublish(self, topic, message):
+        try:
+            if (self.sta_if.isconnected()):
+                self.client.publish(topic, message)
+        except OSError as e:
+            self.connect_and_subscribe()
+            
 
 
     
