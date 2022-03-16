@@ -105,6 +105,9 @@ try:
                 led.on()
             else:
                 led.off()
+        else:
+            if (ledOn):
+                led.off()
 
 except KeyboardInterrupt:
     raise

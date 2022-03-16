@@ -29,9 +29,10 @@ class Dht22Monitor(BasicModule):
 
     @micropython.native 
     def getTelemetry(self):
-        telemetry = {}
-        telemetry.update({"temperature/dht22":self.currentT})
-        telemetry.update({"humidity/dht22":self.currentH})
+        telemetry = {
+            "temperature/dht22" : self.currentT,
+            "humidity/dht22" : self.currentH
+        }
         return telemetry
 
     @micropython.native 
