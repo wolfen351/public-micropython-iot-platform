@@ -25,17 +25,28 @@
     <div class="title">System</div>
 
     <div class="line">
-      <div class="lineitem">Version</div>
-      <div dataitem="version"></div>
+        <div class="lineitem">Version</div>
+        <div dataitem="version"></div>
     </div>
 
     <div class="line">
         <div class="lineitem">Free RAM</div>
         <div dataitem="freeram"></div>
         <div>&nbsp;bytes</div>
-      </div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Status LED</div>
+        <div dataitem="onboard/led" datadisplay="switch" onclick="switchLed()"></div>
+    </div>
 
     <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
     <input type="button" class="navbtn" value="Log" onclick="window.location='/log'"></input>
 
 </div>
+
+<script>
+    function switchLed() {
+        post("/switchLed");
+    }
+</script>

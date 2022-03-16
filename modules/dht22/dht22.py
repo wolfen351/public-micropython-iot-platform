@@ -4,7 +4,7 @@ import dht
 import time
 from serial_log import SerialLog
 
-class Dht11Monitor(BasicModule):
+class Dht22Monitor(BasicModule):
 
     currentT = 0
     currentH = 0
@@ -15,7 +15,7 @@ class Dht11Monitor(BasicModule):
     @micropython.native 
     def start(self):
         self.ts_pin = machine.Pin(16)
-        self.dht = dht.DHT11(self.ts_pin)
+        self.dht = dht.DHT22(self.ts_pin)
 
     @micropython.native 
     def tick(self):
@@ -29,9 +29,10 @@ class Dht11Monitor(BasicModule):
 
     @micropython.native 
     def getTelemetry(self):
-        telemetry = {}
-        telemetry.update({"temperature/dht11":self.currentT})
-        telemetry.update({"humidity/dht11":self.currentH})
+        telemetry = {
+            "temperature/dht22" : self.currentT,
+            "humidity/dht22" : self.currentH
+        }
         return telemetry
 
     @micropython.native 
@@ -53,7 +54,7 @@ class Dht11Monitor(BasicModule):
 
     @micropython.native 
     def getIndexFileName(self):
-        return { "dht11" : "/modules/dht11/dht11_index.html" }
+        return { "dht22" : "/modules/dht22/dht22_index.html" }
 
     # Internal code here
 
