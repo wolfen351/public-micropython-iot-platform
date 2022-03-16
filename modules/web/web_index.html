@@ -106,7 +106,17 @@
 
 <body>
   <h1>Main Status</h1>
-
+  <h2 id="namero"><span class="nameshow" dataitem="name" style="width: unset;">Sensor</span><span
+      style="margin-left:10px; width: unset" onclick="$('#namero').hide();$('#namerw').show();"><svg
+        xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+        <path
+          d="M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z" />
+      </svg></span></h2>
+  <h2 id="namerw" style="display: none;"><input type="text" class="nameedit" value="Name Here" id="nameval" /><span
+      onclick="saveName()"><svg xmlns="http://www.w3.org/2000/svg" style="margin-left:10px" width="16" height="16"
+        viewBox="0 0 24 24">
+        <path d="M15.003 3h2.997v5h-2.997v-5zm8.997 1v20h-24v-24h20l4 4zm-19 5h14v-7h-14v7zm16 4h-18v9h18v-9z" />
+      </svg></span></h2>
   <br />
   <div id='panels' class="grid">
   </div>
@@ -156,14 +166,28 @@
                     panelItem.removeClass("on");
                     panelItem.addClass("off");
                   }
+                  // FORMAT AS CLASS
                 } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
                   val = panelItem.attr('data');
                   panelItem.removeClass('data_' + val);
                   panelItem.addClass('data_' + s[key]);
                   panelItem.attr("data", s[key]);
-                } else {
-                  // JUST DISPLAY IT
+                }
+                // FORMAT AS SWITCH
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
+                  if (s[key] == 'Enabled') {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales" checked="checked">');
+                  } else {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales">');
+                  }
+                }
+                // JUST DISPLAY IT
+                else {
                   panelItem.html(s[key]);
+                }
+
+                if ($("#nameval").val() === "Name Here") {
+                  $("#nameval").val(s.name);
                 }
               }
               else {
@@ -183,6 +207,12 @@
     function post(url) {
       fetch(url, { method: 'GET' })
         .then(response => response.text())
+    }
+
+    function saveName() {
+      $('#namerw').hide();
+      $('#namero').show();
+      post("/saveName?name=" + $("#nameval").val());
     }
   </script>
 

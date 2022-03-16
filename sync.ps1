@@ -37,7 +37,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         $dir = ""
         for ($j = 0; $j -lt $bits.Count - 1; $j++) {
             if ($j -gt 0) {
-                $dir = $dir + "\\" + $bits[$j]
+                $dir = $dir + "/" + $bits[$j]
             }
             else {
                 $dir = $bits[$j]
@@ -47,7 +47,9 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         }
 
         # SEND THE FILE
-        ampy --port COM3 put "$($f.ToString().Replace("\\", "\\\\"))" "$($f.ToString().Replace("\\", "\\\\"))"
+        $fn = "$($f)"
+        $fnn = $fn -replace "\\", "/"
+        ampy --port COM3 put $fnn $fnn
         if (!($?)) {
             Write-Output "Failed."
             exit 3
