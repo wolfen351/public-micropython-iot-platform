@@ -16,11 +16,9 @@ $MAX = Get-Content -Path .\lastedit.dat
 $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
-# increment the version
-./bump_version.ps1
-
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, version, *.crt, *.key
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key
+$sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
     $LE = (Get-ChildItem $f).LastWriteTimeUtc | Get-Date -UFormat %s
@@ -50,6 +48,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         $fn = "$($f)"
         $fnn = $fn -replace "\\", "/"
         ampy --port COM3 put $fnn $fnn
+        $sent++
         if (!($?)) {
             Write-Output "Failed."
             exit 3
@@ -57,10 +56,17 @@ for ($i = 0; $i -lt $files.Count; $i++) {
     }
 }
 
-# record the last time a file was edited
-$MAXEDITTIME = [math]::Round($MAXEDITTIME)
-Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
-ampy --port COM3 put lastedit.dat
+if ($sent -gt 0) {
+    # increment the version
+    ./bump_version.ps1
+
+    # record the last time a file was edited
+    $MAXEDITTIME = [math]::Round($MAXEDITTIME)
+    Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
+    ampy --port COM3 put lastedit.dat
+} else {
+    Write-Output "No changes since last sync."
+}
 
 Write-Output "Rebooting..."
 $port= new-Object System.IO.Ports.SerialPort COM3,115200,None,8,one
