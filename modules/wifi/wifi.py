@@ -20,7 +20,7 @@ class WifiHandler(BasicModule):
         self.ap_if = network.WLAN(network.AP_IF)
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.essid = "%s-%s" % (basicSettings['ShortName'],
-                                self.client_id.decode('ascii'))
+                                self.client_id.decode('ascii')[-4:])
         self.rssi = 0
         self.lastrssitime = 0
         self.version = "unknown"
@@ -62,6 +62,8 @@ class WifiHandler(BasicModule):
                     self.rssi = self.sta_if.status('rssi')
                     self.lastrssitime = now
                     self.freeram = gc.mem_free()
+
+
         #else:
         #    SerialLog.log(self.ap_if.status('stations'))
 

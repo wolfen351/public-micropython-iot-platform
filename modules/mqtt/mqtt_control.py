@@ -60,13 +60,13 @@ class MqttControl(BasicModule):
         if (self.client != None):
             stuffToPost = []
             
-            for attr, value in self.telemetry.items():
-                if (value != telemetry[attr]):
+            for attr, value in telemetry.items():
+                if (value != self.telemetry.get(attr)):
                     stuffToPost.append([attr, telemetry[attr]])
 
             if (len(stuffToPost) > 0):
                 for bit in stuffToPost:
-                    self.client.publish(self.topic_pub + b"/%s" % (bit[0]), str(bit[1]))
+                    self.client.publish(self.topic_pub + b"/%s" % (bit[0]), str(bit[1]), True)
 
             self.telemetry = telemetry.copy()
 
@@ -112,6 +112,8 @@ class MqttControl(BasicModule):
         self.client.connect()
         self.client.subscribe(self.topic_sub)
         SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))        
+        # resend all telemetry on connect
+        self.telemetry = {}
 
     def settings(self, settingsVals):
         # Apply the new settings
