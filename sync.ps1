@@ -1,6 +1,9 @@
-Remove-Item ./lastedit.dat
+# Globals
+$port = "COM5"
 
-ampy --port COM3 get lastedit.dat > lastedit.dat
+
+Remove-Item ./lastedit.dat
+ampy --port $port get lastedit.dat > lastedit.dat
 
 if ((Get-Item "lastedit.dat").length -eq 0) {
     Write-Output "lastedit.dat does not exist, making a new one"
@@ -41,13 +44,13 @@ for ($i = 0; $i -lt $files.Count; $i++) {
                 $dir = $bits[$j]
             }
 
-            ampy --port COM3 mkdir $dir > $null  2>&1
+            ampy --port $port mkdir $dir > $null  2>&1
         }
 
         # SEND THE FILE
         $fn = "$($f)"
         $fnn = $fn -replace "\\", "/"
-        ampy --port COM3 put $fnn $fnn
+        ampy --port $port put $fnn $fnn
         $sent++
         if (!($?)) {
             Write-Output "Failed."
@@ -59,18 +62,18 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 if ($sent -gt 0) {
     # increment the version
     ./bump_version.ps1
-    ampy --port COM3 put version
+    ampy --port $port put version
 
     # record the last time a file was edited
     $MAXEDITTIME = [math]::Round($MAXEDITTIME)
     Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
-    ampy --port COM3 put lastedit.dat
+    ampy --port $port put lastedit.dat
 } else {
     Write-Output "No changes since last sync."
 }
 
 Write-Output "Rebooting..."
-$port= new-Object System.IO.Ports.SerialPort COM3,115200,None,8,one
+$port= new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
 $port.open()
 $port.WriteLine("$([char] 2)")
 $port.WriteLine("$([char] 3)")
@@ -80,19 +83,5 @@ $port.WriteLine("machine.reset()\r\n")
 $port.Close()
 Start-Sleep 1
 Write-Output "Any key to exit"
-$port= new-Object System.IO.Ports.SerialPort COM3,115200,None,8,one
-$port.open()
-while (![Console]::KeyAvailable) {
-    try {
-        $line = $port.ReadExisting()
-        if ($line)
-        {
-            Write-Host -NoNewLine $line
-        }
-    }
-    catch {
-        $port.Close()
-        $port.Open()
-    }
-}
-$port.Close()
+
+.\terminal.ps1

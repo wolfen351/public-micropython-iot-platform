@@ -41,7 +41,7 @@ class LightControl(BasicModule):
     def __init__(self, basicSettings):
         self.calculateTimes()
 
-    @micropython.native 
+    #@micropython.native 
     def start(self):
         # Default all the lights to off
         self.commands.append(b"/mosfet/alloff")
@@ -57,7 +57,7 @@ class LightControl(BasicModule):
         self.lastrun = time.ticks_ms()
         self.calculateTimes()
 
-    @micropython.native 
+    #@micropython.native 
     def tick(self):
         # Main Loop
         Trigger1 = self.T1.value()
@@ -94,7 +94,7 @@ class LightControl(BasicModule):
         #print("T1=", Trigger1, "T2=", Trigger2, " - (", self.LightOnAt[0], self.LightOffAt[0], ") (", self.LightOnAt[1], self.LightOffAt[1], ") (", self.LightOnAt[2], self.LightOffAt[2], ") (", self.LightOnAt[3], self.LightOffAt[3], ")")
         #sleep(100)
 
-    @micropython.native 
+    #@micropython.native 
     def getTelemetry(self):
         return { 
             "light1" : self.Modes[0], 
@@ -105,23 +105,23 @@ class LightControl(BasicModule):
             "trigger2" : 1-self.Triggers[1], 
             }
 
-    @micropython.native 
+    #@micropython.native 
     def processTelemetry(self, telemetry):
         pass
 
-    @micropython.native 
+    #@micropython.native 
     def getCommands(self):
         var = self.commands
         self.commands = []
         return var
 
-    @micropython.native 
+    #@micropython.native 
     def processCommands(self, commands):
         for command in commands:
             if (command == b"/button/onboard/1"):
                 self.SoftT1 = 1
 
-    @micropython.native 
+    #@micropython.native 
     def getRoutes(self):
         return {
             b"/4light/on": self.webCommandOn,
@@ -132,20 +132,20 @@ class LightControl(BasicModule):
             b"/lightloadsettings": self.webLoadSettings
         }
 
-    @micropython.native 
+    #@micropython.native 
     def getIndexFileName(self):
         return { "lights4": "/modules/fourlights/light_index.html" }
 
     # Internal Methods
 
-    @micropython.native 
+    #@micropython.native 
     def webLoadSettings(self, params):
         settings =  self.getsettings()
         headers = okayHeader
         data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
         return data, headers
 
-    @micropython.native 
+    #@micropython.native 
     def webSaveSettings(self, params):
         # Read form params
         TimeOn = unquote(params.get(b"TimeOn", None))
@@ -159,7 +159,7 @@ class LightControl(BasicModule):
         return b"", headers
 
 
-    @micropython.native 
+    #@micropython.native 
     def webCommandOn(self, params):
         headers = okayHeader
         data = b""
@@ -167,7 +167,7 @@ class LightControl(BasicModule):
         self.command(1, val)
         return data, headers  
 
-    @micropython.native 
+    #@micropython.native 
     def webCommandOff(self, params):
         headers = okayHeader
         data = b""
@@ -175,7 +175,7 @@ class LightControl(BasicModule):
         self.command(0, val)
         return data, headers  
 
-    @micropython.native 
+    #@micropython.native 
     def webCommandAuto(self, params):
         headers = okayHeader
         data = b""
@@ -183,7 +183,7 @@ class LightControl(BasicModule):
         self.command(2, val)
         return data, headers  
 
-    @micropython.native 
+    #@micropython.native 
     def calculateTimes(self):
         # Convert to number of loops using a timefactor
         self.TimeOn = self.TimeOnSetting
@@ -199,16 +199,16 @@ class LightControl(BasicModule):
         self.Period3 = self.Delay0 + self.Delay1 + self.Delay2 + self.Delay3
         self.Periods = [self.Period0, self.Period1, self.Period2, self.Period3]
 
-    @micropython.native 
+    #@micropython.native 
     def status(self):
         return self.Modes
 
-    @micropython.native 
+    #@micropython.native 
     def triggers(self):
         return self.Triggers
 
     # override normal behaviour Function=0-Off 1-On 2-Auto; Num  is 0-3
-    @micropython.native 
+    #@micropython.native 
     def command(self, function, num):
         if (function == 0):
             self.Modes[num] = 0 #off
@@ -223,7 +223,7 @@ class LightControl(BasicModule):
         if (function == 2):
             self.Modes[num] = 2 #auto
 
-    @micropython.native 
+    #@micropython.native 
     def settings(self, settingsVals):
         self.TimeOnSetting = settingsVals[0]
         self.Delay0Setting = settingsVals[1]
@@ -242,13 +242,13 @@ class LightControl(BasicModule):
         SerialLog.log(lightSettings)
         lightSettings.write()
     
-    @micropython.native 
+    #@micropython.native 
     def getsettings(self):
         s = (self.TimeOnSetting, self.Delay0Setting, self.Delay1Setting, self.Delay2Setting, self.Delay3Setting)
         return s
 
     # Prevent a number from dropping below -1
-    @micropython.native 
+    #@micropython.native 
     def clampTo(self, old, new):
         if (old > 0 and new < 0):
             return 0
@@ -257,7 +257,7 @@ class LightControl(BasicModule):
         return new
 
     # Make the number at most the desired value, deal with -1 
-    @micropython.native 
+    #@micropython.native 
     def atMost(self, current, desired):
         if (desired <= current):
             return desired
@@ -266,14 +266,14 @@ class LightControl(BasicModule):
         return current
 
     # Make the number at least the desired value
-    @micropython.native 
+    #@micropython.native 
     def atLeast(self, current, desired):
         if (desired >= current):
             return desired
         return current
 
     # If a timer reaches 0 then set the light on or off
-    @micropython.native 
+    #@micropython.native 
     def setLight(self, OnAt, OffAt, Light, Mode):
         if (Mode == 0): # off
             if (self.Lights[Light-1] != 0):
@@ -294,7 +294,7 @@ class LightControl(BasicModule):
                 self.Lights[Light-1] = 0
 
     # Subtract 1 from all the timer calcs, dont let them go below -1
-    @micropython.native 
+    #@micropython.native 
     def subtract(self, OnAt, OffAt, diff):
         return self.clampTo(OnAt, OnAt - diff), self.clampTo(OffAt, OffAt - diff)
 
