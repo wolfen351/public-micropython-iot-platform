@@ -57,6 +57,13 @@ class Touch(object):
             int_pin.irq(trigger=int_pin.IRQ_FALLING | int_pin.IRQ_RISING,
                         handler=self.int_press)
 
+    def get_rawtouch(self):
+        sample = self.raw_touch()  # get a touch
+        if sample is None:
+            return None
+        return self.normalize(sample[0], sample[1])
+
+
     def get_touch(self):
         """Take multiple samples to get accurate touch reading."""
         timeout = 0.50  # set timeout to 2 seconds

@@ -25,7 +25,7 @@ class TouchScreen(BasicModule):
         self.xpt = Touch(self.spi, cs=Pin(18))
     
     def tick(self):
-        t = self.xpt.get_touch()
+        t = self.xpt.get_rawtouch()
         if (t is not None):
             self.display.draw_text(40, 40, str(t), self.robotron, color565(255, 255, 255), background=color565(64, 0, 255))
 
