@@ -17,7 +17,7 @@ $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
@@ -31,7 +31,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         Write-Output "Sending $f"
 
         # MAKE SURE PATH EXISTS ON DEVICE
-        $bits = $f.ToString().Split('\\')
+        $bits = $f.ToString() -split '\\'
         $dir = ""
         for ($j = 0; $j -lt $bits.Count - 1; $j++) {
             if ($j -gt 0) {
