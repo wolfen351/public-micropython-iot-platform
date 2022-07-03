@@ -1,4 +1,5 @@
 # Main 
+
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
@@ -32,6 +33,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.touchscreen.touchscreen import TouchScreen
     import sys
     import gc
     
@@ -51,6 +53,7 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
+        TouchScreen(Basic.Settings),
         web
     ]
     
