@@ -1,5 +1,5 @@
 Write-Output "Any key to exit"
-$port= new-Object System.IO.Ports.SerialPort COM3,115200,None,8,one
+$port= new-Object System.IO.Ports.SerialPort COM5,115200,None,8,one
 $port.open()
 while (![Console]::KeyAvailable) {
     try {
