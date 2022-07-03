@@ -26,10 +26,17 @@ class LedStripControl(BasicModule):
         self.primary = ledStripSettings.ledColorPrimary
         self.secondary = ledStripSettings.ledColorSecondary
         self.brightness = ledStripSettings.ledBrightness
+        self.whiteOverride = False
 
     def tick(self):
         ms = time.ticks_ms()
         perc = (ms % self.duration) / self.duration
+
+        if (self.whiteOverride):
+            if (self.prevaction != b"white"):
+                self.maxwhite()
+                self.prevaction = b"white"
+            return
 
         if (self.action == b"none" and self.prevaction != b"none"):
             self.fullstrip(self.primary)
@@ -174,6 +181,10 @@ class LedStripControl(BasicModule):
                         self.setcolor(self.primary, newSecondary)
                     elif (cc == "effect"):
                         self.setaction(bytes(val, 'ascii'))                    
+            if (b"/button/onboard/1" in c):
+                SerialLog.log("WHITE COMMAND")
+                self.whiteOverride = not self.whiteOverride
+                self.prevaction = b"clear"
 
     def getRoutes(self):
         return { 
@@ -216,6 +227,11 @@ class LedStripControl(BasicModule):
     def saveSettings(self):
         settings = LedStripSettings(self.action, self.primary, self.secondary, self.brightness)
         settings.write()
+
+    def maxwhite(self):
+        for i in range(self.ledCount):
+            self.np[i] = self.hex_to_rgb("ffffff")
+        self.np.write()
 
     def fullstrip(self, color):
         col = self.applybrightness(self.hex_to_rgb(color))

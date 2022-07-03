@@ -1,4 +1,5 @@
 # Main 
+
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
@@ -14,15 +15,15 @@ def runSafe(cmd, p1 = None):
 try:
     # Turn on the LED to show we are alive
     from machine import Pin
-    led = Pin(3, Pin.OUT)
+    led = Pin(15, Pin.OUT)
     led.on()
 
     # set the CPU frequency to 240 MHz
     from serial_log import SerialLog
     SerialLog.log()
     SerialLog.log("CPU 240Mhz")
-    #import machine
-    #machine.freq(240000000) 
+    import machine
+    machine.freq(240000000) 
 
     # Import other modules needed
     SerialLog.log("Loading code..")
@@ -32,8 +33,6 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.gps.gps_control import GPSControl
-    from modules.dht22.dht22 import Dht22Monitor
     import sys
     import gc
     
@@ -53,8 +52,7 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        web,
-        Dht22Monitor(Basic.Settings)
+        web
     ]
     
     # start all the modules up

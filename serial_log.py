@@ -7,22 +7,22 @@ class SerialLog(object):
     logHistoryData = []
 
     @staticmethod
-    #@micropython.native    
+    @micropython.native    
     def enable():
         SerialLog.enabled = True
 
     @staticmethod
-    #@micropython.native    
+    @micropython.native    
     def disable():
         SerialLog.enabled = False
 
     @staticmethod
-    #@micropython.native    
+    @micropython.native    
     def logHistory():
         return ujson.dumps(SerialLog.logHistoryData)
 
     @staticmethod
-    #@micropython.native    
+    @micropython.native    
     def log(message = "", message2 = None, message3 = None, message4 = None):
 
         if (len(SerialLog.logHistoryData) > 40):

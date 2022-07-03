@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'GPS',
-    'ShortName': 'GPS',
+    'Name': 'Master Template',
+    'ShortName': 'Master',
 }

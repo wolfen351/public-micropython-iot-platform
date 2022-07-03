@@ -41,37 +41,37 @@ class WebProcessor(BasicModule):
         self.telemetry = {}
         self.panels = {}
 
-    #@micropython.native 
+    @micropython.native 
     def start(self):
         self.server = WebServer()
         self.server.start()
         self.webSettings = WebSettings()
         self.webSettings.load()
 
-    #@micropython.native 
+    @micropython.native 
     def tick(self):
         self.server.tick()
 
-    #@micropython.native 
+    @micropython.native 
     def getTelemetry(self):
         return { 
             "name": self.webSettings.Name,
             "onboard/led": self.webSettings.Led
         }
 
-    #@micropython.native 
+    @micropython.native 
     def processTelemetry(self, telemetry):
         pass
 
-    #@micropython.native 
+    @micropython.native 
     def getCommands(self):
         return []
 
-    #@micropython.native 
+    @micropython.native 
     def processCommands(self, commands):
         pass
 
-    #@micropython.native 
+    @micropython.native 
     def getRoutes(self):
         return {
             b"/": b"/modules/web/web_index.html",
@@ -84,45 +84,45 @@ class WebProcessor(BasicModule):
         }
 
     # special code called from main to set ALL routes
-    #@micropython.native 
+    @micropython.native 
     def setRoutes(self, routes):
         self.server.setRoutes(routes)
 
     # special code called from main to set ALL telemetry
-    #@micropython.native 
+    @micropython.native 
     def setTelemetry(self, telemetry):
         self.telemetry = telemetry
 
     # special code called from main to set ALL panels
-    #@micropython.native 
+    @micropython.native 
     def setPanels(self, panels):
         self.panels = panels
 
     # special code called from main to see if Led must be on
-    #@micropython.native 
+    @micropython.native 
     def getLedEnabled(self):
         return self.webSettings.Led != b"Disabled"
 
     # return json telemetry to ui
-    #@micropython.native 
+    @micropython.native 
     def webTelemetry(self, params):
         headers = okayHeader
         data = json.dumps(self.telemetry)
         return data, headers  
 
     # return json panel list to ui
-    #@micropython.native 
+    @micropython.native 
     def webPanels(self, params):
         headers = okayHeader
         data = json.dumps(self.panels)
         return data, headers  
 
     # Simple reboot
-    #@micropython.native 
+    @micropython.native 
     def webReboot(self, params):
         machine.reset()
 
-    #@micropython.native 
+    @micropython.native 
     def webSaveName(self, params):
         name = unquote(params.get(b"name", None))
         self.webSettings.Name = name
@@ -131,7 +131,7 @@ class WebProcessor(BasicModule):
         data = name
         return data, headers  
 
-    #@micropython.native 
+    @micropython.native 
     def switchLed(self, params):
         headers = okayHeader
         data = "ok"
