@@ -15,7 +15,7 @@ def runSafe(cmd, p1 = None):
 try:
     # Turn on the LED to show we are alive
     from machine import Pin
-    led = Pin(15, Pin.OUT)
+    led = Pin(3, Pin.OUT)
     led.on()
 
     # set the CPU frequency to 240 MHz
