@@ -1,6 +1,5 @@
 # Globals
-$port = "COM5"
-
+$port = "COM3"
 
 Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat
