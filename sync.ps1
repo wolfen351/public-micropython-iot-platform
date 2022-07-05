@@ -19,7 +19,7 @@ $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]

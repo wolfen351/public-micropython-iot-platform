@@ -14,30 +14,20 @@ class AcRemote(BasicModule):
     spi = None
     display = None
     xpt = None
-    font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57)
+    font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57, 32, 97, 228)
+    mode = "OFF"
+    detectedTemp = 23
+    setpoint = 23
 
     def __init__(self, basicSettings):
         pass
 
     def start(self):
         # High Speed SPI for drawing
-        self.spi = SPI(1, baudrate=100000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+        self.spi = SPI(1, baudrate=40000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
-        self.display.draw_rectangle(0,0,144,60,color565(255,255,0)) # Plus Button
-        self.display.fill_rectangle(0,60,144,200,color565(0,0,255)) # Temp Section
-        self.display.draw_rectangle(0,260,144,60,color565(255,255,0)) # Minus Button
-        self.display.draw_rectangle(144,0,96,80,color565(70,70,70)) # Power Button
-        self.display.draw_rectangle(144,80,96,80,color565(80,80,80)) # Heat Button
-        self.display.draw_rectangle(144,160,96,80,color565(90,90,90)) # Dry Button
-        self.display.draw_rectangle(144,240,96,80,color565(100,100,100)) # Cool Button
-
-        self.display.fill_rectangle(65,270,15,40,color565(255,255,255)) # Minus
-        self.display.fill_rectangle(65,10,15,40,color565(255,255,255)) # Plus Across
-        self.display.fill_rectangle(52,22,40,15,color565(255,255,255)) # Plus Down
-
-        self.display.draw_text(20, 240, "20*C", self.font, color565(255, 255, 255), background=color565(0, 0, 0), landscape=True)
-
+        self.display.draw_image('modules/ac_remote/backgroundsmall.raw',0,0,240,320)
 
         # Low speed SPI for touch
         self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
@@ -46,7 +36,56 @@ class AcRemote(BasicModule):
     def tick(self):
         t = self.xpt.get_rawtouch()
         if (t is not None):
-            self.display.fill_circle(t[0], t[1], 10, color565(255,0,0))
+            mul = 0
+            #self.display.fill_circle(t[0], t[1], 10, color565(255,0,0))
+            if t[0] > 144:
+                if t[1] <= 80: # power
+                    mode = "OFF"
+                    mul = 0
+                if t[1] > 80 and t[1] <= 160: # heat
+                    mode = "HEAT"
+                    mul = 1
+                if t[1] > 160 and t[1] <= 240: # dry
+                    mode = "DRY"
+                    mul = 2
+                if t[1] > 240: # cool
+                    mode = "COOL"
+                    mul = 3
+                # Clear existing
+                self.display.draw_line(238,0,238,319,color565(0,0,0))
+                self.display.draw_line(239,0,239,319,color565(0,0,0))
+                # draw New
+                self.display.draw_line(238,80*mul,238,79+80*mul,color565(0,255,0))
+                self.display.draw_line(239,80*mul,239,79+80*mul,color565(0,255,0))
+            else:
+                if t[1] < 60: # Temp -
+                    self.display.fill_circle(t[0], t[1], 10, color565(255,0,0))
+                    self.setpoint = self.setpoint - 1
+                    if self.setpoint < 10:
+                        self.setpoint = 10
+                if t[1] > 260: # Temp +
+                    self.display.fill_circle(t[0], t[1], 10, color565(255,255,0)) 
+                    self.setpoint = self.setpoint + 1
+                    if self.setpoint > 45:
+                      self.setpoint = 45
+                self.draw_setpoint()
+                self.draw_detectedTemp()
+
+    def draw_setpoint(self):
+        tens = (self.setpoint // 10) % 10 
+        ones = self.setpoint % 10 
+        self.spi = SPI(1, baudrate=40000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+        self.display.draw_image('modules/ac_remote/big'+str(tens)+'.raw',100,200,72,47)
+        self.display.draw_image('modules/ac_remote/big'+str(ones)+'.raw',100,153,72,47)
+        self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+
+    def draw_detectedTemp(self):
+        tens = (self.detectedTemp // 10) % 10 
+        ones = self.detectedTemp % 10 
+        self.spi = SPI(1, baudrate=40000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+        self.display.draw_image('modules/ac_remote/big'+str(tens)+'.raw',20,200,72,47)
+        self.display.draw_image('modules/ac_remote/big'+str(ones)+'.raw',20,153,72,47)
+        self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
 
     def getTelemetry(self):
         telemetry = {}
