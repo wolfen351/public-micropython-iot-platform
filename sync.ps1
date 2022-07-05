@@ -61,7 +61,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 if ($sent -gt 0) {
     # increment the version
     ./bump_version.ps1
-    ampy --port $port put version
+    ampy --baud 1152000 --port $port put version
 
     # record the last time a file was edited
     $MAXEDITTIME = [math]::Round($MAXEDITTIME)

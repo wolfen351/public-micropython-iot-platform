@@ -14,7 +14,7 @@ class AcRemote(BasicModule):
     spi = None
     display = None
     xpt = None
-    font = XglcdFont('modules/touchscreen/fonts/EspressoDolce18x24.c', 18, 24)
+    font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57)
 
     def __init__(self, basicSettings):
         pass
