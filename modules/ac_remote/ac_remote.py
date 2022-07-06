@@ -1,4 +1,5 @@
 
+from time import sleep
 from modules.basic.basic_module import BasicModule
 from modules.touchscreen.ili9341 import Display, color565
 from modules.touchscreen.xglcd_font import XglcdFont
@@ -59,12 +60,10 @@ class AcRemote(BasicModule):
                 self.display.draw_line(239,80*mul,239,79+80*mul,color565(0,255,0))
             else:
                 if t[1] < 60: # Temp -
-                    self.display.fill_circle(t[0], t[1], 10, color565(255,0,0))
                     self.setpoint = self.setpoint - 1
                     if self.setpoint < 10:
                         self.setpoint = 10
                 if t[1] > 260: # Temp +
-                    self.display.fill_circle(t[0], t[1], 10, color565(255,255,0)) 
                     self.setpoint = self.setpoint + 1
                     if self.setpoint > 45:
                       self.setpoint = 45
@@ -75,8 +74,8 @@ class AcRemote(BasicModule):
         tens = (self.setpoint // 10) % 10 
         ones = self.setpoint % 10 
         self.spi = SPI(1, baudrate=40000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
-        self.display.draw_image('modules/ac_remote/big'+str(tens)+'.raw',100,200,72,47)
-        self.display.draw_image('modules/ac_remote/big'+str(ones)+'.raw',100,153,72,47)
+        self.display.draw_image('modules/ac_remote/small'+str(tens)+'.raw',105,170,36,24)
+        self.display.draw_image('modules/ac_remote/small'+str(ones)+'.raw',105,145,36,24)
         self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
 
     def draw_detectedTemp(self):
