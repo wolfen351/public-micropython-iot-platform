@@ -81,6 +81,5 @@ $port.WriteLine("import machine\r\n")
 $port.WriteLine("machine.reset()\r\n")
 $port.Close()
 Start-Sleep 1
-Write-Output "Any key to exit"
 
-.\terminal.ps1
+python -m serial.tools.miniterm COM3 115200

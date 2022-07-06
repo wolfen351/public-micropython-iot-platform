@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'Master Template',
-    'ShortName': 'Master',
+    'Name': 'AC Control',
+    'ShortName': 'ac_control',
 }

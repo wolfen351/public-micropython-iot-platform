@@ -87,7 +87,10 @@ class AcRemote(BasicModule):
         self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
 
     def getTelemetry(self):
-        telemetry = {}
+        telemetry = {
+            "ac_mode": self.mode,
+            "ac_setpoint": self.setpoint
+        }
         return telemetry
 
     def processTelemetry(self, telemetry):
