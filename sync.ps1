@@ -19,7 +19,7 @@ $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
@@ -61,7 +61,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 if ($sent -gt 0) {
     # increment the version
     ./bump_version.ps1
-    ampy --port $port put version
+    ampy --baud 1152000 --port $port put version
 
     # record the last time a file was edited
     $MAXEDITTIME = [math]::Round($MAXEDITTIME)
@@ -81,6 +81,5 @@ $port.WriteLine("import machine\r\n")
 $port.WriteLine("machine.reset()\r\n")
 $port.Close()
 Start-Sleep 1
-Write-Output "Any key to exit"
 
-.\terminal.ps1
+python -m serial.tools.miniterm COM3 115200

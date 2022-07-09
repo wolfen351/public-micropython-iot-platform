@@ -20,6 +20,7 @@ class MqttControl(BasicModule):
         self.basicSettings = basicSettings
         self.telemetry = {}
         self.client = None
+        self.commands = []
 
     def start(self):
         settings = MqttSettings()
@@ -72,7 +73,9 @@ class MqttControl(BasicModule):
 
 
     def getCommands(self):
-        return []
+        c = self.commands
+        self.commands = []
+        return c
 
     def processCommands(self, commands):
         pass
@@ -105,6 +108,7 @@ class MqttControl(BasicModule):
 
     def sub_cb(self, topic, msg):
         SerialLog.log("MQTT Command Received: ", topic, msg)
+        self.commands.append(topic + b"/" + msg)
 
     def connect_and_subscribe(self):
         self.client = MQTTClient(b"mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
