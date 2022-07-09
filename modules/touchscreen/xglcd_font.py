@@ -21,9 +21,9 @@ class XglcdFont(object):
     """
 
     # Dict to tranlate bitwise values to byte position
-    BIT_POS = {1: 0, 2: 2, 4: 4, 8: 6, 16: 8, 32: 10, 64: 12, 128: 14, 256: 16}
+    BIT_POS = {1: 0, 2: 2, 4: 4, 8: 6, 16: 8, 32: 10, 64: 12, 128: 14, 256: 16, 512: 18}
 
-    def __init__(self, path, width, height, start_letter=32, letter_count=96):
+    def __init__(self, path, width, height, start_letter=32, letter_count=96, bytes_per_letter=0):
         """Constructor for X-GLCD Font object.
 
         Args:
@@ -32,13 +32,16 @@ class XglcdFont(object):
             height (int): Height in pixels of each letter
             start_letter (int): First ACII letter.  Default is 32.
             letter_count (int): Total number of letters.  Default is 96.
+            bytes_per_letter (int): Override the bytes per letter calc
         """
         self.width = width
         self.height = height
         self.start_letter = start_letter
         self.letter_count = letter_count
-        self.bytes_per_letter = (floor(
-            (self.height - 1) / 8) + 1) * self.width + 1
+        if (bytes_per_letter == 0):
+            self.bytes_per_letter = (floor((self.height - 1) / 8) + 1) * self.width + 1
+        else:
+            self.bytes_per_letter = bytes_per_letter
         self.__load_xglcd_font(path)
 
     def __load_xglcd_font(self, path):
@@ -66,8 +69,9 @@ class XglcdFont(object):
                 if line.endswith(','):
                     line = line[0:len(line) - 1]
                 # Convert hex strings to bytearray and insert in to letters
-                mv[offset: offset + bytes_per_letter] = bytearray(
+                fontlinedata = bytearray(
                     int(b, 16) for b in line.split(','))
+                mv[offset: offset + bytes_per_letter] = fontlinedata
                 offset += bytes_per_letter
 
     def lit_bits(self, n):
