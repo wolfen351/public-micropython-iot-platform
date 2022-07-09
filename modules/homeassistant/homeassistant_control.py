@@ -229,6 +229,16 @@ class HomeAssistantControl(BasicModule):
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
                 self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
+            if (key.startswith(b'ac_mode')):
+                payload = self.get_basic_payload("ac_mode", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+
+            if (key.startswith(b'ac_setpoint')):
+                payload = self.get_basic_payload("ac_setpoint", safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+
             if (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
