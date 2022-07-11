@@ -19,7 +19,7 @@ class LedRemote(BasicModule):
     xpt = None
 
     color = color565(0,0,0)
-    colorHex = "000000"
+    colorRGB = "000000"
     brightness = 50
     commands = []
 
@@ -103,8 +103,8 @@ class LedRemote(BasicModule):
 
     def getTelemetry(self):
         telemetry = {
-            "colorRGB": self.colorHex,
-            "brightness": self.brightness
+            "colorRGB": self.colorRGB,
+            "brightness": self.brightness,
         }
         return telemetry
 
@@ -129,6 +129,6 @@ class LedRemote(BasicModule):
     # Internal code here
 
     def setcolor(self, r,g,b):
-        self.colorHex = str(r)+","+str(g)+","+str(b)
+        self.colorRGB = str(r)+","+str(g)+","+str(b)
         return color565(r,g,b)
 
