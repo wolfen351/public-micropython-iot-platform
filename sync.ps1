@@ -1,8 +1,8 @@
 # Globals
-$port = "COM3"
+$port = "COM4"
 
 Remove-Item ./lastedit.dat
-ampy --port $port get lastedit.dat > lastedit.dat
+ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 
 if ((Get-Item "lastedit.dat").length -eq 0) {
     Write-Output "lastedit.dat does not exist, making a new one"
@@ -82,4 +82,4 @@ $port.WriteLine("machine.reset()\r\n")
 $port.Close()
 Start-Sleep 1
 
-python -m serial.tools.miniterm COM3 115200
+python -m serial.tools.miniterm $port 115200

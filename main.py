@@ -34,6 +34,7 @@ try:
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
     from modules.ledstrip_remote.ledremote import LedRemote
+    from modules.binary_clock.binary_clock import BinaryClock
     import sys
     import gc
     
@@ -54,7 +55,8 @@ try:
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
         LedRemote(Basic.Settings),
-        web
+        BinaryClock(Basic.Settings),
+        web,
     ]
     
     # start all the modules up

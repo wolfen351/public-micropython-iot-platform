@@ -1,4 +1,4 @@
 Settings = { 
-    'Name': 'LED Remote',
-    'ShortName': 'LedRemote',
+    'Name': 'Binary Clock',
+    'ShortName': 'BinaryClock',
 }
