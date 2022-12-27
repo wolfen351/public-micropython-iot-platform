@@ -23,7 +23,7 @@ class BinaryClock(BasicModule):
     gotTime = False
     ntptime.host = "0.nz.pool.ntp.org"
     UTC_OFFSET = 12 * 60 * 60
-    previous = [0,0,0,0,0,0]
+    previous = [-1,-1,-1,-1,-1,-1,-1]
 
     def __init__(self, basicSettings):
         pass
@@ -54,17 +54,20 @@ class BinaryClock(BasicModule):
                     self.gotTime = True
                 except Exception as e:
                     SerialLog.log("Error syncing time: ", e)
-        else:
-            localTime = time.localtime(time.time() + self.UTC_OFFSET)
-            spacing = 65
-            leftspacing = 60
-            if (self.previous[5] != localTime[5]):
-                self.drawNumber(localTime[5], 200, leftspacing) # seconds
-            if (self.previous[4] != localTime[4]):
-                self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
-            if (self.previous[3] != localTime[3]):
-                self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # mins
-            self.previous = localTime
+
+        self.displayTime()
+
+    def displayTime(self):
+        localTime = time.localtime(time.time() + self.UTC_OFFSET)
+        spacing = 65
+        leftspacing = 60
+        if (self.previous[5] != localTime[5]):
+            self.drawNumber(localTime[5], 200, leftspacing) # seconds
+        if (self.previous[4] != localTime[4]):
+            self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
+        if (self.previous[3] != localTime[3]):
+            self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # mins
+        self.previous = localTime
 
 
     def drawNumber(self, number, x, y):
