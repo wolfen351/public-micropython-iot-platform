@@ -12,7 +12,7 @@ try {
 }
 catch 
 {
-    Write-Error "Failed to connect." -ErrorAction Stop
+    Write-Error "Failed to connect. $PSItem.Exception.Message" -ErrorAction Stop
 }
 
 Remove-Item ./lastedit.dat
@@ -99,13 +99,13 @@ $portObj.WriteLine("import machine\r\n")
 $portObj.WriteLine("machine.reset()\r\n")
 $portObj.Close()
 
-Write-Output "Waiting for port: $port" 
+Write-Output "Waiting for port: $port. Serial Log follows - Press any key to disconnect!" 
 $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
 $portObj.ReadTimeout = 1000
 $portObj.DtrEnable = $true;
 $portObj.RtsEnable = $true;
 $portObj.Open()
-while (1) {
+while (! [console]::KeyAvailable) {
     try {
         $data = $portObj.ReadLine()
         if ($data -ne "") {
@@ -127,3 +127,5 @@ while (1) {
     #python -m serial.tools.miniterm $port 115200 2> $null
 }
 
+Write-Host "Disconnecting from port $port"
+$portObj.Close()

@@ -10,7 +10,7 @@ import ntptime
 import time
 
 #if needed, overwrite default time server
-ntptime.host = "1.europe.pool.ntp.org"
+ntptime.host = "0.nz.pool.ntp.org"
 
 # Screen is 320x240 px
 # X is left to right on the small side (0-240)
