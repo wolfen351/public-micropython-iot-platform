@@ -33,7 +33,6 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.ledstrip_remote.ledremote import LedRemote
     from modules.binary_clock.binary_clock import BinaryClock
     import sys
     import gc
@@ -54,7 +53,6 @@ try:
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
-        LedRemote(Basic.Settings),
         BinaryClock(Basic.Settings),
         web,
     ]
