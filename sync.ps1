@@ -1,11 +1,29 @@
 # Globals
-$port = "COM4"
+$SerialPorts = Get-CimInstance -Class Win32_SerialPort | Select-Object Name, Description, DeviceID
+$port = $SerialPorts | Where-Object -Property Description -eq 'USB Serial Device' | Select -ExpandProperty DeviceID
+
+Write-Output "Connecting on port $port"
+try {
+    $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
+    $portObj.DtrEnable = $true;
+    $portObj.RtsEnable = $true;
+    $portObj.open()
+    $portObj.Close()
+}
+catch 
+{
+    Write-Error "Failed to connect." -ErrorAction Stop
+}
 
 Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 
 if ((Get-Item "lastedit.dat").length -eq 0) {
     Write-Output "lastedit.dat does not exist, making a new one"
+
+    Write-Host "Press any key to continue..."
+    $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
 }
 
@@ -72,14 +90,40 @@ if ($sent -gt 0) {
 }
 
 Write-Output "Rebooting..."
-$port= new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
-$port.open()
-$port.WriteLine("$([char] 2)")
-$port.WriteLine("$([char] 3)")
-$port.WriteLine("$([char] 4)")
-$port.WriteLine("import machine\r\n")
-$port.WriteLine("machine.reset()\r\n")
-$port.Close()
-Start-Sleep 1
+$portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
+$portObj.open()
+$portObj.WriteLine("$([char] 2)")
+$portObj.WriteLine("$([char] 3)")
+$portObj.WriteLine("$([char] 4)")
+$portObj.WriteLine("import machine\r\n")
+$portObj.WriteLine("machine.reset()\r\n")
+$portObj.Close()
 
-python -m serial.tools.miniterm $port 115200
+Write-Output "Waiting for port: $port" 
+$portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
+$portObj.ReadTimeout = 1000
+$portObj.DtrEnable = $true;
+$portObj.RtsEnable = $true;
+$portObj.Open()
+while (1) {
+    try {
+        $data = $portObj.ReadLine()
+        if ($data -ne "") {
+          Write-Output $data
+        }
+    }
+    catch {
+
+        if ($PSItem.Exception.Message.Contains("timeout")){
+            continue;
+        }
+
+        Write-Output "Error. $_"
+
+        if (! $portObj.IsOpen) {
+            $portObj.Open()
+        }
+    }
+    #python -m serial.tools.miniterm $port 115200 2> $null
+}
+
