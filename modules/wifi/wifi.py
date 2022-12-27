@@ -23,6 +23,7 @@ class WifiHandler(BasicModule):
                                 self.client_id.decode('ascii')[-4:])
         self.rssi = 0
         self.lastrssitime = 0
+        self.lastReconnectTime = 0
         self.version = "unknown"
         self.freeram = 0
 
@@ -47,8 +48,12 @@ class WifiHandler(BasicModule):
 
             if (not self.sta_if.isconnected() and self.connected):
                 # Connection lost
-                SerialLog.log('Wifi Connection lost, waiting to reconnect')
-                pass
+                now = time.ticks_ms()
+                diff = time.ticks_diff(now, self.lastReconnectTime)
+                if (diff > 10000):
+                    SerialLog.log('Wifi Connection lost, reconnecting..')
+                    self.lastReconnectTime = now
+                    self.station()
 
             if (not self.sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
                 # Never connected, run an AP after 30s of downtime
@@ -74,14 +79,16 @@ class WifiHandler(BasicModule):
                 "ip": b"192.168.4.1",
                 "rssi": "0",
                 "version": self.version,
-                "freeram": self.freeram
+                "freeram": self.freeram,
+                "wifiMode": b"Access Point"
             }
         return {
             "ssid": self.sta_if.config('essid'),
             "ip": self.sta_if.ifconfig()[0],
             "rssi": self.rssi,
             "version": self.version,
-            "freeram": self.freeram
+            "freeram": self.freeram,
+            "wifiMode": b"Station"
         }
     
 
@@ -163,6 +170,7 @@ class WifiHandler(BasicModule):
             if (netSettings.Type == b"Static"):
                 self.sta_if.ifconfig(
                     (netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
+            SerialLog.log("Wifi connection established")
         except KeyboardInterrupt:
             raise
         except Exception as e:
