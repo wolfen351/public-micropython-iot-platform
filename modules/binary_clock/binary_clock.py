@@ -45,15 +45,16 @@ class BinaryClock(BasicModule):
                     SerialLog.log("Local time before synchronization: %s" %str(time.localtime()))
                     #make sure to have internet connection
                     ntptime.settime()
-                    SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time() + self.UTC_OFFSET)))
-                    doy = time.localtime()[-1]
-                    if (doy < 92 or doy > 268): # 2 April, 25 Sept
-                        self.UTC_OFFSET += 3600
+                    SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
                     localTime = time.localtime(time.time() + self.UTC_OFFSET)
-                    SerialLog.log("Local time after DST Calculation: %s" %str(localTime))
+                    SerialLog.log("Local time after UTC Offet & DST Calculation: %s" %str(localTime))
                     self.gotTime = True
                 except Exception as e:
                     SerialLog.log("Error syncing time: ", e)
+
+        doy = time.localtime()[-1]
+        if (doy < 92 or doy > 268): # 2 April, 25 Sept
+            self.UTC_OFFSET += 3600
 
         self.displayTime()
 
@@ -62,19 +63,21 @@ class BinaryClock(BasicModule):
         spacing = 65
         leftspacing = 60
         if (self.previous[5] != localTime[5]):
-            self.drawNumber(localTime[5], 200, leftspacing) # seconds
+            self.drawNumber(localTime[5], 200, leftspacing, False) # seconds
         if (self.previous[4] != localTime[4]):
             self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
         if (self.previous[3] != localTime[3]):
-            self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # mins
+            self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # hours
         self.previous = localTime
 
 
-    def drawNumber(self, number, x, y):
+    def drawNumber(self, number, x, y, showColon = True):
         tens = (round(number) // 10) % 10 
         ones = round(number) % 10 
-        self.display.draw_image('modules/ac_remote/small'+str(tens)+'.raw',x,y+25,36,24)
-        self.display.draw_image('modules/ac_remote/small'+str(ones)+'.raw',x,y,36,24)
+        if showColon:
+            self.display.draw_image('modules/binary_clock/colon.raw',x,y-10,36,7)
+        self.display.draw_image('modules/binary_clock/small'+str(tens)+'.raw',x,y+25,36,24)
+        self.display.draw_image('modules/binary_clock/small'+str(ones)+'.raw',x,y,36,24)
 
 
 
