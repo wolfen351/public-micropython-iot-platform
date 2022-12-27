@@ -22,6 +22,7 @@ class BinaryClock(BasicModule):
     font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57, 32, 97, 228)
     gotTime = False
     ntptime.host = "0.nz.pool.ntp.org"
+    UTC_BASE_OFFSET = 12 * 60 * 60
     UTC_OFFSET = 12 * 60 * 60
     previous = [-1,-1,-1,-1,-1,-1,-1]
 
@@ -54,7 +55,7 @@ class BinaryClock(BasicModule):
 
         doy = time.localtime()[-1]
         if (doy < 92 or doy > 268): # 2 April, 25 Sept
-            self.UTC_OFFSET += 3600
+            self.UTC_OFFSET = self.UTC_BASE_OFFSET + 3600
 
         self.displayTime()
 
@@ -64,6 +65,7 @@ class BinaryClock(BasicModule):
         leftspacing = 60
         if (self.previous[5] != localTime[5]):
             self.drawNumber(localTime[5], 200, leftspacing, False) # seconds
+            self.drawBinary(localTime[5], 10, 10)
         if (self.previous[4] != localTime[4]):
             self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
         if (self.previous[3] != localTime[3]):
@@ -79,6 +81,22 @@ class BinaryClock(BasicModule):
         self.display.draw_image('modules/binary_clock/small'+str(tens)+'.raw',x,y+25,36,24)
         self.display.draw_image('modules/binary_clock/small'+str(ones)+'.raw',x,y,36,24)
 
+    def drawBinary(self, number, x, y):
+        ones = round(number) % 2 
+        twos = round(number) % 4 
+        fours = round(number) % 8 
+        eights = round(number) % 16
+        self.drawBit(eights, x+40, y)
+        self.drawBit(fours, x+80, y)
+        self.drawBit(twos, x+120, y) 
+        self.drawBit(ones, x+160, y)
+
+
+    def drawBit(self, bitValue, x, y):
+        if (bitValue == 1):
+            self.display.draw_image('modules/binary_clock/on.raw', x, y, 49, 46)
+        else:
+            self.display.draw_image('modules/binary_clock/off.raw', x, y, 49, 46)
 
 
     def getTelemetry(self):
