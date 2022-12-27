@@ -64,7 +64,7 @@ class BinaryClock(BasicModule):
         leftspacing = 60
         if (self.previous[5] != localTime[5]):
             self.drawNumber(localTime[5], 200, leftspacing, False) # seconds
-            self.drawBinary(localTime[5], 10, 10)
+            self.drawBinary(localTime[5], 0, 10)
         if (self.previous[4] != localTime[4]):
             self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
         if (self.previous[3] != localTime[3]):
@@ -84,10 +84,10 @@ class BinaryClock(BasicModule):
         twos = round(number) % 4 
         fours = round(number) % 8 
         eights = round(number) % 16
-        self.drawBit(eights, x+40, y)
-        self.drawBit(fours, x+80, y)
-        self.drawBit(twos, x+120, y) 
-        self.drawBit(ones, x+160, y)
+        self.drawBit(eights, x+10, y)
+        self.drawBit(fours, x+50, y)
+        self.drawBit(twos, x+90, y) 
+        self.drawBit(ones, x+130, y)
 
     def drawBit(self, bitValue, x, y):
         if (bitValue == 1):

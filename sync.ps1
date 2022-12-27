@@ -68,11 +68,20 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         $fnn = $fn -replace "\\", "/"
         ampy --port $port put $fnn $fnn
         if (!($?)) {
-            Write-Output "Failed to send file to the board, aborted!"
+            Write-Output "Failed to send file to the board, attempting to delete and send again.."
             $boardFile = "$(ampy --port $port get $fnn)" 
             Write-Output "File on microcontoller is $($boardFile.length) bytes"
             Write-Output "File on disk is $((Get-Item $fnn).length) bytes"
-            exit 3
+
+            Write-Output "Deleting file on microcontroller:"
+            ampy --port $port rm $fnn
+            Write-Output "Trying another copy:"
+            ampy --port $port put $fnn $fnn
+            if (!($?)) {
+                Write-Output "Failed again. Giving up."
+                exit 3
+            }
+            Write-Output "Success, moving to next file"
         }
         $sent++
     }
