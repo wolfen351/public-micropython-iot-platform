@@ -1,4 +1,3 @@
-
 from time import sleep
 from modules.basic.basic_module import BasicModule
 from modules.touchscreen.ili9341 import Display, color565
@@ -72,7 +71,6 @@ class BinaryClock(BasicModule):
             self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # hours
         self.previous = localTime
 
-
     def drawNumber(self, number, x, y, showColon = True):
         tens = (round(number) // 10) % 10 
         ones = round(number) % 10 
@@ -90,7 +88,6 @@ class BinaryClock(BasicModule):
         self.drawBit(fours, x+80, y)
         self.drawBit(twos, x+120, y) 
         self.drawBit(ones, x+160, y)
-
 
     def drawBit(self, bitValue, x, y):
         if (bitValue == 1):

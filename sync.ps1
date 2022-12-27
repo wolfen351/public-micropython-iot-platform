@@ -1,7 +1,7 @@
 # Globals
+Write-Output "Detecting port..."
 $SerialPorts = Get-CimInstance -Class Win32_SerialPort | Select-Object Name, Description, DeviceID
 $port = $SerialPorts | Where-Object -Property Description -eq 'USB Serial Device' | Select -ExpandProperty DeviceID
-
 Write-Output "Connecting on port $port"
 try {
     $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
@@ -19,8 +19,7 @@ Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 
 if ((Get-Item "lastedit.dat").length -eq 0) {
-    Write-Output "lastedit.dat does not exist, making a new one"
-
+    Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
     Write-Host "Press any key to continue..."
     $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
@@ -29,7 +28,7 @@ if ((Get-Item "lastedit.dat").length -eq 0) {
 
 if ($args[0] -eq "--force") {
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
-    Write-Output "All files will be copied!"
+    Write-Output "Force option specified. All files will be copied!"
 }
 
 $MAX = Get-Content -Path .\lastedit.dat
@@ -68,11 +67,14 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         $fn = "$($f)"
         $fnn = $fn -replace "\\", "/"
         ampy --port $port put $fnn $fnn
-        $sent++
         if (!($?)) {
-            Write-Output "Failed."
+            Write-Output "Failed to send file to the board, aborted!"
+            $boardFile = "$(ampy --port $port get $fnn)" 
+            Write-Output "File on microcontoller is $($boardFile.length) bytes"
+            Write-Output "File on disk is $((Get-Item $fnn).length) bytes"
             exit 3
         }
+        $sent++
     }
 }
 
