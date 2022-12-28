@@ -6,7 +6,7 @@ from modules.web.web_processor import okayHeader
 import ubinascii
 import json
 
-class TempMonitor(BasicModule):
+class DS18B20Temp(BasicModule):
 
     lastTemp = {}
     lastConvert = 0
@@ -61,7 +61,7 @@ class TempMonitor(BasicModule):
         }
 
     def getIndexFileName(self):
-        return { "temp" : "/modules/tempmon/temp_index.html" }
+        return { "temp" : "/modules/ds18b20temp/ds18b20_temp_index.html" }
 
     # Internal code here
     def currentTemp(self):
