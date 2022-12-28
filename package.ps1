@@ -18,6 +18,12 @@ Write-Output "Processing project $SHORTNAME"
 
 $BASEFOLDER="D:\stuff\code\wolfen-iot-firmware-archive"
 
+# prepare git
+Push-Location $BASEFOLDER
+git fetch --all
+git reset --hard origin/master
+Pop-Location
+
 if(!(Test-Path -path "$BASEFOLDER/firmware/$SHORTNAME"))  
 {  
     New-Item -ItemType directory -Path $BASEFOLDER/firmware/$SHORTNAME
