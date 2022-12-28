@@ -5,8 +5,8 @@ $port = $SerialPorts | Where-Object -Property Description -eq 'USB Serial Device
 Write-Output "Connecting on port $port"
 try {
     $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
-    $portObj.DtrEnable = $true;
-    $portObj.RtsEnable = $true;
+    $portObj.DtrEnable = $true
+    $portObj.RtsEnable = $true
     $portObj.open()
     $portObj.Close()
 }
