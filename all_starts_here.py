@@ -1,4 +1,4 @@
 Settings = { 
     'Name': 'Temperature Sensor',
-    'ShortName': 'TempMon',
+    'ShortName': 'DS18B20Temp',
 }

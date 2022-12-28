@@ -21,7 +21,7 @@ ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 if ((Get-Item "lastedit.dat").length -eq 0) {
     Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
     Write-Host "Press any key to continue..."
-    $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    $junk = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
 }
@@ -35,6 +35,9 @@ $MAX = Get-Content -Path .\lastedit.dat
 $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
+# load active modules
+$activeModules = @(Get-Content "active_modules.config")
+
 # send all files to the device
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
 $sent = 0
@@ -43,11 +46,30 @@ for ($i = 0; $i -lt $files.Count; $i++) {
     $LE = (Get-ChildItem $f).LastWriteTimeUtc | Get-Date -UFormat %s
 
     if ($LE -gt $MAX) {
+
+        # Skip unchanged files
         if ($MAXEDITTIME -lt $LE)
         {
             $MAXEDITTIME = $LE
         }
-        Write-Output "Sending $f"
+
+        # Skip files from inactive modules
+        $activeModule = $False
+        $rootFile = $False
+        if ($activeModules.Contains("$((Get-Item $f).Directory.Name)")) {
+            $activeModule = $True
+        }
+        if (!$f.Contains("\")) {
+            $rootFile = $True
+        }
+
+        if (!$rootFile -and !$activeModule)
+        {
+            continue;
+        }
+
+        # Ok send the file, all conditions satisfied
+        Write-Output "Sending file $f..."
 
         # MAKE SURE PATH EXISTS ON DEVICE
         $bits = $f.ToString() -split '\\'

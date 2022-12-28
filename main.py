@@ -33,7 +33,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.tempmon.temp_monitor import TempMonitor
+    from modules.ds18b20temp.ds18b20_temp import DS18B20Temp
     import sys
     import gc
 
@@ -51,7 +51,7 @@ try:
     allModules = [ 
         BuiltinButtonControl(Basic.Settings),
         WifiHandler(Basic.Settings), 
-        TempMonitor(Basic.Settings), 
+        DS18B20Temp(Basic.Settings), 
         MqttControl(Basic.Settings), 
         HomeAssistantControl(Basic.Settings), 
         ThingsboardControl(Basic.Settings), 
