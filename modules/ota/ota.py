@@ -91,7 +91,11 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     latestUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
     response = requests.get(latestUrl)
-    SerialLog.log("Update Response:", response.text)
+    SerialLog.log("Update Response:", response.status_code, response.text)
+    if (response.status_code != 200):
+        SerialLog.log("Unable to check for updates, bad response from server. Giving up!")
+        return False
+
     remote_version, remote_filename, *optional = response.text.strip().rstrip(';').split(';')
     min_free_space, *remote_hash = optional if optional else (0, '')
     min_free_space = int(min_free_space)
