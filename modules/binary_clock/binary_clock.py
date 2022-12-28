@@ -67,10 +67,13 @@ class BinaryClock(BasicModule):
             self.drawBinary(localTime[5], 0, 10)
         if (self.previous[4] != localTime[4]):
             self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
+            self.drawBinary(localTime[4], 0, 110)
         if (self.previous[3] != localTime[3]):
             self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # hours
+            self.drawBinary(localTime[3], 0, 210)
         self.previous = localTime
 
+    # draws a decimal number
     def drawNumber(self, number, x, y, showColon = True):
         tens = (round(number) // 10) % 10 
         ones = round(number) % 10 
@@ -79,21 +82,31 @@ class BinaryClock(BasicModule):
         self.display.draw_image('modules/binary_clock/small'+str(tens)+'.raw',x,y+25,36,24)
         self.display.draw_image('modules/binary_clock/small'+str(ones)+'.raw',x,y,36,24)
 
+    # draws a whole decimal number like 23 as a set of binary digits with leds
     def drawBinary(self, number, x, y):
-        ones = round(number) % 2 
-        twos = round(number) % 4 
-        fours = round(number) % 8 
-        eights = round(number) % 16
-        self.drawBit(eights, x+10, y)
-        self.drawBit(fours, x+50, y)
-        self.drawBit(twos, x+90, y) 
-        self.drawBit(ones, x+130, y)
+        decimal_tens = (round(number) // 10) % 10 
+        decimal_ones = round(number) % 10 
+        self.drawBCD(decimal_ones, x, y)
+        self.drawBCD(decimal_tens, x, y + 43)
 
+    # draws one decimal digit as a series of bit leds
+    def drawBCD(self, number, x, y):
+        decimal_ones = number % 10
+        ones = round(decimal_ones) % 2 
+        twos = round(decimal_ones - ones) % 4 
+        fours = round(decimal_ones - ones - twos) % 8 
+        eights = round(decimal_ones - ones - twos - fours) % 16
+        self.drawBit(eights, x+10, y)
+        self.drawBit(fours, x+52, y)
+        self.drawBit(twos, x+94, y) 
+        self.drawBit(ones, x+136, y)
+
+    # draws one bit (led circle)
     def drawBit(self, bitValue, x, y):
-        if (bitValue == 1):
-            self.display.draw_image('modules/binary_clock/on.raw', x, y, 49, 46)
-        else:
+        if (bitValue == 0):
             self.display.draw_image('modules/binary_clock/off.raw', x, y, 49, 46)
+        else:
+            self.display.draw_image('modules/binary_clock/on.raw', x, y, 49, 46)
 
 
     def getTelemetry(self):
