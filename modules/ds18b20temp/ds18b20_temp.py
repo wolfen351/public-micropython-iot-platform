@@ -61,7 +61,7 @@ class DS18B20Temp(BasicModule):
         }
 
     def getIndexFileName(self):
-        return { "temp" : "/modules/ds18b20temp/temp_index.html" }
+        return { "temp" : "/modules/ds18b20temp/ds18b20_temp_index.html" }
 
     # Internal code here
     def currentTemp(self):
