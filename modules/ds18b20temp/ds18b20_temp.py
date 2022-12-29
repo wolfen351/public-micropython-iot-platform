@@ -6,7 +6,7 @@ from modules.web.web_processor import okayHeader
 import ubinascii
 import json
 
-class TempMonitor(BasicModule):
+class DS18B20Temp(BasicModule):
 
     lastTemp = {}
     lastConvert = 0
@@ -34,7 +34,7 @@ class TempMonitor(BasicModule):
                     current = self.ds_sensor.read_temp(rom)
                     if (current != self.lastTemp[str(rom)]):
                         self.lastTemp[str(rom)] = current
-                        SerialLog.log("%s = %s°C" % (ubinascii.hexlify(rom).decode('ascii'), current))
+                        SerialLog.log("%s = %s'C" % (ubinascii.hexlify(rom).decode('ascii'), current))
                 self.ds_sensor.convert_temp()
                 self.lastConvert = time.ticks_ms()
 
@@ -61,7 +61,7 @@ class TempMonitor(BasicModule):
         }
 
     def getIndexFileName(self):
-        return { "temp" : "/modules/tempmon/temp_index.html" }
+        return { "temp" : "/modules/ds18b20temp/ds18b20_temp_index.html" }
 
     # Internal code here
     def currentTemp(self):

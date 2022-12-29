@@ -22,13 +22,14 @@ echo "Last sync for this board was at $MAX"
 # increment the version
 ./bump_version.sh
 
-# send all files to the device
 shopt -s extglob nullglob globstar
 for f in **/*.py **/*.html **/*.sh **/*.js **/*.cfg version **/*.crt **/*.key
 do
   THIS=$(stat -c %Y $f)
   if [[ $THIS -gt $MAX ]]
   then
+
+
     echo Sending $f
 
     # MAKE SURE PATH EXISTS ON DEVICE
