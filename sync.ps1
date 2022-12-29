@@ -1,20 +1,10 @@
 # Globals
-Write-Output "Detecting port..."
-$SerialPorts = Get-CimInstance -Class Win32_SerialPort | Select-Object Name, Description, DeviceID
-$port = $SerialPorts | Where-Object -Property Description -eq 'USB Serial Device' | Select -ExpandProperty DeviceID
-Write-Output "Connecting on port $port"
-try {
-    $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
-    $portObj.DtrEnable = $true;
-    $portObj.RtsEnable = $true;
-    $portObj.open()
-    $portObj.Close()
-}
-catch 
-{
-    Write-Error "Failed to connect. $PSItem.Exception.Message" -ErrorAction Stop
-}
 
+Import-Module .\serial-toys.psm1
+
+$port = Find-MicrocontrollerPort
+
+Write-Host "Checking when board was last updated.."
 Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 
