@@ -34,7 +34,7 @@ class DS18B20Temp(BasicModule):
                     current = self.ds_sensor.read_temp(rom)
                     if (current != self.lastTemp[str(rom)]):
                         self.lastTemp[str(rom)] = current
-                        SerialLog.log("%s = %s°C" % (ubinascii.hexlify(rom).decode('ascii'), current))
+                        SerialLog.log("%s = %s'C" % (ubinascii.hexlify(rom).decode('ascii'), current))
                 self.ds_sensor.convert_temp()
                 self.lastConvert = time.ticks_ms()
 
