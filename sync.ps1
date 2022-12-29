@@ -113,42 +113,6 @@ if ($sent -gt 0) {
 }
 
 Write-Output "Rebooting..."
-$portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
-$portObj.open()
-$portObj.WriteLine("$([char] 2)")
-$portObj.WriteLine("$([char] 3)")
-$portObj.WriteLine("$([char] 4)")
-$portObj.WriteLine("import machine\r\n")
-$portObj.WriteLine("machine.reset()\r\n")
-$portObj.Close()
+Restart-Microcontroller $port
 
-Write-Output "Waiting for port: $port. Serial Log follows - Press any key to disconnect!" 
-$portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
-$portObj.ReadTimeout = 1000
-$portObj.DtrEnable = $true;
-$portObj.RtsEnable = $true;
-$portObj.Open()
-while (! [console]::KeyAvailable) {
-    try {
-        $data = $portObj.ReadLine()
-        if ($data -ne "") {
-          Write-Output $data
-        }
-    }
-    catch {
-
-        if ($PSItem.Exception.Message.Contains("timeout")){
-            continue;
-        }
-
-        Write-Output "Error. $_"
-
-        if (! $portObj.IsOpen) {
-            $portObj.Open()
-        }
-    }
-    #python -m serial.tools.miniterm $port 115200 2> $null
-}
-
-Write-Host "Disconnecting from port $port"
-$portObj.Close()
+Show-SerialLog $port
