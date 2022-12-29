@@ -21,9 +21,10 @@ try:
     # set the CPU frequency to 240 MHz
     from serial_log import SerialLog
     SerialLog.log()
-    SerialLog.log("CPU 240Mhz")
-    import machine
-    machine.freq(240000000) 
+
+#    SerialLog.log("CPU 240Mhz")
+#    import machine
+#    machine.freq(240000000) 
 
     # Import other modules needed
     SerialLog.log("Loading code..")

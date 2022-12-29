@@ -1,5 +1,7 @@
+Import-Module .\serial-toys.psm1
+
 # increment the version
-.\bump_version.ps1
+Step-Version
 
 # make firmware archive for ota
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, version, *.crt, *.key

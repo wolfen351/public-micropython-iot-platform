@@ -1,0 +1,4 @@
+{
+    "active_modules": ["basic", "builtin_button", "ds18b20temp", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi"],
+    "cpu_speed": 16000000
+}

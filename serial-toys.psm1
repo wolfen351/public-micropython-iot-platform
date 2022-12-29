@@ -54,7 +54,9 @@ function Show-SerialLog {
         $port
     )
 
+    Write-Host "-------------------------------------------------------------------------------"
     Write-Host "Listening on $port. Serial Log follows - Press any key to disconnect!" 
+    Write-Host "-------------------------------------------------------------------------------"
     $portObj = new-Object System.IO.Ports.SerialPort $port,115200,None,8,one
     $portObj.ReadTimeout = 1000
     $portObj.DtrEnable = $true;
@@ -105,4 +107,16 @@ function Restart-Microcontroller {
     $portObj.WriteLine("machine.reset()\r\n")
     $portObj.Close()
 
+    esptool.py --port $port chip_id
+}
+
+function Step-Version {
+    # increment the version 
+    $raw = Get-Content -Path .\version -Raw
+    $v = [version]$raw
+    $nv = [version]::New($v.Major,$v.Minor,$v.Build+1,0)
+    $newVersion = "$($nv)";
+    $newVersion = $newVersion.Substring(0, $newVersion.Length - 2)
+    Write-Host "Version is now: $newVersion"
+    Write-Output $newVersion | Out-File -encoding ascii .\version
 }

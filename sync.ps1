@@ -1,7 +1,27 @@
-# Globals
+param($profileName) 
 
+# Globals
 Import-Module .\serial-toys.psm1
 
+# Load the profile
+try {
+
+    if ($null -eq $profileName) {
+        throw "Profile Name Required!"
+    }
+    
+    $activeProfile = Get-Content -Raw ".\profiles\$profileName.json" | ConvertFrom-Json 
+    # load active modules
+    $activeModules = $activeProfile.active_modules
+    Write-Host "Flashing Profile: $profileName"
+    Write-Host "Active Modules: $activeModules"
+}
+catch {
+    Write-Error "Could not load profile from file .\profiles\$profileName.json"
+    Write-Error "Please specify the profile name as a parameter to this script" -ErrorAction Stop
+}
+
+# Connect to the board
 $port = Find-MicrocontrollerPort
 
 Write-Host "Checking when board was last updated.."
@@ -24,9 +44,6 @@ if ($args[0] -eq "--force") {
 $MAX = Get-Content -Path .\lastedit.dat
 $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
-
-# load active modules
-$activeModules = @(Get-Content "active_modules.config")
 
 # send all files to the device
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
@@ -101,12 +118,15 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 
 if ($sent -gt 0) {
     # increment the version
-    ./bump_version.ps1
-    ampy --baud 1152000 --port $port put version
+    Step-Version
+
+    Write-Host "Uploading new version file to board.."
+    ampy --port $port put version
 
     # record the last time a file was edited
     $MAXEDITTIME = [math]::Round($MAXEDITTIME)
     Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
+    Write-Host "Uploading lastedit.dat file to board.."
     ampy --port $port put lastedit.dat
 } else {
     Write-Output "No changes since last sync."
