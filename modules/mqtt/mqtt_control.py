@@ -22,7 +22,7 @@ class MqttControl(BasicModule):
         self.commands = []
 
     def start(self):
-        BasicModule.start()
+        BasicModule.start(self)
         settings = MqttSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -30,12 +30,12 @@ class MqttControl(BasicModule):
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
         else:
-            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['ShortName'], self.client_id)
+            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['shortName'], self.client_id)
 
         if (settings.Publish != b""):
             self.topic_pub = settings.Publish
         else:
-            self.topic_pub = b'%s/%s/status' % (self.basicSettings['ShortName'], self.client_id)
+            self.topic_pub = b'%s/%s/status' % (self.basicSettings['shortName'], self.client_id)
 
     def tick(self):
         if (self.enabled == b"Y"):
@@ -127,12 +127,12 @@ class MqttControl(BasicModule):
         if (settingsVals[2] != b""):
             self.topic_sub = settingsVals[2]
         else:
-            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['ShortName'], self.client_id)
+            self.topic_sub = b'%s/%s/command/#' % (self.basicSettings['shortName'], self.client_id)
 
         if (settingsVals[3] != b""):
             self.topic_pub = settingsVals[3]
         else: 
-            self.topic_pub = b'%s/%s/status' % (self.basicSettings['ShortName'], self.client_id)
+            self.topic_pub = b'%s/%s/status' % (self.basicSettings['shortName'], self.client_id)
 
         # Save the settings to disk
         settings = MqttSettings()

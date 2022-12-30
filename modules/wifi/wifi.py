@@ -26,8 +26,8 @@ class WifiHandler(BasicModule):
         self.freeram = 0
 
     def start(self):
-        BasicModule.start()
-        self.essid = "%s-%s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii')[-4:])
+        BasicModule.start(self)
+        self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
 
         self.station()
         self.version = ota.local_version()

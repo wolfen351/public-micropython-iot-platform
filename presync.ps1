@@ -12,7 +12,7 @@ try {
     
     $activeProfile = Get-Content -Raw ".\profiles\$profileName.json" | ConvertFrom-Json 
     # load active modules
-    $activeModules = $activeProfile.active_modules
+    $activeModules = $activeProfile.activeModules
     Write-Host "Flashing Profile: $profileName"
     Write-Host "Active Modules: $activeModules"
 }

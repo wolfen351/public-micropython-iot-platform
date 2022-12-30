@@ -23,7 +23,7 @@ class ThingsboardControl(BasicModule):
         self.client = None
 
     def start(self):
-        BasicModule.start()
+        BasicModule.start(self)
         settings = ThingsboardSettings()
         settings.load()
         self.enabled = settings.Enable

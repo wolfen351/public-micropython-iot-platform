@@ -16,8 +16,8 @@ class CpuHardware():
         settings_dict = ujson.loads(settings_string)
 
         try: 
-            SerialLog.log("CPU ", settings_dict["cpu_speed"] / 1000000, "Mhz")
-            machine.freq(settings_dict["cpu_speed"]) 
+            SerialLog.log("CPU ", settings_dict["cpuSpeed"] / 1000000, "Mhz")
+            machine.freq(settings_dict["cpuSpeed"]) 
         except Exception as e:
             sys.print_exception(e)
             SerialLog.log("Error! Failed to set cpu speed")

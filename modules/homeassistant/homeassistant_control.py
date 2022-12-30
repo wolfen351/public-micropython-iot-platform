@@ -31,7 +31,7 @@ class HomeAssistantControl(BasicModule):
 
     #@micropython.native
     def start(self):
-        BasicModule.start()
+        BasicModule.start(self)
         settings = HomeAssistantSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -175,13 +175,13 @@ class HomeAssistantControl(BasicModule):
     def get_basic_payload(self, name, uniqueid, attr):
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
-            "name": "%s %s %s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), name),
+            "name": "%s %s %s" % (self.basicSettings['shortName'], self.client_id.decode('ascii'), name),
             "unique_id": uniqueid,
             "device": {
                 "manufacturer": "Wolfen",
                 "name": self.basicSettings["Name"] + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
-                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["ShortName"], self.basicSettings["Name"] ],
+                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["shortName"], self.basicSettings["Name"] ],
                 #"configuration_url": "http://" + self.ip,
             },
             "stat_t": "~/state",
