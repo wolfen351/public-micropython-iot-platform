@@ -34,7 +34,6 @@ class Dht22Monitor(BasicModule):
     def getTelemetry(self):
         telemetry = {
             "temperature/dht22" : self.currentT,
-            "temperature/dht22_history" : self.historyT,
             "humidity/dht22" : self.currentH
         }
         return telemetry
