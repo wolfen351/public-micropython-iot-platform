@@ -23,7 +23,7 @@ class LedRemote(BasicModule):
     brightness = 50
     commands = []
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

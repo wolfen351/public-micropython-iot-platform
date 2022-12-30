@@ -23,7 +23,7 @@ class AcRemote(BasicModule):
 
     #84f703d7c4b2 
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

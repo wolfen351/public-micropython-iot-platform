@@ -12,15 +12,13 @@ import gc
 
 class WifiHandler(BasicModule):
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.connected = False
         self.apMode = False
         self.downTimeStart = time.time()  # start time of no connection
         self.sta_if = network.WLAN(network.STA_IF)
         self.ap_if = network.WLAN(network.AP_IF)
         self.client_id = ubinascii.hexlify(machine.unique_id())
-        self.essid = "%s-%s" % (basicSettings['ShortName'],
-                                self.client_id.decode('ascii')[-4:])
         self.rssi = 0
         self.lastrssitime = 0
         self.lastReconnectTime = 0
@@ -28,6 +26,9 @@ class WifiHandler(BasicModule):
         self.freeram = 0
 
     def start(self):
+        BasicModule.start(self)
+        self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+
         self.station()
         self.version = ota.local_version()
 
@@ -170,7 +171,7 @@ class WifiHandler(BasicModule):
             if (netSettings.Type == b"Static"):
                 self.sta_if.ifconfig(
                     (netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
-            SerialLog.log("Wifi connection established")
+            SerialLog.log("Wifi connection intitiated")
         except KeyboardInterrupt:
             raise
         except Exception as e:

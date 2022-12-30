@@ -12,7 +12,7 @@ class TouchScreen(BasicModule):
     xpt = None
     robotron = XglcdFont('modules/touchscreen/ArcadePix9x11.c', 9, 11)
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

@@ -16,7 +16,7 @@ class LedStripControl(BasicModule):
     duration = 5000
     brightness = 255
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

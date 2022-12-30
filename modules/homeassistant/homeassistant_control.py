@@ -10,7 +10,7 @@ import ujson
 
 class HomeAssistantControl(BasicModule):
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None
@@ -21,7 +21,6 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
-        self.basicSettings = basicSettings
         self.telemetry = {}
         self.client = None
         self.configuredKeys = []
@@ -32,6 +31,7 @@ class HomeAssistantControl(BasicModule):
 
     #@micropython.native
     def start(self):
+        BasicModule.start(self)
         settings = HomeAssistantSettings()
         settings.load()
         self.enabled = settings.Enable
@@ -175,13 +175,13 @@ class HomeAssistantControl(BasicModule):
     def get_basic_payload(self, name, uniqueid, attr):
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
-            "name": "%s %s %s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii'), name),
+            "name": "%s %s %s" % (self.basicSettings['shortName'], self.client_id.decode('ascii'), name),
             "unique_id": uniqueid,
             "device": {
                 "manufacturer": "Wolfen",
-                "name": self.basicSettings["Name"] + " - " + self.client_id.decode('ascii'),
+                "name": self.basicSettings["name"] + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
-                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["ShortName"], self.basicSettings["Name"] ],
+                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["shortName"], self.basicSettings["name"] ],
                 #"configuration_url": "http://" + self.ip,
             },
             "stat_t": "~/state",

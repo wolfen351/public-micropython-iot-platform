@@ -2,3 +2,5 @@ lastedit.dat
 version
 /firmware.tar.gz
 /latest
+/Deploy/
+profile.json

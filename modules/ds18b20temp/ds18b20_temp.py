@@ -11,7 +11,7 @@ class DS18B20Temp(BasicModule):
     lastTemp = {}
     lastConvert = 0
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):
@@ -38,7 +38,7 @@ class DS18B20Temp(BasicModule):
                 self.ds_sensor.convert_temp()
                 self.lastConvert = time.ticks_ms()
 
-    def getTelemetry(self):
+    def getTelemetry(self): 
         telemetry = {}
         for rom in self.roms:
             sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))

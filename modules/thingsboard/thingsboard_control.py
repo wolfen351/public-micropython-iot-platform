@@ -10,7 +10,7 @@ import json
 
 class ThingsboardControl(BasicModule):
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None
@@ -18,12 +18,12 @@ class ThingsboardControl(BasicModule):
         self.thingsBoardTelemetryUrl = b"v1/devices/me/telemetry"
         self.mqtt_port = 1883
         self.access_token = None
-        self.basicSettings = basicSettings
         self.telemetry = {}
         self.enabled = b"N"
         self.client = None
 
     def start(self):
+        BasicModule.start(self)
         settings = ThingsboardSettings()
         settings.load()
         self.enabled = settings.Enable

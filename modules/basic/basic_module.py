@@ -1,9 +1,15 @@
+import ujson
+
 class BasicModule:
-    def __init__(self, basicSettings):
-        pass
+
+    def __init__(self):
+        self.basicSettings = {}
 
     def start(self):
-        pass
+        f = open("profile.json",'r')
+        settings_string=f.read()
+        f.close()
+        self.basicSettings = ujson.loads(settings_string)
 
     def tick(self):
         pass

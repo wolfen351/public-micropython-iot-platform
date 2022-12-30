@@ -15,17 +15,15 @@ def runSafe(cmd, p1 = None):
 try:
     # Turn on the LED to show we are alive
     from machine import Pin
-    led = Pin(15, Pin.OUT)
+    led = Pin(3, Pin.OUT)
     led.on()
 
-    # set the CPU frequency to 240 MHz
-    from serial_log import SerialLog
-    SerialLog.log()
-    SerialLog.log("CPU 240Mhz")
-    import machine
-    machine.freq(240000000) 
+    # set the CPU to max speed
+    from board_system.cpu_hardware import CpuHardware
+    CpuHardware.SetCpuMaxSpeed()    
 
     # Import other modules needed
+    from serial_log import SerialLog
     SerialLog.log("Loading code..")
     from modules.mqtt.mqtt_control import MqttControl
     from modules.homeassistant.homeassistant_control import HomeAssistantControl
@@ -33,26 +31,24 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.dht22.dht22 import Dht22Monitor
     import sys
     import gc
     
-    #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
-
     # some storage
-    import all_starts_here as Basic
-    
     ledOn = True
     telemetry = dict()
 
     # register all the modules
-    web = WebProcessor(Basic.Settings)
+    web = WebProcessor()
     allModules = [ 
-        BuiltinButtonControl(Basic.Settings),
-        WifiHandler(Basic.Settings), 
-        MqttControl(Basic.Settings), 
-        HomeAssistantControl(Basic.Settings), 
-        ThingsboardControl(Basic.Settings), 
-        web
+        BuiltinButtonControl(),
+        WifiHandler(), 
+        MqttControl(), 
+        HomeAssistantControl(), 
+        ThingsboardControl(), 
+        web,
+        Dht22Monitor()
     ]
     
     # start all the modules up
@@ -116,6 +112,7 @@ except Exception as e:
     import machine
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
-    machine.sleep(10000)
+    for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
+        machine.sleep(100)
     machine.reset()
 

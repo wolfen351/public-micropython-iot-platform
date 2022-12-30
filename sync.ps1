@@ -1,7 +1,30 @@
-# Globals
+param($profileName) 
 
+# Globals
 Import-Module .\serial-toys.psm1
 
+# Load the profile
+try {
+
+    if ($null -eq $profileName) {
+        throw "Profile Name Required!"
+    }
+    
+    $activeProfile = Get-Content -Raw ".\profiles\$profileName.json" | ConvertFrom-Json 
+    # load active modules
+    $activeModules = $activeProfile.activeModules
+    Write-Host "Flashing Profile: $profileName"
+    Write-Host "Active Modules: $activeModules"
+
+    $dest = "$PSScriptRoot\profile.json"
+    Invoke-Expression "xcopy .\profiles\$profileName.json $dest /Y /-I"
+}
+catch {
+    Write-Error "Could not load profile from file .\profiles\$profileName.json"
+    Write-Error "Please specify the profile name as a parameter to this script" -ErrorAction Stop
+}
+
+# Connect to the board
 $port = Find-MicrocontrollerPort
 
 Write-Host "Checking when board was last updated.."
@@ -25,11 +48,8 @@ $MAX = Get-Content -Path .\lastedit.dat
 $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
-# load active modules
-$activeModules = @(Get-Content "active_modules.config")
-
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw, profile.json
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
@@ -50,6 +70,9 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             $activeModule = $True
         }
         if (!$f.Contains("\")) {
+            $rootFile = $True
+        }
+        if ($f.Contains("board_system")) {
             $rootFile = $True
         }
 
@@ -88,7 +111,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Deleting file on microcontroller:"
             ampy --port $port rm $fnn
             Write-Output "Trying another copy:"
-            ampy --port $port put $fnn $fnn
+            ampy --baud 460800 --port $port put $fnn $fnn
             if (!($?)) {
                 Write-Output "Failed again. Giving up."
                 exit 3
@@ -101,16 +124,22 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 
 if ($sent -gt 0) {
     # increment the version
-    ./bump_version.ps1
-    ampy --baud 1152000 --port $port put version
+    Step-Version
+
+    Write-Host "Uploading new version file to board.."
+    ampy --port $port put version
 
     # record the last time a file was edited
     $MAXEDITTIME = [math]::Round($MAXEDITTIME)
     Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
+    Write-Host "Uploading lastedit.dat file to board.."
     ampy --port $port put lastedit.dat
 } else {
     Write-Output "No changes since last sync."
 }
+
+# Clean up
+Remove-Item profile.json
 
 Write-Output "Rebooting..."
 Restart-Microcontroller $port

@@ -9,15 +9,15 @@ class Dht11Monitor(BasicModule):
     currentT = 0
     currentH = 0
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.lastConvert = time.ticks_ms()
 
-    @micropython.native 
+    #@micropython.native 
     def start(self):
         self.ts_pin = machine.Pin(16)
         self.dht = dht.DHT11(self.ts_pin)
 
-    @micropython.native 
+    #@micropython.native 
     def tick(self):
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastConvert)
@@ -27,31 +27,31 @@ class Dht11Monitor(BasicModule):
             self.currentH = self.dht.humidity()
             self.lastConvert = currentTime
 
-    @micropython.native 
+    #@micropython.native 
     def getTelemetry(self):
         telemetry = {}
         telemetry.update({"temperature/dht11":self.currentT})
         telemetry.update({"humidity/dht11":self.currentH})
         return telemetry
 
-    @micropython.native 
+    #@micropython.native 
     def processTelemetry(self, telemetry):
         pass
 
-    @micropython.native 
+    #@micropython.native 
     def getCommands(self):
         return []
 
-    @micropython.native 
+    #@micropython.native 
     def processCommands(self, commands):
         pass
 
-    @micropython.native 
+    #@micropython.native 
     def getRoutes(self):
         return {
         }
 
-    @micropython.native 
+    #@micropython.native 
     def getIndexFileName(self):
         return { "dht11" : "/modules/dht11/dht11_index.html" }
 

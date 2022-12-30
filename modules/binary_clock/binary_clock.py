@@ -25,7 +25,7 @@ class BinaryClock(BasicModule):
     UTC_OFFSET = 12 * 60 * 60
     previous = [-1,-1,-1,-1,-1,-1,-1]
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
 

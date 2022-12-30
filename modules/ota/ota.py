@@ -11,7 +11,7 @@ import uzlib
 import upip_utarfile as tarfile
 from micropython import const
 from serial_log import SerialLog
-import all_starts_here as Basic
+import ujson
 
 GZDICT_SZ = const(31)
 ota_config = {}
@@ -88,7 +88,12 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
 
-    latestUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/latest'
+    f = open("profile.json",'r')
+    settings_string=f.read()
+    f.close()
+    basicSettings = ujson.loads(settings_string)
+
+    latestUrl = ota_config['url']  + basicSettings['shortName'].lower() + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
     response = requests.get(latestUrl)
     SerialLog.log("Update Response:", response.status_code, response.text)
@@ -118,7 +123,12 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
             SerialLog.log('not enough free space for the new firmware')
             return False
 
-        downloadUrl = ota_config['url']  + Basic.Settings['ShortName'].lower() + '/' + remote_filename
+        f = open("profile.json",'r')
+        settings_string=f.read()
+        f.close()
+        basicSettings = ujson.loads(settings_string)
+
+        downloadUrl = ota_config['url']  + basicSettings['shortName'].lower() + '/' + remote_filename
         SerialLog.log("Fetching update updates on: ", downloadUrl)
         response = requests.get(downloadUrl)
         with open(ota_config['tmp_filename'], 'wb') as f:
