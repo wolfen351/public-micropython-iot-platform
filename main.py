@@ -31,6 +31,7 @@ try:
     from modules.web.web_processor import WebProcessor
     from modules.wifi.wifi import WifiHandler
     from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+    from modules.dht22.dht22 import Dht22Monitor
     import sys
     import gc
     
@@ -46,7 +47,8 @@ try:
         MqttControl(), 
         HomeAssistantControl(), 
         ThingsboardControl(), 
-        web
+        web,
+        Dht22Monitor()
     ]
     
     # start all the modules up

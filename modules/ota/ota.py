@@ -88,7 +88,12 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
 
-    latestUrl = ota_config['url']  + self.basicSettings['shortName'].lower() + '/latest'
+    f = open("profile.json",'r')
+    settings_string=f.read()
+    f.close()
+    basicSettings = ujson.loads(settings_string)
+
+    latestUrl = ota_config['url']  + basicSettings['shortName'].lower() + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
     response = requests.get(latestUrl)
     SerialLog.log("Update Response:", response.status_code, response.text)
