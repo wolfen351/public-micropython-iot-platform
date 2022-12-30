@@ -6,7 +6,7 @@ class BuiltinButtonControl(BasicModule):
     # CommandCache
     commands = []
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.buttonPin = Pin(0, Pin.IN)
         self.value = 0
 

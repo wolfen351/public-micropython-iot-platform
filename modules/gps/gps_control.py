@@ -3,7 +3,7 @@ from serial_log import SerialLog
 from modules.gps.micropyGPS import MicropyGPS
 
 class GPSControl:
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.uart = UART(1, 9600)                         # init with given baudrate
         self.uart.init(9600, bits=8, parity=None, stop=1, tx=18, rx=19) # init with given parameters
         self.myGPS = MicropyGPS()

@@ -51,9 +51,13 @@ foreach ($itemToCopy in $allFiles)
     Invoke-Expression "xcopy $itemToCopy $dest /Y /-I"
 }
 
+# Profile File
+$dest = "$PSScriptRoot\Deploy\profile.json"
+Invoke-Expression "xcopy .\profiles\$profileName.json $dest /Y /-I"
+
 Write-Host "Sending files to the board, will take about 2 min..."
 cd Deploy
-ampy --port COM6 put . /
+ampy --baud 460800 --port COM6 put . /
 ampy --port COM6 ls
 cd ..
 

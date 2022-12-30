@@ -10,7 +10,7 @@ import ujson
 
 class HomeAssistantControl(BasicModule):
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.init = False
         self.status = None

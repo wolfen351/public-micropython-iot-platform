@@ -15,7 +15,7 @@ class MosfetControl(BasicModule):
     # Actual of the switches (0=Off, 1=On)
     States = [0, 0, 0, 0]
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

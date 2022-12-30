@@ -12,7 +12,7 @@ import gc
 
 class WifiHandler(BasicModule):
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.connected = False
         self.apMode = False
         self.downTimeStart = time.time()  # start time of no connection

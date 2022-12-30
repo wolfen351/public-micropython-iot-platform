@@ -11,7 +11,6 @@ import uzlib
 import upip_utarfile as tarfile
 from micropython import const
 from serial_log import SerialLog
-import all_starts_here as Basic
 
 GZDICT_SZ = const(31)
 ota_config = {}

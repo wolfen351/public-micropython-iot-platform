@@ -37,7 +37,7 @@ def unquote(string):
 
 class WebProcessor(BasicModule):
    
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.telemetry = {}
         self.panels = {}
 

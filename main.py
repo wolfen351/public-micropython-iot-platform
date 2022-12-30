@@ -37,19 +37,17 @@ try:
     #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
 
     # some storage
-    import all_starts_here as Basic
-    
     ledOn = True
     telemetry = dict()
 
     # register all the modules
-    web = WebProcessor(Basic.Settings)
+    web = WebProcessor()
     allModules = [ 
-        BuiltinButtonControl(Basic.Settings),
-        WifiHandler(Basic.Settings), 
-        MqttControl(Basic.Settings), 
-        HomeAssistantControl(Basic.Settings), 
-        ThingsboardControl(Basic.Settings), 
+        BuiltinButtonControl(),
+        WifiHandler(), 
+        MqttControl(), 
+        HomeAssistantControl(), 
+        ThingsboardControl(), 
         web
     ]
     
@@ -114,6 +112,7 @@ except Exception as e:
     import machine
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
-    machine.sleep(10000)
+    for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
+        machine.sleep(100)
     machine.reset()
 

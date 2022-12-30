@@ -38,7 +38,7 @@ class LightControl(BasicModule):
     # State of the triggers (1=off)
     Triggers = [1, 1]
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.calculateTimes()
 
     #@micropython.native 

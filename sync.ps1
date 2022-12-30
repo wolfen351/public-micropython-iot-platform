@@ -15,6 +15,9 @@ try {
     $activeModules = $activeProfile.active_modules
     Write-Host "Flashing Profile: $profileName"
     Write-Host "Active Modules: $activeModules"
+
+    $dest = "$PSScriptRoot\profile.json"
+    Invoke-Expression "xcopy .\profiles\$profileName.json $dest /Y /-I"
 }
 catch {
     Write-Error "Could not load profile from file .\profiles\$profileName.json"
@@ -46,7 +49,7 @@ $MAXEDITTIME = $MAX
 Write-Output "Last sync for this board was at $MAX"
 
 # send all files to the device
-$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw
+$files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw, profile.json
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
@@ -108,7 +111,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Deleting file on microcontroller:"
             ampy --port $port rm $fnn
             Write-Output "Trying another copy:"
-            ampy --port $port put $fnn $fnn
+            ampy --baud 460800 --port $port put $fnn $fnn
             if (!($?)) {
                 Write-Output "Failed again. Giving up."
                 exit 3
@@ -134,6 +137,9 @@ if ($sent -gt 0) {
 } else {
     Write-Output "No changes since last sync."
 }
+
+# Clean up
+Remove-Item profile.json
 
 Write-Output "Rebooting..."
 Restart-Microcontroller $port

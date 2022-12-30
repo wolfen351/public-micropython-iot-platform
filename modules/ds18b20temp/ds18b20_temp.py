@@ -11,7 +11,7 @@ class DS18B20Temp(BasicModule):
     lastTemp = {}
     lastConvert = 0
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         pass
 
     def start(self):

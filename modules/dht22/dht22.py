@@ -9,7 +9,7 @@ class Dht22Monitor(BasicModule):
     currentT = 0
     currentH = 0
 
-    def __init__(self, basicSettings):
+    def __init__(self):
         self.lastConvert = time.ticks_ms()
 
     #@micropython.native 
