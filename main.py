@@ -34,8 +34,6 @@ try:
     import sys
     import gc
     
-    #SerialLog.disable() # disable for live, otherwise you pay 10s startup cost
-
     # some storage
     ledOn = True
     telemetry = dict()
