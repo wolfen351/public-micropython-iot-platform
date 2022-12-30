@@ -69,6 +69,9 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         if (!$f.Contains("\")) {
             $rootFile = $True
         }
+        if ($f.Contains("board_system")) {
+            $rootFile = $True
+        }
 
         if (!$rootFile -and !$activeModule)
         {

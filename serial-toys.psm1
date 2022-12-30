@@ -120,3 +120,15 @@ function Step-Version {
     Write-Host "Version is now: $newVersion"
     Write-Output $newVersion | Out-File -encoding ascii .\version
 }
+
+function Xargs {
+    param(
+        $Cmd
+    )
+    process {
+        $args += ,$_
+    }
+    end {
+        & $Cmd @args
+    }
+}

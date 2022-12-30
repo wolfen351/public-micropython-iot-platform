@@ -18,15 +18,12 @@ try:
     led = Pin(3, Pin.OUT)
     led.on()
 
-    # set the CPU frequency to 240 MHz
-    from serial_log import SerialLog
-    SerialLog.log()
-
-#    SerialLog.log("CPU 240Mhz")
-#    import machine
-#    machine.freq(240000000) 
+    # set the CPU to max speed
+    from board_system.cpu_hardware import CpuHardware
+    CpuHardware.SetCpuMaxSpeed()    
 
     # Import other modules needed
+    from serial_log import SerialLog
     SerialLog.log("Loading code..")
     from modules.mqtt.mqtt_control import MqttControl
     from modules.homeassistant.homeassistant_control import HomeAssistantControl
