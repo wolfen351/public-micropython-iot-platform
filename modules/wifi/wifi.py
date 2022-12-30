@@ -19,8 +19,6 @@ class WifiHandler(BasicModule):
         self.sta_if = network.WLAN(network.STA_IF)
         self.ap_if = network.WLAN(network.AP_IF)
         self.client_id = ubinascii.hexlify(machine.unique_id())
-        self.essid = "%s-%s" % (basicSettings['ShortName'],
-                                self.client_id.decode('ascii')[-4:])
         self.rssi = 0
         self.lastrssitime = 0
         self.lastReconnectTime = 0
@@ -28,6 +26,9 @@ class WifiHandler(BasicModule):
         self.freeram = 0
 
     def start(self):
+        BasicModule.start()
+        self.essid = "%s-%s" % (self.basicSettings['ShortName'], self.client_id.decode('ascii')[-4:])
+
         self.station()
         self.version = ota.local_version()
 

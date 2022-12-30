@@ -18,12 +18,12 @@ class ThingsboardControl(BasicModule):
         self.thingsBoardTelemetryUrl = b"v1/devices/me/telemetry"
         self.mqtt_port = 1883
         self.access_token = None
-        self.basicSettings = basicSettings
         self.telemetry = {}
         self.enabled = b"N"
         self.client = None
 
     def start(self):
+        BasicModule.start()
         settings = ThingsboardSettings()
         settings.load()
         self.enabled = settings.Enable

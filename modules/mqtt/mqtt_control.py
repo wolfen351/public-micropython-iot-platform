@@ -17,12 +17,12 @@ class MqttControl(BasicModule):
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
-        self.basicSettings = basicSettings
         self.telemetry = {}
         self.client = None
         self.commands = []
 
     def start(self):
+        BasicModule.start()
         settings = MqttSettings()
         settings.load()
         self.enabled = settings.Enable

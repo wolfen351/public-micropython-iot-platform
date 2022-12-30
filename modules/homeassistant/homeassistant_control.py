@@ -21,7 +21,6 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_port = 1883
         self.mqtt_user = None
         self.mqtt_password = None
-        self.basicSettings = basicSettings
         self.telemetry = {}
         self.client = None
         self.configuredKeys = []
@@ -32,6 +31,7 @@ class HomeAssistantControl(BasicModule):
 
     #@micropython.native
     def start(self):
+        BasicModule.start()
         settings = HomeAssistantSettings()
         settings.load()
         self.enabled = settings.Enable
