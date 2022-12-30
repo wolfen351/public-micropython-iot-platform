@@ -171,7 +171,7 @@ class WifiHandler(BasicModule):
             if (netSettings.Type == b"Static"):
                 self.sta_if.ifconfig(
                     (netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
-            SerialLog.log("Wifi connection established")
+            SerialLog.log("Wifi connection intitiated")
         except KeyboardInterrupt:
             raise
         except Exception as e:
