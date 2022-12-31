@@ -22,35 +22,62 @@ try:
     from board_system.cpu_hardware import CpuHardware
     CpuHardware.SetCpuMaxSpeed()    
 
-    # Import other modules needed
-    from serial_log import SerialLog
-    SerialLog.log("Loading code..")
-    from modules.mqtt.mqtt_control import MqttControl
-    from modules.homeassistant.homeassistant_control import HomeAssistantControl
-    from modules.thingsboard.thingsboard_control import ThingsboardControl
-    from modules.web.web_processor import WebProcessor
-    from modules.wifi.wifi import WifiHandler
-    from modules.builtin_button.builtin_button_control import BuiltinButtonControl
-    from modules.dht22.dht22 import Dht22Monitor
-    import sys
-    import gc
-    
     # some storage
     ledOn = True
     telemetry = dict()
 
-    # register all the modules
+    # Import other modules needed
+    from serial_log import SerialLog
+    SerialLog.log("Loading modules..")
+    allModules = [ ];
+
+    # Get the list of modules to load
+    import ujson
+    f = open("profile.json",'r')
+    settings_string=f.read()
+    f.close()
+    settings_dict = ujson.loads(settings_string)
+
+    # Preload the web module, it is special
+    from modules.web.web_processor import WebProcessor
     web = WebProcessor()
-    allModules = [ 
-        BuiltinButtonControl(),
-        WifiHandler(), 
-        MqttControl(), 
-        HomeAssistantControl(), 
-        ThingsboardControl(), 
-        web,
-        Dht22Monitor()
-    ]
-    
+    allModules.append(web)
+
+    # load up all other modules
+    import sys
+    import gc
+    for modname in settings_dict['activeModules']:
+        SerialLog.log("Loading module:", modname)
+        if modname == 'basic':
+            pass
+        elif modname == 'mqtt':
+            from modules.mqtt.mqtt_control import MqttControl
+            allModules.append(MqttControl())
+        elif modname == 'homeassistant':
+            from modules.homeassistant.homeassistant_control import HomeAssistantControl
+            allModules.append(HomeAssistantControl())
+        elif modname == 'thingsboard':
+            from modules.thingsboard.thingsboard_control import ThingsboardControl
+            allModules.append(ThingsboardControl())
+        elif modname == 'web':
+            pass # preloaded
+        elif modname == 'wifi':
+            from modules.wifi.wifi import WifiHandler
+            allModules.append(WifiHandler())
+        elif modname == 'builtin_button':
+            from modules.builtin_button.builtin_button_control import BuiltinButtonControl
+            allModules.append(BuiltinButtonControl())
+        elif modname == 'dht22':
+            from modules.dht22.dht22 import Dht22Monitor
+            allModules.append(Dht22Monitor())
+        elif modname == 'ota':
+            pass # used differently
+        elif modname == 'ds18b20temp':
+            from modules.ds18b20temp.ds18b20_temp import DS18B20Temp
+            allModules.append(DS18B20Temp())
+        else:
+            SerialLog.log("Error: Unsupported Module! ", modname);
+   
     # start all the modules up
     routes = {}
     panels = {}
