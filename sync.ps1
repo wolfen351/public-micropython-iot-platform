@@ -26,7 +26,7 @@ catch {
 
 # Connect to the board
 $port = Find-MicrocontrollerPort
-
+Start-Sleep 2
 Write-Host "Checking when board was last updated.."
 Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat 2> $null
