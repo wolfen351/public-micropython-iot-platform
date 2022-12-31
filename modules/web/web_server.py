@@ -30,7 +30,7 @@ class WebServer():
         self.httpsServer.sock.listen(5)
         self.httpsServer.sock.setblocking(False)
 
-    #@micropython.native
+    
     def handle(self, sock, event, others):
         if sock is self.httpServer.sock:
             # client connecting on port 80, so spawn off a new

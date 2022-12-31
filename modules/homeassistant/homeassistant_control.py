@@ -29,7 +29,7 @@ class HomeAssistantControl(BasicModule):
         self.messageStr = b""
         self.commands = []
 
-    #@micropython.native
+    
     def start(self):
         BasicModule.start(self)
         settings = HomeAssistantSettings()
@@ -46,7 +46,7 @@ class HomeAssistantControl(BasicModule):
         else:
             self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
 
-    #@micropython.native     
+         
     def tick(self):
         if (self.enabled == b"Y"):
             if (self.sta_if.isconnected()):
@@ -59,11 +59,11 @@ class HomeAssistantControl(BasicModule):
                     self.connect_and_subscribe()
                     raise
 
-    #@micropython.native
+    
     def getTelemetry(self):
         return {}
 
-    #@micropython.native
+    
     def processTelemetry(self, telemetry):
 
         if (self.enabled != b"Y"):
@@ -117,17 +117,17 @@ class HomeAssistantControl(BasicModule):
                     self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
             self.telemetry = telemetry.copy()
 
-    #@micropython.native
+    
     def getCommands(self):
         c = self.commands
         self.commands = []
         return c
 
-    #@micropython.native
+    
     def processCommands(self, commands):
         pass
 
-    #@micropython.native
+    
     def getRoutes(self):
         return {
             b"/ha": b"/modules/homeassistant/web_ha.html", 
@@ -136,14 +136,14 @@ class HomeAssistantControl(BasicModule):
         }
 
     # Internal Code 
-    #@micropython.native
+    
     def loadhasettings(self, params):
         settings =  self.getsettings()
         headers = okayHeader
         data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
         return data, headers
 
-    #@micropython.native
+    
     def savehasettings(self, params):
         # Read form params
         enable = unquote(params.get(b"enable", None))
@@ -155,12 +155,12 @@ class HomeAssistantControl(BasicModule):
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 
-    #@micropython.native
+    
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
         self.commands.append(topic + b"/" + msg)
 
-    #@micropython.native
+    
     def connect_and_subscribe(self):
         self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_port)
         self.client.set_callback(self.sub_cb)
@@ -171,7 +171,7 @@ class HomeAssistantControl(BasicModule):
         self.configuredKeys = []
         SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
 
-    #@micropython.native
+    
     def get_basic_payload(self, name, uniqueid, attr):
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
@@ -189,7 +189,7 @@ class HomeAssistantControl(BasicModule):
         }
         return basicPayload
 
-    #@micropython.native
+    
     def home_assistant_configure(self, key):
         
         if key not in self.configuredKeys:
@@ -288,7 +288,7 @@ class HomeAssistantControl(BasicModule):
             #     SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
             #     self.client.publish("%s/ledsecondary%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
 
-    #@micropython.native
+    
     def settings(self, settingsVals):
         # Apply the new settings
         self.enabled = settingsVals[0]
@@ -312,7 +312,7 @@ class HomeAssistantControl(BasicModule):
         settings.Publish = self.topic_pub
         settings.write()
     
-    #@micropython.native 
+     
     def getsettings(self):
         s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
         return s

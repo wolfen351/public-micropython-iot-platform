@@ -15,7 +15,11 @@ class DS18B20Temp(BasicModule):
         pass
 
     def start(self):
-        self.ds_pin = machine.Pin(18)
+        BasicModule.start(self)
+
+        self.pinNumber = self.basicSettings['ds18b20']['pin'] # default is 18
+        SerialLog.log("Configured to look for ds18b20 on pin: ", self.pinNumber)
+        self.ds_pin = machine.Pin(self.pinNumber)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         self.roms = self.ds_sensor.scan()
         SerialLog.log('Found DS devices: ', self.roms)
