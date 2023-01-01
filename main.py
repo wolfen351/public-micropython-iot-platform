@@ -75,6 +75,9 @@ try:
         elif modname == 'ds18b20temp':
             from modules.ds18b20temp.ds18b20_temp import DS18B20Temp
             allModules.append(DS18B20Temp())
+        elif modname == 'ntp':
+            from modules.ntp.ntp import NtpSync
+            allModules.append(NtpSync())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
    

@@ -1,3 +1,4 @@
+import machine
 from serial_log import SerialLog
 import uerrno
 import uio
@@ -22,13 +23,15 @@ class WebServer():
         self.request = dict()
         self.conns = dict()
 
-        # queue up to 1 connection requests before refusing
+        # queue up to 5 connection requests before refusing
         self.httpServer.sock.listen(5)
         self.httpServer.sock.setblocking(False)
 
         self.httpsServer = Server(self.poller, 443, socket.SOCK_STREAM, "WebHTTPS Server")
         self.httpsServer.sock.listen(5)
         self.httpsServer.sock.setblocking(False)
+
+        self.shouldReboot = False
 
     
     def handle(self, sock, event, others):
@@ -105,15 +108,15 @@ class WebServer():
             try:
                 if (req.path.endswith(b".js")):
                     headers += "content-type: application/javascript\r\n"
-                return open(req.path, "rb"), headers
+                return open(req.path, "rb"), headers, False
             except OSError: #open failed
                 headers = b"HTTP/1.1 404 Not Found\r\n"
-                return uio.BytesIO(b""), headers
+                return uio.BytesIO(b""), headers, False
 
         if type(route) is bytes:
             # expect a filename, so return contents of file
             SerialLog("Returning file:", route)
-            return open(route, "rb"), headers
+            return open(route, "rb"), headers, False
 
         if callable(route):
             # call a function, which may or may not return a response
@@ -121,17 +124,20 @@ class WebServer():
                 response = route(req.params)
                 body = response[0] or b""
                 headers = response[1]
-                return uio.BytesIO(body), headers
+                shouldReboot = False
+                if len(response) == 3:
+                    shouldReboot = headers[2]
+                return uio.BytesIO(body), headers, shouldReboot
             except KeyboardInterrupt:
                 raise
             except Exception as e:
                 import sys
                 sys.print_exception(e)
                 headers = b"HTTP/1.1 500 Function failed\r\n"
-                return uio.BytesIO(b""), headers
+                return uio.BytesIO(b""), headers, False
 
         headers = b"HTTP/1.1 404 Not Found\r\n"
-        return uio.BytesIO(b""), headers
+        return uio.BytesIO(b""), headers, False
 
     def read(self, s):
         try:
@@ -157,7 +163,8 @@ class WebServer():
 
             # get the completed request
             req = self.parse_request(self.request.pop(sid))
-            body, headers = self.get_response(req)
+            body, headers, shouldReboot = self.get_response(req)
+            self.shouldReboot = shouldReboot
             self.prepare_write(s, body, headers)
         except:
             self.close(s)
@@ -223,6 +230,8 @@ class WebServer():
             del self.request[sid]
         if sid in self.conns:
             del self.conns[sid]
+        if (self.shouldReboot):
+            machine.reset()
 
     def start(self):
         SerialLog.log("Web server started")

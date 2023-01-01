@@ -58,12 +58,16 @@ class MqttControl(BasicModule):
         if (self.enabled != b"Y"):
             return
 
+        if (not self.sta_if.isconnected()):
+            return
+
         if (self.client != None):
             stuffToPost = []
             
             for attr, value in telemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    stuffToPost.append([attr, telemetry[attr]])
+                    if (attr != "time"): # dont post the time every second
+                        stuffToPost.append([attr, telemetry[attr]])
 
             if (len(stuffToPost) > 0):
                 for bit in stuffToPost:

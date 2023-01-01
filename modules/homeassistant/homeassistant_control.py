@@ -198,7 +198,6 @@ class HomeAssistantControl(BasicModule):
 
             self.configuredKeys.append(key)
 
-
             attr = key.replace("/","_")
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/')):
@@ -280,14 +279,6 @@ class HomeAssistantControl(BasicModule):
                 })
                 SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
                 self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
-
-
-
-            # if (key.startswith(b'ledsecondary')):
-            #     payload = self.get_basic_payload("Primary Colour", safeid, attr) 
-            #     SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
-            #     self.client.publish("%s/ledsecondary%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
-
     
     def settings(self, settingsVals):
         # Apply the new settings

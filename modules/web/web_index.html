@@ -134,7 +134,7 @@
     fetch('/panels')
       .then(response => response.json())
       .then(files => {
-        for (let f of Object.keys(files)) {
+        for (let f of Object.keys(files).sort()) {
           fetch(files[f])
             .then(panel => {
               panel.text().then(t => $("#panels").append(t));
@@ -142,6 +142,10 @@
         }
         getTelemetry();
       });
+
+    function leftFillNum(num, targetLength) {
+      return num.toString().padStart(targetLength, 0);
+    }
 
     function getTelemetry() {
       setTimeout(function () {
@@ -180,6 +184,10 @@
                   } else {
                     panelItem.html('<input type="checkbox" id="scales" name="scales">');
                   }
+                }
+                // FORMAT AS TIME
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'timearray') {
+                  panelItem.html(s[key][0] + "/" + s[key][1] + "/" + s[key][2] + "  " + leftFillNum(s[key][3],2) + ":" + leftFillNum(s[key][4],2) + ":" + leftFillNum(s[key][5],2));
                 }
                 // JUST DISPLAY IT
                 else {
