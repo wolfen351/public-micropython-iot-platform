@@ -120,8 +120,7 @@ class WebProcessor(BasicModule):
     # Simple reboot
      
     def webReboot(self, params):
-        machine.reset()
-
+        return "", okayHeader, True
      
     def webSaveName(self, params):
         name = unquote(params.get(b"name", None))

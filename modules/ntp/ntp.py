@@ -1,10 +1,12 @@
+import machine
 from modules.basic.basic_module import BasicModule
+from modules.ntp.ntp_settings import NtpSettings
+from modules.web.web_processor import okayHeader, unquote
 from serial_log import SerialLog
 import ntptime
 import time
 import network
-
-
+ 
 # Screen is 320x240 px
 # X is left to right on the small side (0-240)
 # Y is up to down on the long side (0-320)
@@ -13,8 +15,8 @@ class NtpSync(BasicModule):
 
     gotTime = False
     ntptime.host = "0.nz.pool.ntp.org"
-    UTC_BASE_OFFSET = 12 * 60 * 60
-    UTC_OFFSET = 12 * 60 * 60
+    UTC_BASE_OFFSET = 0 # seconds from utc without DST
+    UTC_OFFSET = 0 # seconds from utc with DST
     previous = [-1,-1,-1,-1,-1,-1,-1]
 
     def __init__(self):
@@ -23,6 +25,10 @@ class NtpSync(BasicModule):
 
     def start(self):
         self.sta_if = network.WLAN(network.STA_IF)
+        self.settings = NtpSettings()
+        self.settings.load()
+        self.UTC_BASE_OFFSET = self.settings.defaultOffset * 60 * 60
+        self.UTC_OFFSET = self.UTC_BASE_OFFSET # TODO: Implement DST here
 
     def tick(self):
 
@@ -40,14 +46,11 @@ class NtpSync(BasicModule):
                 except Exception as e:
                     SerialLog.log("Error syncing time: ", e)
 
-        doy = time.localtime()[-1]
-        if (doy < 92 or doy > 268): # 2 April, 25 Sept
-            self.UTC_OFFSET = self.UTC_BASE_OFFSET + 3600
-
     def getTelemetry(self):
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
         telemetry = {
-            "time" : localTime
+            "time" : localTime,
+            "timeZone": self.settings.tzIANACode
         }
         return telemetry
 
@@ -62,9 +65,30 @@ class NtpSync(BasicModule):
 
     def getRoutes(self):
         return {
+            b"/ntp": b"/modules/ntp/ntp_settings.html",
+            b"/spacetime.min.js": b"/modules/ntp/spacetime.min.js",
+            b"/timezones.js": b"/modules/ntp/timezones.js",
+            b"/ntploadsettings": self.loadntpsettings,
+            b"/ntpsavesettings": self.saventpsettings,
         }
 
     def getIndexFileName(self):
-        return {  }
+        return {"ntp": "/modules/ntp/ntp_index.html"}
 
     # Internal code here
+
+    def loadntpsettings(self, params):
+        settings = NtpSettings()
+        settings.load()
+        headers = okayHeader
+        data = b"{ \"tz\": \"%s\", \"defaultOffset\": \"%s\" }" % (settings.tzIANACode, settings.defaultOffset)
+        return data, headers
+
+    def saventpsettings(self, params):
+        # Read form params
+        tz = unquote(params.get(b"tz", None))
+        defaultOffset = int(unquote(params.get(b"defaultOffset", None)))
+        settings = NtpSettings(tz, defaultOffset)
+        settings.write()
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers, True

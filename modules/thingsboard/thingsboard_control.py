@@ -60,12 +60,14 @@ class ThingsboardControl(BasicModule):
             
             for attr, value in self.telemetry.items():
                 if (value != telemetry[attr]):
-                    stuffToPost.update({attr : telemetry[attr]})
+                    if (attr != "time"): # dont post the time every second
+                        stuffToPost.update({attr : telemetry[attr]})
 
             if (len(stuffToPost) > 0):
-                messageStr = json.dumps(stuffToPost)
-                SerialLog.log("Sending TB MQTT: ", messageStr)
-                self.client.publish(self.thingsBoardTelemetryUrl, messageStr)
+                if (self.sta_if.isconnected()):
+                    messageStr = json.dumps(stuffToPost)
+                    SerialLog.log("Sending TB MQTT: ", messageStr)
+                    self.client.publish(self.thingsBoardTelemetryUrl, messageStr)
 
             self.telemetry = telemetry.copy()
 

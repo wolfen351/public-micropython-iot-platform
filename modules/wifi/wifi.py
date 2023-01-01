@@ -142,9 +142,7 @@ class WifiHandler(BasicModule):
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         # Connect using the new settings
         self.station()
-        # Reboot
-        machine.reset()
-        return b"", headers
+        return b"", headers, True
 
     def ap(self):
         # Enable AP
