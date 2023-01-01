@@ -75,6 +75,9 @@ try:
         elif modname == 'ds18b20temp':
             from modules.ds18b20temp.ds18b20_temp import DS18B20Temp
             allModules.append(DS18B20Temp())
+        elif modname == 'temphistory':
+            from modules.temphistory.temphistory import TempHistory
+            allModules.append(TempHistory())
         elif modname == 'ntp':
             from modules.ntp.ntp import NtpSync
             allModules.append(NtpSync())
