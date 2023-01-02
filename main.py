@@ -46,8 +46,10 @@ try:
     # load up all other modules
     import sys
     import gc
+    gc.collect()
+
     for modname in settings_dict['activeModules']:
-        SerialLog.log("Loading module:", modname)
+        ramfree = gc.mem_free()
         if modname == 'basic':
             pass
         elif modname == 'mqtt':
@@ -83,6 +85,8 @@ try:
             allModules.append(NtpSync())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
+        gc.collect()
+        SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
    
     # start all the modules up
     routes = {}
