@@ -2,8 +2,18 @@
     <div class="title">Temperature History</div>
 
     <div class="line">
-        <div class="lineitem">Time</div>
-        <div dataitem="time" datadisplay="timearray"></div>
+        <div class="lineitem">24h Max</div>
+        <div dataitem="maxtemp"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">24h Min</div>
+        <div dataitem="mintemp"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">24h Avg</div>
+        <div dataitem="avgtemp"></div>
     </div>
 
     <input type="button" class="navbtn" value="See More" onclick="window.location='/temphistory'"></input>
