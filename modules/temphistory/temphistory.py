@@ -31,6 +31,11 @@ class TempHistory(BasicModule):
             'tempmax': self.max,
             'tempavg': (self.sum / self.count) if self.count > 0 else 0,
             'tempcount': self.count,
+
+            'daymin': self.daymin,
+            'daymax': self.daymax,
+            'dayavg': (self.daysum / self.daycount) if self.daycount > 0 else 0,
+            'daycount': self.daycount,
         }
         return telemetry
 
@@ -40,11 +45,17 @@ class TempHistory(BasicModule):
             if (attr.startswith('temperature')):
                 if (value != -127): # exclude unknown value
                     self.count +=1
+                    self.daycount += 1
                     self.sum += value
+                    self.daysum += value
                     if (self.min > value): 
                         self.min = value
                     if (self.max < value):
                         self.max = value
+                    if (self.daymin > value): 
+                        self.daymin = value
+                    if (self.daymax < value):
+                        self.daymax = value
             if (attr == "time"):
                 hour = value[3]
                 day = value[2]
