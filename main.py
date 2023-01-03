@@ -83,6 +83,9 @@ try:
         elif modname == 'ntp':
             from modules.ntp.ntp import NtpSync
             allModules.append(NtpSync())
+        elif modname == 'lilygo_battery':
+            from modules.lilygo_battery.lilygo_battery import LilyGoBattery
+            allModules.append(LilyGoBattery())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
