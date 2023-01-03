@@ -69,7 +69,6 @@
     }
   </style>
   <script src="cash.min.js" crossorigin="anonymous"></script>
-  <script src="spacetime.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -80,12 +79,77 @@
     <h3>History data:</h3>
     <h4>History data displayed below for the past 24h:</h4>
 
+
+    <div style="display:flex;">
+    <div id="today">Data</div>
+    <div id="month">Data</div>
+  </div>
+
   </div>
 
 
   <script type="text/javascript">
+    setInterval(function () {
+      fetch('/temphistorydetail')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
 
+          hour = 0;
+          table = "<div class='thh'>Today</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s.today)) {
+            if (!s.today[hour])
+              s.today[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s.today[hour].min.toFixed(1)} °C</td><td>${s.today[hour].max.toFixed(1)} °C</td><td>${(s.today[hour].sum / s.today[hour].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            hour++;;
+          }
+          table += "</table>";
+          $("#today").html(table);
+
+          day = 0;
+          table = "<div class='thh'>This Month</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Day</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s.month)) {
+            if (!s.month[day])
+              s.month[day] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${day}</td><td>${s.month[day].min.toFixed(1)} °C</td><td>${s.month[day].max.toFixed(1)} °C</td><td>${(s.month[day].sum / s.month[day].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            day++;;
+          }
+          table += "</table>";
+          $("#month").html(table);
+
+
+        });
+    }, 2000);
   </script>
+
+  <style>
+
+.dataList {
+  background: red;
+  border: 1px solid black;
+  background-color: transparent;
+}
+
+.dataList th {
+  font-weight: bold;
+  background: #00006060;
+  border: 1px black solid;
+}
+
+.dataList td {
+  background-color: ;
+  border: 1px black solid;
+  padding: 7px;
+}
+
+div + div {
+  margin-left: 50px;
+}
+
+
+  </style>
 
 </body>
 

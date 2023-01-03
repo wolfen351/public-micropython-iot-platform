@@ -1,6 +1,7 @@
 import json
 from modules.basic.basic_module import BasicModule
 from modules.web.web_processor import okayHeader
+from serial_log import SerialLog
 
 class TempHistory(BasicModule):
 
@@ -9,8 +10,8 @@ class TempHistory(BasicModule):
 
 
     def start(self):
-        self.historyData = [None for i in range(24)]
-        self.historyDataDay = [None for i in range(31)]
+        self.historyToday = [None for i in range(24)]
+        self.historyMonth = [None for i in range(32)]
         self.min = 200
         self.max = -200
         self.count = 0
@@ -40,7 +41,10 @@ class TempHistory(BasicModule):
         return telemetry
 
     def processTelemetry(self, telemetry):
-        # make sure these is a node for each sensor
+
+        if (telemetry["time"][0] == 2000): #exclude when we dont have ntp time
+            return
+
         for attr, value in telemetry.items():
             if (attr.startswith('temperature')):
                 if (value != -127): # exclude unknown value
@@ -61,13 +65,13 @@ class TempHistory(BasicModule):
                 day = value[2]
                 # reset counters every day
                 if (self.currentDay != day):
-                    self.historyDataDay[self.currentDay] = {
-                        "min": self.daymin,
-                        "max": self.daymax,
-                        "count": self.daycount,
-                        "sum": self.daysum
-                    }
-
+                    if (self.currentDay != -1):
+                        self.historyMonth[self.currentDay] = {
+                            "min": self.daymin,
+                            "max": self.daymax,
+                            "count": self.daycount,
+                            "sum": self.daysum
+                        }
                     self.daymin = 200
                     self.daymax = -200
                     self.daycount = 0
@@ -76,19 +80,34 @@ class TempHistory(BasicModule):
 
                 # reset counters every hour
                 if (self.currentHour != hour):
-
-                    self.historyData[self.currentHour] = {
-                        "min": self.min,
-                        "max": self.max,
-                        "count": self.count,
-                        "sum": self.sum
-                    }
+                    if (self.currentHour != -1):
+                        self.historyToday[self.currentHour] = {
+                            "min": self.min,
+                            "max": self.max,
+                            "count": self.count,
+                            "sum": self.sum
+                        }
                     self.min = 200
                     self.max = -200
                     self.count = 0
                     self.sum = 0
                     self.currentHour = hour
 
+                # update current hour
+                self.historyToday[self.currentHour] = {
+                    "min": self.min,
+                    "max": self.max,
+                    "count": self.count,
+                    "sum": self.sum
+                }
+
+                # update current day
+                self.historyMonth[self.currentDay] = {
+                    "min": self.daymin,
+                    "max": self.daymax,
+                    "count": self.daycount,
+                    "sum": self.daysum
+                }
 
     def getCommands(self):
         return []
@@ -104,17 +123,10 @@ class TempHistory(BasicModule):
 
     def tempHistoryDetail(self, params):
         headers = okayHeader
-        data = b""
-
         telemetry = {
-            'tempmin': self.min,
-            'tempmax': self.max,
-            'tempavg': (self.sum / self.count) if self.count > 0 else 0,
-            'tempcount': self.count,
-            'temphistory': self.historyData,
-            'temphistoryMonth': self.historyDataDay
+            'today': self.historyToday,
+            'month': self.historyMonth
         }
-
         data = json.dumps(telemetry)
         return data, headers  
 
