@@ -69,6 +69,9 @@ class HomeAssistantControl(BasicModule):
         if (self.enabled != b"Y"):
             return
 
+        if (not self.sta_if.isconnected()):
+            return
+
         if (self.client != None):
             
             for attr, value in self.telemetry.items():
