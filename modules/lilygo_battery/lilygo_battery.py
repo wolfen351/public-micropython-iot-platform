@@ -1,13 +1,14 @@
 from board_system.cpu_hardware import CpuHardware
 from machine import Pin, ADC
-import machine
-from serial_log import SerialLog
 import network
+import time
 
 class LilyGoBattery:
 
     loopcount = 0
-    voltagePercent = 100
+    voltage = 0
+    voltagePercent = 0
+    lastBatteryCheck = 0
 
     def __init__(self):
         pass
@@ -24,13 +25,19 @@ class LilyGoBattery:
                 CpuHardware.lightSleep(600000) # sleep for 10min
                 #machine.deepsleep(60000)
 
+        currentTime = time.ticks_ms()
+        diff = time.ticks_diff(currentTime, self.lastBatteryCheck)
+
+        if (diff > 5000):
+            pot_value = self.pot.read()
+            self.voltage = pot_value * 2 / 1000
+            self.voltagePercent = round(((pot_value * 2) / 5842) * 100)
+            self.lastBatteryCheck = time.ticks_ms()
+
     def getTelemetry(self):
 
-        pot_value = self.pot.read()
-        self.voltagePercent = round(((pot_value * 2) / 5842) * 100)
-
         return { 
-            "voltage": pot_value * 2 / 1000,
+            "voltage": self.voltage,
             "voltagePercent": self.voltagePercent
         }
 

@@ -22,6 +22,7 @@ class TempHistory(BasicModule):
         self.daysum = 0
         self.currentHour = -1
         self.currentDay = -1
+        self.lastRead = 0 # last time we got fresh temp data
 
     def tick(self):
         pass
@@ -44,6 +45,11 @@ class TempHistory(BasicModule):
 
         if (telemetry["time"][0] == 2000): #exclude when we dont have ntp time
             return
+
+        if (telemetry["tempReadAt"] == self.lastRead): # only cycle if we have freesh data
+            return
+
+        self.lastRead = telemetry["tempReadAt"]
 
         for attr, value in telemetry.items():
             if (attr.startswith('temperature')):

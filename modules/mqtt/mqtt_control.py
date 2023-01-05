@@ -66,10 +66,15 @@ class MqttControl(BasicModule):
             
             for attr, value in telemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    if (attr != "time"): # dont post the time every second
+                    if (attr != "time" and attr != "voltage"): # dont post the time or voltage every second
                         stuffToPost.append([attr, telemetry[attr]])
 
             if (len(stuffToPost) > 0):
+
+                # post these values iff we also have other stuff to post
+                stuffToPost.append(["time", telemetry["time"]])
+                stuffToPost.append(["voltage", telemetry["voltage"]])
+
                 for bit in stuffToPost:
                     self.client.publish(self.topic_pub + b"/%s" % (bit[0]), str(bit[1]), True)
 

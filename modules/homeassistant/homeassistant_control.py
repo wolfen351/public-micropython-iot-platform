@@ -26,7 +26,7 @@ class HomeAssistantControl(BasicModule):
         self.configuredKeys = []
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
-        self.messageStr = b""
+        self.jsonOfPreviousValuesToCheckForChanges = b""
         self.commands = []
 
     
@@ -82,14 +82,19 @@ class HomeAssistantControl(BasicModule):
                 if (attr not in self.configuredKeys):
                     self.home_assistant_configure(attr)
 
-            messageStr = ujson.dumps(telemetry)
-            messageStr = messageStr.replace("/","_")
-            # dont send duplicate messages
-            if (self.messageStr != messageStr):
-                SerialLog.log("Sending HA MQTT: ", messageStr)
-                self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageStr)
+            telemetryToCheckForChanges = telemetry.copy()
+            telemetryToCheckForChanges.pop("time") # dont report on time changes, will still send time in message
+            telemetryToCheckForChanges.pop("voltage") # dont report on voltage changes, will still send time in message
+            
+            jsonOfValuesToCheckForChanges = ujson.dumps(telemetryToCheckForChanges)
 
-                self.messageStr = messageStr
+            # dont send duplicate messages
+            if (self.jsonOfPreviousValuesToCheckForChanges != jsonOfValuesToCheckForChanges):
+                messageToSend = ujson.dumps(telemetry).replace("/","_")
+                SerialLog.log("Sending HA MQTT: ", messageToSend)
+                self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend)
+
+                self.jsonOfPreviousValuesToCheckForChanges = jsonOfValuesToCheckForChanges
 
                 if ("ledprimary" in telemetry):
                     state = {

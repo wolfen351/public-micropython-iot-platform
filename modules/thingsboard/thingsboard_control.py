@@ -60,10 +60,15 @@ class ThingsboardControl(BasicModule):
             
             for attr, value in self.telemetry.items():
                 if (value != telemetry[attr]):
-                    if (attr != "time"): # dont post the time every second
+                    if (attr != "time" and attr != "voltage"): # dont post the time, voltage every second
                         stuffToPost.update({attr : telemetry[attr]})
 
             if (len(stuffToPost) > 0):
+
+                # post these values iff we also have other stuff to post
+                stuffToPost.update({"time": telemetry["time"]})
+                stuffToPost.update({"voltage": telemetry["voltage"]})
+
                 if (self.sta_if.isconnected()):
                     messageStr = json.dumps(stuffToPost)
                     SerialLog.log("Sending TB MQTT: ", messageStr)
