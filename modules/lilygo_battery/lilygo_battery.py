@@ -21,13 +21,13 @@ class LilyGoBattery:
     def tick(self):
         if (not self.sta_if.isconnected() or self.voltagePercent < 95): # no wifi, or battery is discharging, so enable sleep
             self.loopcount += 1
-            if (self.loopcount > 400 and (self.loopcount % 100) == 0):
-                CpuHardware.lightSleep(600000) # sleep for 10min
+            if (self.loopcount > 600 and (self.loopcount % 600) == 0):
+                CpuHardware.lightSleep(120000) # sleep for 10min
                 #machine.deepsleep(60000)
 
+        # check battery voltage every 5s
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastBatteryCheck)
-
         if (diff > 5000):
             pot_value = self.pot.read()
             self.voltage = pot_value * 2 / 1000

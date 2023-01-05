@@ -26,7 +26,6 @@ class HomeAssistantControl(BasicModule):
         self.configuredKeys = []
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
-        self.jsonOfPreviousValuesToCheckForChanges = b""
         self.commands = []
 
     
@@ -72,57 +71,52 @@ class HomeAssistantControl(BasicModule):
         if (not self.sta_if.isconnected()):
             return
 
+        # record telemetry we may need
+        for attr, value in self.telemetry.items():
+            if (attr == "ip"):
+                self.ip = value
+            if (attr == "version"):
+                self.version = value
+
+        # tell home assistant about any new keys
         if (self.client != None):
-            
             for attr, value in self.telemetry.items():
-                if (attr == "ip"):
-                    self.ip = value
-                if (attr == "version"):
-                    self.version = value
                 if (attr not in self.configuredKeys):
                     self.home_assistant_configure(attr)
 
-            telemetryToCheckForChanges = telemetry.copy()
-            telemetryToCheckForChanges.pop("time") # dont report on time changes, will still send time in message
-            telemetryToCheckForChanges.pop("voltage") # dont report on voltage changes, will still send time in message
-            
-            jsonOfValuesToCheckForChanges = ujson.dumps(telemetryToCheckForChanges)
+        # tell home assistant about any new values
+        if (self.hasTelemetryChanged(telemetry)):
+            messageToSend = ujson.dumps(telemetry).replace("/","_")
+            SerialLog.log("Sending HA MQTT: ")
+            self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend)
 
-            # dont send duplicate messages
-            if (self.jsonOfPreviousValuesToCheckForChanges != jsonOfValuesToCheckForChanges):
-                messageToSend = ujson.dumps(telemetry).replace("/","_")
-                SerialLog.log("Sending HA MQTT: ", messageToSend)
-                self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend)
+            if ("ledprimary" in telemetry):
+                state = {
+                    "state": telemetry["ledstate"],
+                    "brightness": telemetry["ledbrightness"],
+                    "color_mode": "rgb",
+                    "color": {
+                        "r": telemetry["ledprimaryr"],
+                        "g": telemetry["ledprimaryg"],
+                        "b": telemetry["ledprimaryb"]
+                    },
+                    "effect": telemetry["ledaction"]
+                }
+                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
 
-                self.jsonOfPreviousValuesToCheckForChanges = jsonOfValuesToCheckForChanges
-
-                if ("ledprimary" in telemetry):
-                    state = {
-                        "state": telemetry["ledstate"],
-                        "brightness": telemetry["ledbrightness"],
-                        "color_mode": "rgb",
-                        "color": {
-                            "r": telemetry["ledprimaryr"],
-                            "g": telemetry["ledprimaryg"],
-                            "b": telemetry["ledprimaryb"]
-                        },
-                        "effect": telemetry["ledaction"]
-                    }
-                    self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
-
-                if ("ledsecondary" in telemetry):
-                    state = {
-                        "state": telemetry["ledstate"],
-                        "brightness": telemetry["ledbrightness"],
-                        "color_mode": "rgb",
-                        "color": {
-                            "r": telemetry["ledsecondaryr"],
-                            "g": telemetry["ledsecondaryg"],
-                            "b": telemetry["ledsecondaryb"]
-                        },
-                        "effect": telemetry["ledaction"]
-                    }
-                    self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
+            if ("ledsecondary" in telemetry):
+                state = {
+                    "state": telemetry["ledstate"],
+                    "brightness": telemetry["ledbrightness"],
+                    "color_mode": "rgb",
+                    "color": {
+                        "r": telemetry["ledsecondaryr"],
+                        "g": telemetry["ledsecondaryg"],
+                        "b": telemetry["ledsecondaryb"]
+                    },
+                    "effect": telemetry["ledaction"]
+                }
+                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
             self.telemetry = telemetry.copy()
 
     
@@ -144,6 +138,14 @@ class HomeAssistantControl(BasicModule):
         }
 
     # Internal Code 
+
+    def hasTelemetryChanged(self, newTelemetry):
+        thingsThatChanged = 0
+        for attr, value in newTelemetry.items():
+            if (value != self.telemetry.get(attr)):
+                if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second
+                    thingsThatChanged += 1
+        return thingsThatChanged > 0
     
     def loadhasettings(self, params):
         settings =  self.getsettings()
@@ -211,44 +213,44 @@ class HomeAssistantControl(BasicModule):
             if (key.startswith(b'temperature/')):
                 payload = self.get_basic_payload("Temperature", safeid, attr) 
                 payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr) 
                 payload.update({ "dev_cla": "humidity", "unit_of_meas": "%RH"})
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'rssi')):
                 payload = self.get_basic_payload("RSSI", safeid, attr) 
                 payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
                 
             if (key.startswith(b'ip')):
                 payload = self.get_basic_payload("IP", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ssid')):
                 payload = self.get_basic_payload("SSID", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ac_mode')):
                 payload = self.get_basic_payload("ac_mode", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ac_setpoint')):
                 payload = self.get_basic_payload("ac_setpoint", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr) 
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
 
             if (key.startswith(b'ledprimaryb')):
@@ -267,7 +269,7 @@ class HomeAssistantControl(BasicModule):
 	                    "unique_id": safeid,
                         "stat_t": "~/ledprimaryrgbstate",
                 })
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
             if (key.startswith(b'ledsecondaryb')):
                 payload = self.get_basic_payload("Secondary Colour", safeid, attr) 
@@ -285,7 +287,7 @@ class HomeAssistantControl(BasicModule):
 	                    "unique_id": safeid,
                         "stat_t": "~/ledsecondaryrgbstate",
                 })
-                SerialLog.log("HA MQTT Sending: ", ujson.dumps(payload))
+                SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
     
     def settings(self, settingsVals):

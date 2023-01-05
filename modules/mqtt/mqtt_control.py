@@ -61,25 +61,11 @@ class MqttControl(BasicModule):
         if (not self.sta_if.isconnected()):
             return
 
-        if (self.client != None):
-            stuffToPost = []
-            
+        if (self.client != None and self.hasTelemetryChanged(telemetry)):
             for attr, value in telemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    if (attr != "time" and attr != "voltage"): # dont post the time or voltage every second
-                        stuffToPost.append([attr, telemetry[attr]])
-
-            if (len(stuffToPost) > 0):
-
-                # post these values iff we also have other stuff to post
-                stuffToPost.append(["time", telemetry["time"]])
-                stuffToPost.append(["voltage", telemetry["voltage"]])
-
-                for bit in stuffToPost:
-                    self.client.publish(self.topic_pub + b"/%s" % (bit[0]), str(bit[1]), True)
-
+                    self.client.publish(self.topic_pub + b"/%s" % (attr), str(telemetry[attr]), True)
             self.telemetry = telemetry.copy()
-
 
     def getCommands(self):
         c = self.commands
@@ -97,6 +83,13 @@ class MqttControl(BasicModule):
         }
 
     # Internal Code 
+    def hasTelemetryChanged(self, newTelemetry):
+            thingsThatChanged = 0
+            for attr, value in newTelemetry.items():
+                if (value != self.telemetry.get(attr)):
+                    if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second
+                        thingsThatChanged += 1
+            return thingsThatChanged > 0
 
     def loadmqttsettings(self, params):
         settings =  self.getsettings()
