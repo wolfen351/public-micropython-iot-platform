@@ -102,7 +102,7 @@ class MQTTClient:
     def ping(self):
         self.sock.write(b"\xc0\0")
 
-    def publish(self, topic, msg, retain=False, qos=0):
+    def publishInternal(self, topic, msg, retain=False, qos=0):
         SerialLog.log("MQTT Sending: ", topic, msg)
         pkt = bytearray(b"\x30\0\0\0")
         pkt[0] |= qos << 1 | retain
@@ -136,6 +136,24 @@ class MQTTClient:
                         return
         elif qos == 2:
             assert 0
+
+    def publish(self, topic, msg, retain=False, qos=0):
+        SerialLog.log("MQTT Sending: ", topic, msg)
+        try:
+            self.publishInternal(topic, msg)
+        except Exception as e:
+            SerialLog.log("MQTT failed, reconnecting: ", e)
+            try:
+                self.disconnect()
+            except:
+                pass
+            try:
+                self.connect()
+                SerialLog.log("MQTT reconnected")
+                raise
+            except:
+                SerialLog.log("MQTT failed to reconnect")
+
 
     def subscribe(self, topic, qos=0):
         assert self.cb is not None, "Subscribe callback is not set"

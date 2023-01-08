@@ -19,10 +19,10 @@ class LilyGoBattery:
         self.sta_if = network.WLAN(network.STA_IF)
 
     def tick(self):
-        if (not self.sta_if.isconnected() or self.voltagePercent < 95): # no wifi, or battery is discharging, so enable sleep
+        if (not self.sta_if.isconnected() or self.voltagePercent < 95 or True): # no wifi, or battery is discharging, so enable sleep
             self.loopcount += 1
-            if (self.loopcount > 600 and (self.loopcount % 600) == 0):
-                CpuHardware.lightSleep(120000) # sleep for 10min
+            if (self.loopcount > 600 and (self.loopcount % 800) == 0):
+                CpuHardware.lightSleep(240000) # sleep for 4min
                 #machine.deepsleep(60000)
 
         # check battery voltage every 5s
