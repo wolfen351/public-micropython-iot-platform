@@ -6,8 +6,24 @@ from machine import Pin
 
 class CpuHardware():
 
+    statusPin = None
+
     def __init__(self):
         pass
+
+    @staticmethod
+    def StatusLedOn():
+        if (CpuHardware.statusPin == None):
+            f = open("profile.json",'r')
+            settings_string=f.read()
+            f.close()
+            settings_dict = ujson.loads(settings_string)
+            CpuHardware.statusPin = Pin(settings_dict["statusLedPin"], Pin.OUT)
+        CpuHardware.statusPin.on()
+
+    @staticmethod
+    def StatusLedOff():
+        CpuHardware.statusPin.off()
 
     @staticmethod
     def SetCpuMaxSpeed():

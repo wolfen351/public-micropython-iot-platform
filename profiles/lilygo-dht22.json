@@ -2,5 +2,6 @@
     "name": "LilyGo Battery Powered Temp Sensor",
     "shortName": "lilygo-ds18b20",
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "dht22", "ntp", "temphistory", "lilygo_battery"],
-    "cpuSpeed": 160000000
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 3
 }

@@ -26,10 +26,10 @@ catch {
 
 # Connect to the board
 $port = Find-MicrocontrollerPort
-Start-Sleep 2
+Start-Sleep 4
 Write-Host "Checking when board was last updated.."
 Remove-Item ./lastedit.dat
-ampy --port $port get lastedit.dat > lastedit.dat 2> $null
+ampy --port $port get lastedit.dat > lastedit.dat # 2> $null
 
 if ((Get-Item "lastedit.dat").length -eq 0) {
     Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
