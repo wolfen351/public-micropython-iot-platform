@@ -1,0 +1,7 @@
+{
+    "name": "Esp32R4 4 Relays Board",
+    "shortName": "esp32r4v3-4relay",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "ntp", "wifi"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 2
+}

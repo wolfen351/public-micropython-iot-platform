@@ -55,20 +55,19 @@ class ThingsboardControl(BasicModule):
         if (self.enabled != b"Y"):
             return
 
-        if (self.client != None):
+        if (not self.sta_if.isconnected()):
+            return
+
+        if (self.client != None and self.hasTelemetryChanged(telemetry)):
+
             stuffToPost = {}
-            
-            for attr, value in self.telemetry.items():
-                if (value != telemetry[attr]):
-                    if (attr != "time"): # dont post the time every second
-                        stuffToPost.update({attr : telemetry[attr]})
+            for attr, value in telemetry.items():
+                if (value != self.telemetry.get(attr)):
+                    stuffToPost.update({attr: value})
 
-            if (len(stuffToPost) > 0):
-                if (self.sta_if.isconnected()):
-                    messageStr = json.dumps(stuffToPost)
-                    SerialLog.log("Sending TB MQTT: ", messageStr)
-                    self.client.publish(self.thingsBoardTelemetryUrl, messageStr)
-
+            messageStr = json.dumps(stuffToPost)
+            SerialLog.log("Sending TB MQTT: ")
+            self.client.publish(self.thingsBoardTelemetryUrl, messageStr)
             self.telemetry = telemetry.copy()
 
     def getCommands(self):
@@ -85,6 +84,14 @@ class ThingsboardControl(BasicModule):
         }
 
     # Internal Code 
+
+    def hasTelemetryChanged(self, newTelemetry):
+        thingsThatChanged = 0
+        for attr, value in newTelemetry.items():
+            if (value != self.telemetry.get(attr)):
+                if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second
+                    thingsThatChanged += 1
+        return thingsThatChanged > 0
 
     def connect(self):
         self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)

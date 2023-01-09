@@ -18,6 +18,7 @@ class DS18B20Temp(BasicModule):
         BasicModule.start(self)
 
         self.pinNumber = self.basicSettings['ds18b20']['pin'] # default is 18
+        self.readEveryMs = self.basicSettings['ds18b20']['readEveryMs'] # default is 1000
         SerialLog.log("Configured to look for ds18b20 on pin: ", self.pinNumber)
         self.ds_pin = machine.Pin(self.pinNumber)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
@@ -33,7 +34,7 @@ class DS18B20Temp(BasicModule):
         if (len(self.roms) > 0):
             currentTime = time.ticks_ms()
             diff = time.ticks_diff(currentTime, self.lastConvert)
-            if (diff > 750): 
+            if (diff > self.readEveryMs and diff > 750): 
                 for rom in self.roms:
                     current = self.ds_sensor.read_temp(rom)
                     if (current != self.lastTemp[str(rom)]):
@@ -48,6 +49,7 @@ class DS18B20Temp(BasicModule):
             sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))
             current = self.lastTemp[str(rom)]
             telemetry.update({sensorName:current})
+        telemetry.update({"tempReadAt": self.lastConvert})
         return telemetry
 
     def processTelemetry(self, telemetry):

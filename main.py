@@ -14,12 +14,10 @@ def runSafe(cmd, p1 = None):
 
 try:
     # Turn on the LED to show we are alive
-    from machine import Pin
-    led = Pin(3, Pin.OUT)
-    led.on()
+    from board_system.cpu_hardware import CpuHardware
+    CpuHardware.StatusLedOn()
 
     # set the CPU to max speed
-    from board_system.cpu_hardware import CpuHardware
     CpuHardware.SetCpuMaxSpeed()    
 
     # some storage
@@ -83,6 +81,9 @@ try:
         elif modname == 'ntp':
             from modules.ntp.ntp import NtpSync
             allModules.append(NtpSync())
+        elif modname == 'lilygo_battery':
+            from modules.lilygo_battery.lilygo_battery import LilyGoBattery
+            allModules.append(LilyGoBattery())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
@@ -102,7 +103,13 @@ try:
     web.setPanels(panels)
 
     # Switch off the led before the loop, it will flash if it needs to
-    led.off()
+    for i in range(5):
+        import machine
+        CpuHardware.StatusLedOn()
+        machine.sleep(100)
+        CpuHardware.StatusLedOff()
+        machine.sleep(100)
+
     while True:
 
         # tick all modules
@@ -134,19 +141,19 @@ try:
         if (web.getLedEnabled()):
             ledOn = not ledOn
             if (ledOn):
-                led.on()
+                    CpuHardware.StatusLedOn()
             else:
-                led.off()
+                CpuHardware.StatusLedOff()
         else:
             if (ledOn):
-                led.off()
+                CpuHardware.StatusLedOff()
+
 
 except KeyboardInterrupt:
     raise
 except Exception as e:
     import sys
     from serial_log import SerialLog
-    import machine
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect

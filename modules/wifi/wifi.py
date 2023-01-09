@@ -23,7 +23,7 @@ class WifiHandler(BasicModule):
         self.lastrssitime = 0
         self.lastReconnectTime = 0
         self.version = "unknown"
-        self.freeram = 0
+        self.freeram = -1
 
     def start(self):
         BasicModule.start(self)
@@ -69,6 +69,8 @@ class WifiHandler(BasicModule):
                     self.lastrssitime = now
                     self.freeram = gc.mem_free()
 
+            if (self.freeram == -1):
+                self.freeram = gc.mem_free()
 
         #else:
         #    SerialLog.log(self.ap_if.status('stations'))

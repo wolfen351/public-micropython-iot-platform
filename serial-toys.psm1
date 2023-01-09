@@ -22,8 +22,9 @@ function Test-Port {
 function Find-MicrocontrollerPort {
     Write-Host "Detecting port..."
     $SerialPorts = Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-    $Name = $SerialPorts | Where-Object { ($_.Description -eq 'USB Serial Device') -or ($_.Description -eq 'USB-SERIAL CH340K') } | Select-Object -ExpandProperty Name
+    $Name = $SerialPorts | Where-Object { ($_.Description -eq 'USB Serial Device') -or ($_.Description -eq 'USB-SERIAL CH340K') -or ($_.Description -eq 'Prolific USB-to-Serial Comm Port') } | Select-Object -ExpandProperty Name
     $Name -match "COM\d+" > $null
+
     $port = $Matches.0
 
     try {
@@ -31,9 +32,6 @@ function Find-MicrocontrollerPort {
         if ($null -eq $port) {
             throw "Unable to find serial port"
         }
-
-        Write-Host "Testing connectivity to port $port ..."
-        Test-Port $port
 
         return $port
     }
