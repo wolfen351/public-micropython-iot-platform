@@ -47,10 +47,10 @@ class SerialLog(object):
                         print(message, message2, message3, message4)
             endedAt = time.ticks_ms()
 
-            # # Logging is taking more than 1000ms PER LINE, stopping now
-            # diff = time.ticks_diff(endedAt, startedAt)
-            # if (diff > 1000):
-            #     SerialLog.disable()
+            # Logging is taking more than 1000ms PER LINE, stopping now
+            diff = time.ticks_diff(endedAt, startedAt)
+            if (diff > 1000):
+                SerialLog.disable()
 
 
 

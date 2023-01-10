@@ -23,6 +23,8 @@ def load_ota_cfg():
         settings_string=f.read()
         f.close()
         basicSettings = ujson.loads(settings_string)
+        global shortName
+        global ota_config
         ota_config.update(basicSettings['ota'])
         shortName = basicSettings["shortName"]
         return True

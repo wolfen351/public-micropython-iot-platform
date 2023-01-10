@@ -68,7 +68,12 @@ class HomeAssistantControl(BasicModule):
         if (self.enabled != b"Y"):
             return
 
+        # wait for wifi connection
         if (not self.sta_if.isconnected()):
+            return
+
+        # wait for mqtt connection
+        if (self.client == None):
             return
 
         # record telemetry we may need
@@ -79,10 +84,9 @@ class HomeAssistantControl(BasicModule):
                 self.version = value
 
         # tell home assistant about any new keys
-        if (self.client != None):
-            for attr, value in self.telemetry.items():
-                if (attr not in self.configuredKeys):
-                    self.home_assistant_configure(attr)
+        for attr, value in self.telemetry.items():
+            if (attr not in self.configuredKeys):
+                self.home_assistant_configure(attr)
 
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):

@@ -53,7 +53,6 @@ class CpuHardware():
     @staticmethod
     def lightSleep(timeToNapInMs):
         SerialLog.log("Going to sleep..")
-        machine.sleep(100)
         # lights out
         led = Pin(3, Pin.OUT)
         led.off()

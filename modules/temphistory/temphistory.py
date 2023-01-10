@@ -38,6 +38,9 @@ class TempHistory(BasicModule):
             'daymax': self.daymax,
             'dayavg': (self.daysum / self.daycount) if self.daycount > 0 else 0,
             'daycount': self.daycount,
+
+            'temptoday': self.historyToday,
+            'tempmonth': self.historyMonth            
         }
         return telemetry
 
