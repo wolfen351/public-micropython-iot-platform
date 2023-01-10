@@ -15,14 +15,19 @@ import ujson
 
 GZDICT_SZ = const(31)
 ota_config = {}
+shortName = ""
 
 def load_ota_cfg():
     try:
-        with open('uota.cfg', 'r') as f:
-            ota_config.update(eval(f.read()))
+        f = open("profile.json",'r')
+        settings_string=f.read()
+        f.close()
+        basicSettings = ujson.loads(settings_string)
+        ota_config.update(basicSettings['ota'])
+        shortName = basicSettings["shortName"]
         return True
     except OSError:
-        SerialLog.log('Cannot find uota config file `uota.cfg`. OTA is disabled.')
+        SerialLog.log('Cannot find ota config file in profile.json. OTA is disabled.')
         return False
 
 def recursive_delete(path: str):
@@ -88,12 +93,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
 
-    f = open("profile.json",'r')
-    settings_string=f.read()
-    f.close()
-    basicSettings = ujson.loads(settings_string)
-
-    latestUrl = ota_config['url']  + basicSettings['shortName'].lower() + '/latest'
+    latestUrl = ota_config['url']  + shortName + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
     response = requests.get(latestUrl)
     SerialLog.log("Update Response:", response.status_code, response.text)
@@ -123,12 +123,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
             SerialLog.log('not enough free space for the new firmware')
             return False
 
-        f = open("profile.json",'r')
-        settings_string=f.read()
-        f.close()
-        basicSettings = ujson.loads(settings_string)
-
-        downloadUrl = ota_config['url']  + basicSettings['shortName'].lower() + '/' + remote_filename
+        downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update updates on: ", downloadUrl)
         response = requests.get(downloadUrl)
         with open(ota_config['tmp_filename'], 'wb') as f:

@@ -3,5 +3,11 @@
     "shortName": "esp32r4v3-4relay",
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "ntp", "wifi"],
     "cpuSpeed": 240000000,
-    "statusLedPin" : 2
+    "statusLedPin" : 2,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
 }

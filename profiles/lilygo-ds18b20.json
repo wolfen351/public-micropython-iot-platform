@@ -7,5 +7,11 @@
     "ds18b20": {
         "pin": 9,
         "readEveryMs": 60000
+    },
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
     }
 }
