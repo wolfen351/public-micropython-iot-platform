@@ -14,14 +14,16 @@ class Dht22Monitor(BasicModule):
 
      
     def start(self):
+        BasicModule.start(self)
         self.ts_pin = machine.Pin(8)
         self.dht = dht.DHT22(self.ts_pin)
+        self.readEveryMs = self.basicSettings['dht22']['readEveryMs'] # default is 1000
 
      
     def tick(self):
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastConvert)
-        if (diff > 2500): 
+        if (diff > self.readEveryMs and diff > 2500): 
             self.dht.measure()
             self.currentT = self.dht.temperature()
             self.currentH = self.dht.humidity()
@@ -31,10 +33,10 @@ class Dht22Monitor(BasicModule):
     def getTelemetry(self):
         telemetry = {
             "temperature/dht22" : self.currentT,
-            "humidity/dht22" : self.currentH
+            "humidity/dht22" : self.currentH,
+            "tempReadAt": self.lastConvert
         }
         return telemetry
-
      
     def processTelemetry(self, telemetry):
         pass

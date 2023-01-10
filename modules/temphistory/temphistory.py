@@ -46,7 +46,10 @@ class TempHistory(BasicModule):
 
     def processTelemetry(self, telemetry):
 
-        if (telemetry["time"][0] == 2000): #exclude when we dont have ntp time
+        if (telemetry["time"][0] == 2000): # exclude when we dont have ntp time
+            return
+
+        if (not "tempReadAt" in telemetry): # quit if we havent read a temp
             return
 
         if (telemetry["tempReadAt"] == self.lastRead): # only cycle if we have freesh data

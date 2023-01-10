@@ -4,6 +4,9 @@
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "dht22", "ntp", "temphistory", "lilygo_battery"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
+    "dht22": {
+        "readEveryMs": 20000
+    },    
     "ota": {
         "url": "https://firmware.wolfen.nz/firmware",
         "tmp_filename": "new_firmware.tar.gz",
