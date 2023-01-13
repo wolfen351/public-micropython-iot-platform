@@ -110,6 +110,8 @@ class MqttControl(BasicModule):
 
     def sub_cb(self, topic, msg):
         SerialLog.log("MQTT Command Received: ", topic, msg)
+        # remove the part we subscribe to from the topic
+        topic = topic.replace(self.topic_sub.replace(b"/#", b""), b"") 
         self.commands.append(topic + b"/" + msg)
 
     def connect_and_subscribe(self):
