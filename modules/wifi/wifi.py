@@ -37,8 +37,7 @@ class WifiHandler(BasicModule):
             if (self.sta_if.isconnected() and not self.connected):
                 # New connection
                 self.connected = True
-                SerialLog.log('Wifi Connected! Config:',
-                              self.sta_if.ifconfig())
+                SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
                 # Disable AP
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
@@ -58,6 +57,7 @@ class WifiHandler(BasicModule):
 
             if (not self.sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
                 # Never connected, run an AP after 30s of downtime
+                SerialLog.log("Failed to connect to wifi, switching to AP mode...")
                 self.ap()
 
             if (self.sta_if.isconnected() and self.connected):
@@ -72,8 +72,15 @@ class WifiHandler(BasicModule):
             if (self.freeram == -1):
                 self.freeram = gc.mem_free()
 
-        #else:
-        #    SerialLog.log(self.ap_if.status('stations'))
+        else:
+            if (len(self.ap_if.status('stations')) == 0):
+                now = time.ticks_ms()
+                diff = time.ticks_diff(now, self.lastReconnectTime)
+                if (diff > 60000):
+                    SerialLog.log("No stations connected to AP, switching back to station mode")
+                    self.lastReconnectTime = now
+                    self.apMode = False
+                    self.station()
 
     def getTelemetry(self):
         if (self.apMode):
@@ -83,7 +90,8 @@ class WifiHandler(BasicModule):
                 "rssi": "0",
                 "version": self.version,
                 "freeram": self.freeram,
-                "wifiMode": b"Access Point"
+                "wifiMode": b"Access Point",
+                "stations": len(self.ap_if.status('stations'))
             }
         return {
             "ssid": self.sta_if.config('essid'),
@@ -106,7 +114,7 @@ class WifiHandler(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/network": b"/modules/wifi/web_network.html",
+            b"/network": b"/modules/wifi/web_network.hctml",
             b"/log": b"/modules/wifi/web_log.html",
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings,
@@ -166,12 +174,11 @@ class WifiHandler(BasicModule):
             self.sta_if.config(dhcp_hostname=self.essid)
             netSettings = WifiSettings()
             netSettings.load()
-            SerialLog.log("Network: ", netSettings.Ssid)
             self.sta_if.connect(netSettings.Ssid, netSettings.Password)
             if (netSettings.Type == b"Static"):
                 self.sta_if.ifconfig(
                     (netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
-            SerialLog.log("Wifi connection intitiated")
+            SerialLog.log("Wifi connection starting..")
         except KeyboardInterrupt:
             raise
         except Exception as e:
