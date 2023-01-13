@@ -87,6 +87,9 @@ try:
         elif modname == 'four_relay':
             from modules.four_relay.four_relay import FourRelay
             allModules.append(FourRelay())
+        elif modname == 'four_button':
+            from modules.four_button.four_button_control import FourButton
+            allModules.append(FourButton())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
