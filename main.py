@@ -84,6 +84,9 @@ try:
         elif modname == 'lilygo_battery':
             from modules.lilygo_battery.lilygo_battery import LilyGoBattery
             allModules.append(LilyGoBattery())
+        elif modname == 'four_relay':
+            from modules.four_relay.four_relay import FourRelay
+            allModules.append(FourRelay())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()

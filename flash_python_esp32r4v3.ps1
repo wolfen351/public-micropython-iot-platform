@@ -8,5 +8,5 @@ Write-Output "    Release Button PROG When you hear the prompt tone on usb recon
 Write-Host "Press any key to continue..."
 $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
-esptool.py --chip esp32 --port COM8 erase_flash
-esptool.py --chip esp32 --port COM8 write_flash -z 0x1000 ./firmware/esp32-20220117-v1.18.bin
+esptool.py --chip esp32 --port COM11 erase_flash
+esptool.py --chip esp32 --port COM11 write_flash -z 0x1000 ./firmware/esp32-20220117-v1.18.bin
