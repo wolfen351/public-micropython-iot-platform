@@ -9,5 +9,9 @@
         "tmp_filename": "new_firmware.tar.gz",
         "excluded_files": [],
         "delete": []
+    },
+    "four_button": {
+        "commandsOn": [ "/relay/flip/1","/relay/flip/2","/relay/flip/3","/relay/flip/4"],
+        "commandsOff": [ "","","",""]
     }
 }

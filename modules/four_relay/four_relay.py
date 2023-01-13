@@ -48,6 +48,9 @@ class FourRelay(BasicModule):
             if (c.startswith(b"/relay/off/")):
                 s = int(c.replace(b"/relay/off/", b""))
                 self.off(s)
+            if (c.startswith(b"/relay/flip/")):
+                s = int(c.replace(b"/relay/flip/", b""))
+                self.flip(s)
 
     def getRoutes(self):
         return { 
