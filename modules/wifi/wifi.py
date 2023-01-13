@@ -79,6 +79,7 @@ class WifiHandler(BasicModule):
                 if (diff > 60000):
                     SerialLog.log("No stations connected to AP, switching back to station mode")
                     self.lastReconnectTime = now
+                    self.downTimeStart = now
                     self.apMode = False
                     self.station()
 
