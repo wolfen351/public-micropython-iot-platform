@@ -13,7 +13,7 @@ class DionHallwayLightsControl(BasicModule):
     lightState = [0, 0, 0, 0]
 
     # State of the triggers (0=off)
-    Triggers = [0, 0]
+    triggerState = [0, 0]
 
     # Action says which way we are going
     action = 0 # 0=none 1=up 2=down
@@ -33,24 +33,30 @@ class DionHallwayLightsControl(BasicModule):
     def start(self):
         # Default all the lights to off, so the software matches the HW behaviour
         self.lightState = [0, 0, 0, 0]
+
+        # Load the light settings
+        lightSettings = DionHallwayLightsSettings()
+        lightSettings.load()
+        self.stayOnFor = lightSettings.TimeOnSetting
+        self.delayBetweenLights = lightSettings.DelaySetting
      
     def tick(self):
         # Main Loop
-        if (self.Triggers[0] == 1):
-            SerialLog.log(b"Light: Trigger 1 - " + str(self.Triggers[0]))
+        if (self.triggerState[0] == 1):
+            SerialLog.log(b"Light: Trigger 1")
             self.action = 1
             self.triggeredAt = time.ticks_ms()
 
-        if (self.Triggers[1] == 1):
-            SerialLog.log(b"Light: Trigger 2 - " + str(self.Triggers[1]))
+        if (self.triggerState[1] == 1):
+            SerialLog.log(b"Light: Trigger 2")
             self.action = 2
             self.triggeredAt = time.ticks_ms()
 
         # Reset Triggers
-        self.Triggers[0] = 0
-        self.Triggers[1] = 0
+        self.triggerState[0] = 0
+        self.triggerState[1] = 0
 
-        newLightState = [self.lightState[0], self.lightState[1], self.lightState[2], self.lightState[3]]
+        newLightState = self.lightState.copy()
 
         if (self.action > 0):
             diff = time.ticks_diff(time.ticks_ms(), self.triggeredAt)
@@ -95,12 +101,12 @@ class DionHallwayLightsControl(BasicModule):
 
 
             # send changes as commands
-            for num in range(4):
-                if (newLightState[num] != self.lightState[num] and newLightState[num] == 0):
+            for num, val in enumerate(newLightState):
+                if (val != self.lightState[num] and val == 0):
                     self.commands.append(b"/relay/off/" + str(num+1).encode('ascii'))
                     self.lightState[num] = 0
 
-                if (newLightState[num] != self.lightState[num] and newLightState[num] == 1):
+                if (val != self.lightState[num] and val == 1):
                     self.commands.append(b"/relay/on/" + str(num+1).encode('ascii'))
                     self.lightState[num] = 1
      
@@ -124,7 +130,7 @@ class DionHallwayLightsControl(BasicModule):
         for c in commands:
             if (c.startswith(b"/trigger/")):
                 s = int(c.replace(b"/trigger/", b""))
-                self.Triggers[s] = 1
+                self.triggerState[s] = 1
      
     def getRoutes(self):
         return {
@@ -138,44 +144,22 @@ class DionHallwayLightsControl(BasicModule):
 
     # Internal Methods
     def webLoadSettings(self, params):
-        settings =  self.getsettings()
         headers = okayHeader
-        data = b"{ \"timeOn\": %s, \"delay1\": %s, \"delay2\": %s, \"delay3\": %s, \"delay4\": %s }" % (settings[0], settings[1], settings[2], settings[3], settings[4])
+        data = b"{ \"timeOn\": %s, \"delay\": %s }" % (self.stayOnFor, self.delayBetweenLights)
         return data, headers
      
     def webSaveSettings(self, params):
         # Read form params
-        TimeOn = unquote(params.get(b"TimeOn", None))
-        Delay1 = unquote(params.get(b"Delay1", None))
-        Delay2 = unquote(params.get(b"Delay2", None))
-        Delay3 = unquote(params.get(b"Delay3", None))
-        Delay4 = unquote(params.get(b"Delay4", None))
-        settings = (int(TimeOn), int(Delay1), int(Delay2), int(Delay3), int(Delay4))
-        self.settings(settings)
-        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        return b"", headers
-
-    def settings(self, settingsVals):
-        self.TimeOnSetting = settingsVals[0]
-        self.Delay0Setting = settingsVals[1]
-        self.Delay1Setting = settingsVals[2]
-        self.Delay2Setting = settingsVals[3]
-        self.Delay3Setting = settingsVals[4]
+        self.stayOnFor = int(unquote(params.get(b"TimeOn", None)))
+        self.delayBetweenLights = int(unquote(params.get(b"Delay", None)))
 
         # Save the light settings to disk
         lightSettings = DionHallwayLightsSettings()
-        lightSettings.TimeOnSetting = self.TimeOnSetting
-        lightSettings.Delay0Setting = self.Delay0Setting
-        lightSettings.Delay1Setting = self.Delay1Setting
-        lightSettings.Delay2Setting = self.Delay2Setting
-        lightSettings.Delay3Setting = self.Delay3Setting
+        lightSettings.TimeOnSetting = self.stayOnFor
+        lightSettings.DelaySetting = self.delayBetweenLights
         SerialLog.log(lightSettings)
         lightSettings.write()
-    
-     
-    def getsettings(self):
-        s = (self.TimeOnSetting, self.Delay0Setting, self.Delay1Setting, self.Delay2Setting, self.Delay3Setting)
-        return s
 
-
+        headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+        return b"", headers
 

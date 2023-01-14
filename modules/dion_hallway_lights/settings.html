@@ -89,10 +89,7 @@
     <div class="sett">
       <form action="/lightsavesettings" method="get">
         <span class="lbl">Stay On For:</span><input type="text" name="TimeOn" value="30000" id="TimeOn">ms<br />
-        <span class="lbl">Delay before Light1:</span><input type="text" name="Delay1" value="0" id="Delay1">ms<br />
-        <span class="lbl">Delay before Light2:</span><input type="text" name="Delay2" value="0" id="Delay2">ms<br />
-        <span class="lbl">Delay before Light3:</span><input type="text" name="Delay3" value="0" id="Delay3">ms<br />
-        <span class="lbl">Delay before Light4:</span><input type="text" name="Delay4" value="0" id="Delay4">ms<br />
+        <span class="lbl">Delay between lights:</span><input type="text" name="Delay" value="0" id="Delay">ms<br />
         <button type="submit" class="btn">Save</button>
 
         <button onclick="window.history.back()" class="btn">Back</button>
@@ -111,10 +108,7 @@
           s = data;
 
           $("#TimeOn").val(s.timeOn);
-          $("#Delay1").val(s.delay1);
-          $("#Delay2").val(s.delay2);
-          $("#Delay3").val(s.delay3);
-          $("#Delay4").val(s.delay4);
+          $("#Delay").val(s.delay);
         })
       
     );
