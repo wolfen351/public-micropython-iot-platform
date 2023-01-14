@@ -93,6 +93,9 @@ try:
         elif modname == "dion_hallway_lights":
             from modules.dion_hallway_lights.dion_hallway_lights import DionHallwayLightsControl
             allModules.append(DionHallwayLightsControl())
+        elif modname == "pir":
+            from modules.pir.pirDetect import PIRDetect
+            allModules.append(PIRDetect())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
@@ -115,9 +118,9 @@ try:
     for i in range(5):
         import machine
         CpuHardware.StatusLedOn()
-        machine.sleep(100)
+        machine.sleep(200)
         CpuHardware.StatusLedOff()
-        machine.sleep(100)
+        machine.sleep(200)
 
     while True:
 
