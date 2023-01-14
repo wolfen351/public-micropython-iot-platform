@@ -90,6 +90,9 @@ try:
         elif modname == 'four_button':
             from modules.four_button.four_button_control import FourButton
             allModules.append(FourButton())
+        elif modname == "dion_hallway_lights":
+            from modules.dion_hallway_lights.dion_hallway_lights import DionHallwayLightsControl
+            allModules.append(DionHallwayLightsControl())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
