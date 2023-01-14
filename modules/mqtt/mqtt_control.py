@@ -48,6 +48,10 @@ class MqttControl(BasicModule):
                 except Exception as e:
                     self.connect_and_subscribe()
                     raise
+            
+            # detect loss of wifi after initial connection
+            if (not self.sta_if.isconnected() and self.init == True):
+                self.init = False # re-subscribe if wifi comes back later
 
 
     def getTelemetry(self):
