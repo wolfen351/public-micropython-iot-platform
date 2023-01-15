@@ -3,7 +3,6 @@ from machine import unique_id, reset
 from serial_log import SerialLog
 import ubinascii
 import network
-from modules.wifi.wifi_settings import WifiSettings
 import time
 import modules.ota.ota as ota
 from modules.web.web_processor import okayHeader, unquote
@@ -150,11 +149,17 @@ class WifiHandler(BasicModule):
     # internal functions
 
     def loadnetsettings(self, params):
-        settings = WifiSettings()
-        settings.load()
+
+        ssid = self.getPref("wifi", "ssid", b"NETWORK")
+        password = self.getPref("wifi", "password", b"password")
+        type = self.getPref("wifi", "type", b"DHCP")
+        ip = self.getPref("wifi", "ip", b"")
+        netmask = self.getPref("wifi", "netmask", b"")
+        gateway = self.getPref("wifi", "gateway", b"")
+
         headers = okayHeader
         data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (
-            settings.Ssid, settings.Password, settings.Type, settings.Ip, settings.Netmask, settings.Gateway)
+            ssid, password, type, ip, netmask, gateway)
         return data, headers
 
     def getlog(self, params):
@@ -164,14 +169,13 @@ class WifiHandler(BasicModule):
 
     def savenetsettings(self, params):
         # Read form params
-        ssid = unquote(params.get(b"Ssid", None))
-        password = unquote(params.get(b"Password", None))
-        type = unquote(params.get(b"Type", None))
-        ip = unquote(params.get(b"Ip", None))
-        netmask = unquote(params.get(b"Netmask", None))
-        gateway = unquote(params.get(b"Gateway", None))
-        settings = WifiSettings(ssid, password, type, ip, netmask, gateway)
-        settings.write()
+        self.setPref("wifi", "ssid", unquote(params.get(b"Ssid", None)))
+        self.setPref("wifi", "password", unquote(params.get(b"Password", None)))
+        self.setPref("wifi", "type", unquote(params.get(b"Type", None)))
+        self.setPref("wifi", "ip", unquote(params.get(b"Ip", None)))
+        self.setPref("wifi", "netmask", unquote(params.get(b"Netmask", None)))
+        self.setPref("wifi", "gateway", unquote(params.get(b"Gateway", None)))
+
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         # Connect using the new settings
         self.station()
@@ -193,12 +197,17 @@ class WifiHandler(BasicModule):
                 self.sta_if.disconnect()
             self.sta_if.active(True)
             self.sta_if.config(dhcp_hostname=self.essid)
-            netSettings = WifiSettings()
-            netSettings.load()
-            self.sta_if.connect(netSettings.Ssid, netSettings.Password)
-            if (netSettings.Type == b"Static"):
-                self.sta_if.ifconfig(
-                    (netSettings.Ip, netSettings.Netmask, netSettings.Gateway, b'8.8.8.8'))
+
+            ssid = self.getPref("wifi", "ssid", b"NETWORK")
+            password = self.getPref("wifi", "password", b"password")
+            self.sta_if.connect(ssid, password)
+
+            type = self.getPref("wifi", "type", b"DHCP")
+            if (type == b"Static"):
+                ip = self.getPref("wifi", "ip", b"")
+                netmask = self.getPref("wifi", "netmask", b"")
+                gateway = self.getPref("wifi", "gateway", b"")
+                self.sta_if.ifconfig((ip, netmask, gateway, b'8.8.8.8'))
             SerialLog.log("Wifi connection starting..")
         except KeyboardInterrupt:
             raise
