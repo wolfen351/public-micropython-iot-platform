@@ -136,15 +136,15 @@ class WifiHandler(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/network": b"/modules/wifi/web_network.hctml",
-            b"/log": b"/modules/wifi/web_log.html",
+            b"/network": b"/modules/wifi/settings.html",
+            b"/log": b"/modules/wifi/log.html",
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings,
             b"/getlog": self.getlog
         }
 
     def getIndexFileName(self):
-        return {"wifi": "/modules/wifi/wifi_index.html"}
+        return {"wifi": "/modules/wifi/index.html"}
 
     # internal functions
 
