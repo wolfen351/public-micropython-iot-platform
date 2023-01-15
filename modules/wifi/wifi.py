@@ -12,7 +12,7 @@ import gc
 
 class WifiHandler(BasicModule):
 
-    essid = ""
+    essid = "ElectronicAP"
 
     def __init__(self):
         self.connected = False
@@ -28,8 +28,8 @@ class WifiHandler(BasicModule):
         self.freeram = -1
 
     def preStart(self):
-        BasicModule.start(self)
-        self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+
+        self.ap_if.active(False)
         self.station()
 
         self.version = ota.local_version()
@@ -54,7 +54,8 @@ class WifiHandler(BasicModule):
 
 
     def start(self):
-        pass
+        BasicModule.start(self)
+        self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
 
     def tick(self):
         if (not self.apMode):
@@ -62,7 +63,7 @@ class WifiHandler(BasicModule):
                 # New connection
                 self.connected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
-                # Disable AP
+                # Disable AP on station mode successful connection
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
 
@@ -78,7 +79,7 @@ class WifiHandler(BasicModule):
 
             if (not self.sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
                 # Never connected, run an AP after 30s of downtime
-                SerialLog.log("Failed to connect to wifi, switching to AP mode...")
+                SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
                 self.ap()
 
             if (self.sta_if.isconnected() and self.connected):
@@ -98,7 +99,7 @@ class WifiHandler(BasicModule):
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastReconnectTime)
                 if (diff > 60000):
-                    SerialLog.log("No stations connected to AP, switching back to station mode")
+                    SerialLog.log("No stations connected to AP, retrying station mode too")
                     self.lastReconnectTime = now
                     self.downTimeStart = now
                     self.apMode = False
@@ -183,13 +184,11 @@ class WifiHandler(BasicModule):
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0",
                             "192.168.4.1", "192.168.4.1"))
         self.ap_if.config(essid=self.essid, authmode=network.AUTH_OPEN)
-        self.sta_if.active(False)
         self.apMode = True
 
     def station(self):
         SerialLog.log('\nConnecting to wifi...')
         try:
-            self.ap_if.active(False)
             if (self.sta_if.isconnected()):
                 self.sta_if.disconnect()
             self.sta_if.active(True)
