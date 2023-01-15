@@ -1,6 +1,4 @@
-import machine
 from modules.basic.basic_module import BasicModule
-from modules.ntp.ntp_settings import NtpSettings
 from modules.web.web_processor import okayHeader, unquote
 from serial_log import SerialLog
 import ntptime
@@ -25,9 +23,7 @@ class NtpSync(BasicModule):
 
     def start(self):
         self.sta_if = network.WLAN(network.STA_IF)
-        self.settings = NtpSettings()
-        self.settings.load()
-        self.UTC_BASE_OFFSET = self.settings.defaultOffset * 60 * 60
+        self.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 0) * 60 * 60
         self.UTC_OFFSET = self.UTC_BASE_OFFSET # TODO: Implement DST here
 
     def tick(self):
@@ -53,7 +49,7 @@ class NtpSync(BasicModule):
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
         telemetry = {
             "time" : localTime,
-            "timeZone": self.settings.tzIANACode
+            "timeZone": self.getPref("ntp", "tzIANA", "pacific/auckland")
         }
         return telemetry
 
@@ -81,17 +77,17 @@ class NtpSync(BasicModule):
     # Internal code here
 
     def loadntpsettings(self, params):
-        settings = NtpSettings()
-        settings.load()
         headers = okayHeader
-        data = b"{ \"tz\": \"%s\", \"defaultOffset\": \"%s\" }" % (settings.tzIANACode, settings.defaultOffset)
+        data = b"{ \"tz\": \"%s\", \"defaultOffset\": \"%s\" }" % (self.getPref("ntp", "tzIANA", "pacific/auckland"), self.getPref("ntp", "defaultOffset", 0))
         return data, headers
 
     def saventpsettings(self, params):
         # Read form params
         tz = unquote(params.get(b"tz", None))
         defaultOffset = int(unquote(params.get(b"defaultOffset", None)))
-        settings = NtpSettings(tz, defaultOffset)
-        settings.write()
+
+        self.setPref("ntp", "tzIANA", tz)
+        self.setPref("ntp", "defaultOffset", defaultOffset)
+
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers, True
