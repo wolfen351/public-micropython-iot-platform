@@ -5,7 +5,7 @@ class WifiSettings:
 
     SETTINGS_FILE = "./net.settings"
 
-    def __init__(self, Ssid=b"CIYANET", Password=b"Alpha351", Type=b"DHCP", Ip=b"", Netmask=b"", Gateway=b""):
+    def __init__(self, Ssid=b"NETWORK", Password=b"password", Type=b"DHCP", Ip=b"", Netmask=b"", Gateway=b""):
         self.Ssid=Ssid
         self.Password=Password
         self.Type=Type

@@ -1,8 +1,6 @@
-import machine
 from modules.basic.basic_module import BasicModule
 from modules.web.web_server import WebServer
 import json
-
 from modules.web.web_settings import WebSettings
 
 #public static code

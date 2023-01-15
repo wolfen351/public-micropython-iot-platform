@@ -33,10 +33,10 @@ class WifiHandler(BasicModule):
         self.station()
 
         self.version = ota.local_version()
-        self.lastReconnectTime = time.ticks_ms()
+        startTime = time.ticks_ms()
 
         SerialLog.log('Waiting for wifi...')
-        while (time.ticks_diff(time.ticks_ms(), self.lastReconnectTime) < 5000 and not self.sta_if.isconnected()):
+        while (time.ticks_diff(time.ticks_ms(), startTime) < 5000 and not self.sta_if.isconnected()):
             time.sleep(0.1)
 
         # wait up to 5s for a connection
@@ -48,9 +48,13 @@ class WifiHandler(BasicModule):
             if ota.check_for_updates():
                 ota.install_new_firmware()
                 reset()
+        else:
+            SerialLog.log('No Wifi available, skipping OTA')
+
+
 
     def start(self):
-        self.station()
+        pass
 
     def tick(self):
         if (not self.apMode):

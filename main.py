@@ -39,16 +39,17 @@ try:
     allModules.append(WifiHandler())
     wifi.preStart()
 
-    from modules.web.web_processor import WebProcessor
-    web = WebProcessor()
-    allModules.append(web)
-
     # load up all other modules
     import sys
     import gc
     from serial_log import SerialLog
     gc.collect()
     SerialLog.log("Loading modules..")
+
+    # start Web processing
+    from modules.web.web_processor import WebProcessor
+    web = WebProcessor()
+    allModules.append(web)
 
     for modname in settings_dict['activeModules']:
         ramfree = gc.mem_free()
@@ -113,6 +114,7 @@ try:
         routes.update(runSafe(mod.getRoutes))
         panels.update(runSafe(mod.getIndexFileName))
 
+    SerialLog.log("Setting up Web Routes:")
     web.setRoutes(routes)
     web.setTelemetry(telemetry)
     web.setPanels(panels)
@@ -121,9 +123,9 @@ try:
     for i in range(5):
         from time import sleep
         CpuHardware.StatusLedOn()
-        sleep(200)
+        sleep(0.2)
         CpuHardware.StatusLedOff()
-        sleep(200)
+        sleep(0.2)
 
     SerialLog.log("All loaded. Main program:")
 
@@ -175,7 +177,7 @@ except Exception as e:
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
-        sleep(100)
+        sleep(0.1)
     from machine import reset
     reset()
 
