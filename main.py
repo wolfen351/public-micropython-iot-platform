@@ -24,9 +24,6 @@ try:
     ledOn = True
     telemetry = dict()
 
-    # Import other modules needed
-    from serial_log import SerialLog
-    SerialLog.log("Loading modules..")
     allModules = [ ];
 
     # Get the list of modules to load
@@ -46,13 +43,12 @@ try:
     web = WebProcessor()
     allModules.append(web)
 
-    
-
-
     # load up all other modules
     import sys
     import gc
+    from serial_log import SerialLog
     gc.collect()
+    SerialLog.log("Loading modules..")
 
     for modname in settings_dict['activeModules']:
         ramfree = gc.mem_free()
@@ -128,6 +124,9 @@ try:
         sleep(200)
         CpuHardware.StatusLedOff()
         sleep(200)
+
+    SerialLog.log("All loaded. Main program:")
+
 
     while True:
 
