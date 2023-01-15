@@ -36,10 +36,18 @@ try:
     f.close()
     settings_dict = ujson.loads(settings_string)
 
-    # Preload the web module, it is special
+    # Connect to wifi and web and check for updates
+    from modules.wifi.wifi import WifiHandler
+    wifi = WifiHandler()
+    allModules.append(WifiHandler())
+    wifi.preStart()
+
     from modules.web.web_processor import WebProcessor
     web = WebProcessor()
     allModules.append(web)
+
+    
+
 
     # load up all other modules
     import sys
@@ -62,16 +70,15 @@ try:
         elif modname == 'web':
             pass # preloaded
         elif modname == 'wifi':
-            from modules.wifi.wifi import WifiHandler
-            allModules.append(WifiHandler())
+            pass # preloaded
+        elif modname == 'ota':
+            pass # special and different
         elif modname == 'builtin_button':
             from modules.builtin_button.builtin_button_control import BuiltinButtonControl
             allModules.append(BuiltinButtonControl())
         elif modname == 'dht22':
             from modules.dht22.dht22 import Dht22Monitor
             allModules.append(Dht22Monitor())
-        elif modname == 'ota':
-            pass # used differently
         elif modname == 'ds18b20temp':
             from modules.ds18b20temp.ds18b20_temp import DS18B20Temp
             allModules.append(DS18B20Temp())
@@ -116,11 +123,11 @@ try:
 
     # Switch off the led before the loop, it will flash if it needs to
     for i in range(5):
-        import machine
+        from time import sleep
         CpuHardware.StatusLedOn()
-        machine.sleep(200)
+        sleep(200)
         CpuHardware.StatusLedOff()
-        machine.sleep(200)
+        sleep(200)
 
     while True:
 
@@ -169,6 +176,7 @@ except Exception as e:
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
-        machine.sleep(100)
-    machine.reset()
+        sleep(100)
+    from machine import reset
+    reset()
 

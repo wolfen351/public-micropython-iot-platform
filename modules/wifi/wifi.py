@@ -1,5 +1,5 @@
 from modules.basic.basic_module import BasicModule
-import machine
+from machine import unique_id, reset
 from serial_log import SerialLog
 import ubinascii
 import network
@@ -12,25 +12,45 @@ import gc
 
 class WifiHandler(BasicModule):
 
+    essid = ""
+
     def __init__(self):
         self.connected = False
         self.apMode = False
         self.downTimeStart = time.time()  # start time of no connection
         self.sta_if = network.WLAN(network.STA_IF)
         self.ap_if = network.WLAN(network.AP_IF)
-        self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.client_id = ubinascii.hexlify(unique_id())
         self.rssi = 0
         self.lastrssitime = 0
         self.lastReconnectTime = 0
         self.version = "unknown"
         self.freeram = -1
 
-    def start(self):
+    def preStart(self):
         BasicModule.start(self)
         self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
-
         self.station()
+
         self.version = ota.local_version()
+        self.lastReconnectTime = time.ticks_ms()
+
+        SerialLog.log('Waiting for wifi...')
+        while (time.ticks_diff(time.ticks_ms(), self.lastReconnectTime) < 5000 and not self.sta_if.isconnected()):
+            time.sleep(0.1)
+
+        # wait up to 5s for a connection
+        if self.sta_if.isconnected():
+            # New connection
+            self.connected = True
+            SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
+            # Check for update and update if needed
+            if ota.check_for_updates():
+                ota.install_new_firmware()
+                reset()
+
+    def start(self):
+        self.station()
 
     def tick(self):
         if (not self.apMode):
@@ -41,10 +61,7 @@ class WifiHandler(BasicModule):
                 # Disable AP
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
-                # Check for update and update if needed
-                if ota.check_for_updates():
-                    ota.install_new_firmware()
-                    machine.reset()
+
 
             if (not self.sta_if.isconnected() and self.connected):
                 # Connection lost
