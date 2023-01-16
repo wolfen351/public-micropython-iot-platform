@@ -22,6 +22,7 @@ class TempHistory(BasicModule):
         self.daysum = 0
         self.currentHour = -1
         self.currentDay = -1
+        self.currentMonth = -1
         self.lastRead = 0 # last time we got fresh temp data
 
     def tick(self):
@@ -37,10 +38,7 @@ class TempHistory(BasicModule):
             'daymin': self.daymin,
             'daymax': self.daymax,
             'dayavg': (self.daysum / self.daycount) if self.daycount > 0 else 0,
-            'daycount': self.daycount,
-
-            'temptoday': self.historyToday,
-            'tempmonth': self.historyMonth            
+            'daycount': self.daycount
         }
         return telemetry
 
@@ -72,18 +70,19 @@ class TempHistory(BasicModule):
                         self.daymin = value
                     if (self.daymax < value):
                         self.daymax = value
+
             if (attr == "time"):
                 hour = value[3]
                 day = value[2]
+                month = value[1]
+
+                # reset counters every month
+                if (self.currentMonth != month):
+                    self.historyMonth = [None for i in range(32)]
+
                 # reset counters every day
                 if (self.currentDay != day):
-                    if (self.currentDay != -1):
-                        self.historyMonth[self.currentDay] = {
-                            "min": self.daymin,
-                            "max": self.daymax,
-                            "count": self.daycount,
-                            "sum": self.daysum
-                        }
+                    self.historyToday = [None for i in range(24)]
                     self.daymin = 200
                     self.daymax = -200
                     self.daycount = 0
@@ -92,13 +91,6 @@ class TempHistory(BasicModule):
 
                 # reset counters every hour
                 if (self.currentHour != hour):
-                    if (self.currentHour != -1):
-                        self.historyToday[self.currentHour] = {
-                            "min": self.min,
-                            "max": self.max,
-                            "count": self.count,
-                            "sum": self.sum
-                        }
                     self.min = 200
                     self.max = -200
                     self.count = 0
@@ -106,20 +98,22 @@ class TempHistory(BasicModule):
                     self.currentHour = hour
 
                 # update current hour
-                self.historyToday[self.currentHour] = {
-                    "min": self.min,
-                    "max": self.max,
-                    "count": self.count,
-                    "sum": self.sum
-                }
+                if (self.count > 0):
+                    self.historyToday[self.currentHour] = {
+                        "min": self.min,
+                        "max": self.max,
+                        "count": self.count,
+                        "sum": self.sum
+                    }
 
                 # update current day
-                self.historyMonth[self.currentDay] = {
-                    "min": self.daymin,
-                    "max": self.daymax,
-                    "count": self.daycount,
-                    "sum": self.daysum
-                }
+                if (self.daycount > 0):
+                    self.historyMonth[self.currentDay] = {
+                        "min": self.daymin,
+                        "max": self.daymax,
+                        "count": self.daycount,
+                        "sum": self.daysum
+                    }
 
     def getCommands(self):
         return []
