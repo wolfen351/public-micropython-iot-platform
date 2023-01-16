@@ -31,6 +31,7 @@ try:
     allModules = [ wifi ]
 
     # Get the list of modules to load
+    from serial_log import SerialLog
     SerialLog.log("Loading modules..")
     import ujson
     f = open("profile.json",'r')
@@ -41,7 +42,6 @@ try:
     # load up all other modules
     import sys
     import gc
-    from serial_log import SerialLog
     gc.collect()
 
     # start Web processing
@@ -166,11 +166,12 @@ except KeyboardInterrupt:
     raise
 except Exception as e:
     import sys
+    import time
     from serial_log import SerialLog
     sys.print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
-        sleep(0.1)
+        time.sleep(0.1)
     from machine import reset
     reset()
 
