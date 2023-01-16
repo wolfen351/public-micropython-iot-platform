@@ -13,12 +13,7 @@ class BasicModule:
         settings_string=f.read()
         f.close()
         self.basicSettings = ujson.loads(settings_string)
-
-        if not "prefs.json" in listdir(): 
-            SerialLog.log("No prefs.json file found. Making a new one")
-            f = open("prefs.json", "w")
-            f.write("{}")
-            f.close()
+        self.ensurePrefsExists()
 
     def tick(self):
         pass
@@ -42,9 +37,18 @@ class BasicModule:
         return { }
 
     #internal code
+    def ensurePrefsExists(self):
+        if not "prefs.json" in listdir(): 
+            SerialLog.log("No prefs.json file found. Making a new one")
+            f = open("prefs.json", "w")
+            f.write("{}")
+            f.close()
+
 
     # Returns the preference if possible, otherwise the default
     def getPref(self, node, setting, default):
+        self.ensurePrefsExists()
+
         f = open("prefs.json",'r')
         settings_string=f.read()
         f.close()
@@ -59,20 +63,21 @@ class BasicModule:
 
         return pref[setting]
 
-    def setPref(self, node, setting, value):
+    def setPref(self, sectionName, settingName, value):
+        self.ensurePrefsExists()
+
         f = open("prefs.json",'r')
         settings_string=f.read()
         f.close()
-        prefs = ujson.loads(settings_string)
+        fullDoc = ujson.loads(settings_string)
 
-        if (node not in prefs):
-            prefs.update({node: {setting: value}})
+        if (sectionName not in fullDoc):
+            fullDoc.update({sectionName: {settingName: value}})
 
-        pref = prefs[node]
-        if (setting not in pref):
-            pref.update({setting: value})
+        section = fullDoc[sectionName]
+        section.update({settingName: value})
 
-        data = ujson.dumps(prefs)
+        data = ujson.dumps(fullDoc)
         SerialLog.log("New prefs.json: ", data)
 
         f = open("prefs.json", "w")

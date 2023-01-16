@@ -3,6 +3,8 @@ from machine import Pin, ADC
 import network
 import time
 
+from serial_log import SerialLog
+
 class LilyGoBattery:
 
     loopcount = 0
@@ -17,13 +19,16 @@ class LilyGoBattery:
         self.pot = ADC(Pin(2))
         self.pot.atten(ADC.ATTN_11DB)       #Full range: 3.3v
         self.sta_if = network.WLAN(network.STA_IF)
+        self.ap_if = network.WLAN(network.AP_IF)
 
     def tick(self):
-        if (not self.sta_if.isconnected() or self.voltagePercent < 95 or True): # no wifi, or battery is discharging, so enable sleep
+        if (not self.sta_if.isconnected()): # no wifi, so enable sleep
             self.loopcount += 1
             if (self.loopcount > 600 and (self.loopcount % 800) == 0):
-                CpuHardware.lightSleep(240000) # sleep for 4min
-                #machine.deepsleep(60000)
+                if (not self.ap_if.active()): # suppress sleep if AP is active
+                    CpuHardware.lightSleep(600000) # sleep for 10min
+                else:
+                    SerialLog.log("Staying awake, AP is active")
 
         # check battery voltage every 5s
         currentTime = time.ticks_ms()

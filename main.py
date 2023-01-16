@@ -20,36 +20,35 @@ try:
     # set the CPU to max speed
     CpuHardware.SetCpuMaxSpeed()    
 
+    # Connect to wifi and web and check for updates
+    from modules.wifi.wifi import WifiHandler
+    wifi = WifiHandler()
+    wifi.preStart()
+
     # some storage
     ledOn = True
     telemetry = dict()
-
-    allModules = [ ];
+    allModules = [ wifi ]
 
     # Get the list of modules to load
+    SerialLog.log("Loading modules..")
     import ujson
     f = open("profile.json",'r')
     settings_string=f.read()
     f.close()
     settings_dict = ujson.loads(settings_string)
 
-    # Connect to wifi and web and check for updates
-    from modules.wifi.wifi import WifiHandler
-    wifi = WifiHandler()
-    allModules.append(WifiHandler())
-    wifi.preStart()
-
     # load up all other modules
     import sys
     import gc
     from serial_log import SerialLog
     gc.collect()
-    SerialLog.log("Loading modules..")
 
     # start Web processing
     from modules.web.web_processor import WebProcessor
     web = WebProcessor()
     allModules.append(web)
+    gc.collect()
 
     for modname in settings_dict['activeModules']:
         ramfree = gc.mem_free()
@@ -120,15 +119,9 @@ try:
     web.setPanels(panels)
 
     # Switch off the led before the loop, it will flash if it needs to
-    for i in range(5):
-        from time import sleep
-        CpuHardware.StatusLedOn()
-        sleep(0.2)
-        CpuHardware.StatusLedOff()
-        sleep(0.2)
+    CpuHardware.StatusLedOff()
 
     SerialLog.log("All loaded. Main program:")
-
 
     while True:
 

@@ -97,7 +97,7 @@ class WifiHandler(BasicModule):
             if (len(self.ap_if.status('stations')) == 0):
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastReconnectTime)
-                if (diff > 60000):
+                if (diff > 300000):
                     SerialLog.log("No stations connected to AP, retrying station mode too")
                     self.lastReconnectTime = now
                     self.downTimeStart = now
@@ -150,12 +150,12 @@ class WifiHandler(BasicModule):
 
     def loadnetsettings(self, params):
 
-        ssid = self.getPref("wifi", "ssid", b"NETWORK")
-        password = self.getPref("wifi", "password", b"password")
-        type = self.getPref("wifi", "type", b"DHCP")
-        ip = self.getPref("wifi", "ip", b"")
-        netmask = self.getPref("wifi", "netmask", b"")
-        gateway = self.getPref("wifi", "gateway", b"")
+        ssid = self.getPref("wifi", "ssid", "NETWORK")
+        password = self.getPref("wifi", "password", "password")
+        type = self.getPref("wifi", "type", "DHCP")
+        ip = self.getPref("wifi", "ip", "")
+        netmask = self.getPref("wifi", "netmask", "")
+        gateway = self.getPref("wifi", "gateway", "")
 
         headers = okayHeader
         data = b"{ \"ssid\": \"%s\", \"password\": \"%s\", \"type\": \"%s\", \"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\" }" % (
@@ -191,23 +191,23 @@ class WifiHandler(BasicModule):
         self.apMode = True
 
     def station(self):
-        SerialLog.log('\nConnecting to wifi...')
+        ssid = self.getPref("wifi", "ssid", "NETWORK")
+        SerialLog.log('\nConnecting to wifi...', ssid)
         try:
             if (self.sta_if.isconnected()):
                 self.sta_if.disconnect()
             self.sta_if.active(True)
             self.sta_if.config(dhcp_hostname=self.essid)
 
-            ssid = self.getPref("wifi", "ssid", b"NETWORK")
-            password = self.getPref("wifi", "password", b"password")
+            password = self.getPref("wifi", "password", "password")
             self.sta_if.connect(ssid, password)
 
-            type = self.getPref("wifi", "type", b"DHCP")
-            if (type == b"Static"):
-                ip = self.getPref("wifi", "ip", b"")
-                netmask = self.getPref("wifi", "netmask", b"")
-                gateway = self.getPref("wifi", "gateway", b"")
-                self.sta_if.ifconfig((ip, netmask, gateway, b'8.8.8.8'))
+            type = self.getPref("wifi", "type", "DHCP")
+            if (type == "Static"):
+                ip = self.getPref("wifi", "ip", "")
+                netmask = self.getPref("wifi", "netmask", "")
+                gateway = self.getPref("wifi", "gateway", "")
+                self.sta_if.ifconfig((ip, netmask, gateway, '8.8.8.8'))
             SerialLog.log("Wifi connection starting..")
         except KeyboardInterrupt:
             raise
