@@ -72,6 +72,9 @@ try:
         elif modname == 'builtin_button':
             from modules.builtin_button.builtin_button_control import BuiltinButtonControl
             allModules.append(BuiltinButtonControl())
+        elif modname == 'dht11':
+            from modules.dht11.dht11 import Dht11Monitor
+            allModules.append(Dht11Monitor())
         elif modname == 'dht22':
             from modules.dht22.dht22 import Dht22Monitor
             allModules.append(Dht22Monitor())

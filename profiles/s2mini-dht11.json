@@ -1,0 +1,13 @@
+{
+    "name": "S2 Mini DHT11",
+    "shortName": "s2mini-dht11",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "dht11"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}
