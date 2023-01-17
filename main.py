@@ -102,6 +102,9 @@ try:
         elif modname == "ac_remote":
             from modules.ac_remote.ac_remote import AcRemote
             allModules.append(AcRemote())
+        elif modname == "binary_clock":
+            from modules.binary_clock.binary_clock import BinaryClock
+            allModules.append(BinaryClock())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
