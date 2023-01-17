@@ -15,9 +15,10 @@ class Dht22Monitor(BasicModule):
      
     def start(self):
         BasicModule.start(self)
-        self.ts_pin = machine.Pin(8)
-        self.dht = dht.DHT22(self.ts_pin)
+        self.pin = self.basicSettings['dht22']['pin'] # default is 1000
         self.readEveryMs = self.basicSettings['dht22']['readEveryMs'] # default is 1000
+        self.ts_pin = machine.Pin(self.pin)
+        self.dht = dht.DHT22(self.ts_pin)
 
      
     def tick(self):

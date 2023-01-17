@@ -5,6 +5,7 @@
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
     "dht22": {
+        "pin": 8,
         "readEveryMs": 20000
     },    
     "ota": {
