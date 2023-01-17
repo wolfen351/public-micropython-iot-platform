@@ -42,13 +42,11 @@ try:
     # load up all other modules
     import sys
     import gc
-    gc.collect()
 
     # start Web processing
     from modules.web.web_processor import WebProcessor
     web = WebProcessor()
     allModules.append(web)
-    gc.collect()
 
     for modname in settings_dict['activeModules']:
         ramfree = gc.mem_free()
@@ -108,10 +106,18 @@ try:
         elif modname == "binary_clock":
             from modules.binary_clock.binary_clock import BinaryClock
             allModules.append(BinaryClock())
+        elif modname == "mosfet":
+            from modules.mosfet.mosfet_control import MosfetControl
+            allModules.append(MosfetControl())            
+        elif modname == "gps":
+            from modules.gps.gps_control import GPSControl
+            allModules.append(GPSControl())    
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
-        gc.collect()
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
+
+    gc.collect()
+    SerialLog.log("All code compiled. Ram Free:", gc.mem_free())
    
     # start all the modules up
     routes = {}
@@ -130,8 +136,10 @@ try:
     # Switch off the led before the loop, it will flash if it needs to
     CpuHardware.StatusLedOff()
 
-    SerialLog.log("All loaded. Main program:")
+    gc.collect()
+    SerialLog.log("All modules loaded. Ram Free:", gc.mem_free())
 
+    SerialLog.log("Main loop starting...")
     while True:
 
         # tick all modules
