@@ -99,6 +99,9 @@ try:
         elif modname == "pir":
             from modules.pir.pirDetect import PIRDetect
             allModules.append(PIRDetect())
+        elif modname == "ac_remote":
+            from modules.ac_remote.ac_remote import AcRemote
+            allModules.append(AcRemote())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         gc.collect()
