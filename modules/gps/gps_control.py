@@ -10,8 +10,9 @@ class GPSControl(BasicModule):
     def start(self):
         BasicModule.start(self)
         self.rxPinNumber = self.basicSettings['gps']['rxPin'] # default is 18
+        self.txPinNumber = self.basicSettings['gps']['txPin'] # default is 18
         self.uart = UART(1, 9600)                         # init with given baudrate
-        self.uart.init(9600, bits=8, parity=None, stop=1, tx=18, rx=35) # init with given parameters
+        self.uart.init(9600, bits=8, parity=None, stop=1, tx=self.txPinNumber, rx=self.rxPinNumber) # init with given parameters
         self.myGPS = MicropyGPS()
 
     def tick(self):

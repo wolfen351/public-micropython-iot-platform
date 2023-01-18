@@ -5,7 +5,8 @@
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "gps": {
-        "rxPin": 35
+        "rxPin": 35,
+        "txPin": 18
     },
     "ota": {
         "url": "https://firmware.wolfen.nz/firmware",
