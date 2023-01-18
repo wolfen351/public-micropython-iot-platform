@@ -1,19 +1,22 @@
 from machine import UART
+from modules.basic.basic_module import BasicModule
 from serial_log import SerialLog
 from modules.gps.micropyGPS import MicropyGPS
 
-class GPSControl:
+class GPSControl(BasicModule):
     def __init__(self):
-        self.uart = UART(1, 9600)                         # init with given baudrate
-        self.uart.init(9600, bits=8, parity=None, stop=1, tx=18, rx=19) # init with given parameters
-        self.myGPS = MicropyGPS()
+        pass
 
     def start(self):
-        pass
+        BasicModule.start(self)
+        self.rxPinNumber = self.basicSettings['gps']['rxPin'] # default is 18
+        self.uart = UART(1, 9600)                         # init with given baudrate
+        self.uart.init(9600, bits=8, parity=None, stop=1, tx=18, rx=35) # init with given parameters
+        self.myGPS = MicropyGPS()
 
     def tick(self):
         gpsData = self.uart.readline()     # read a line
-        if (gpsData != None):
+        if (gpsData != None and len(gpsData) > 0):
             for c in gpsData.decode('ascii'): #bytes to string
                 self.myGPS.update(c)
             #SerialLog.log("GPS:", gpsData, self.myGPS.latitude_string() + " " + self.myGPS.longitude_string() + " " + self.myGPS.date_string('s_dmy') + " " + str(self.myGPS.satellites_in_use))

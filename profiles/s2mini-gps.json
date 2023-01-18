@@ -4,6 +4,9 @@
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "gps"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
+    "gps": {
+        "rxPin": 35
+    },
     "ota": {
         "url": "https://firmware.wolfen.nz/firmware",
         "tmp_filename": "new_firmware.tar.gz",
