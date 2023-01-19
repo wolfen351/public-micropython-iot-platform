@@ -1,6 +1,5 @@
 from modules.basic.basic_module import BasicModule
 import machine, neopixel, time
-from modules.ledstrip.ledstrip_settings import LedStripSettings
 from modules.web.web_processor import okayHeader, unquote
 from serial_log import SerialLog
 import ujson
@@ -21,6 +20,7 @@ class LedStripControl(BasicModule):
     ACTION_BOUNCE = 6
     ACTION_RAINBOW = 7
     ACTION_COLOR = 8
+    ACTION_BRIGHTNESS = 9
 
     ACTION_LOOKUP = { 
         b"none" : ACTION_NONE,
@@ -31,19 +31,10 @@ class LedStripControl(BasicModule):
         b"cycle": ACTION_CYCLE,
         b"bounce": ACTION_BOUNCE,
         b"rainbow": ACTION_RAINBOW,
-        b"color": ACTION_COLOR
+        b"color": ACTION_COLOR,
+        b"brightness": ACTION_BRIGHTNESS
     }   
-    ACTION_TEXT_LOOKUP = {
-        ACTION_NONE : b"none",
-        ACTION_WHITE : b"white",
-        ACTION_CLEAR : b"clear",
-        ACTION_SWITCH : b"switch",
-        ACTION_FADE : b"fade",
-        ACTION_CYCLE : b"cycle",
-        ACTION_BOUNCE : b"bounce",
-        ACTION_RAINBOW : b"rainbow",
-        ACTION_COLOR: b"color"
-    }
+    ACTION_TEXT_LOOKUP = {v: k for k, v in ACTION_LOOKUP.items()}
 
     action = ACTION_NONE
     prevaction = ACTION_NONE
@@ -54,12 +45,11 @@ class LedStripControl(BasicModule):
     def start(self):
         BasicModule.start(self)
 
-        ledStripSettings = LedStripSettings()
-        ledStripSettings.load()
-        self.action = ledStripSettings.ledAction
-        self.primary = ledStripSettings.ledColorPrimary
-        self.secondary = ledStripSettings.ledColorSecondary
-        self.brightness = ledStripSettings.ledBrightness
+        self.action = self.getPref("ledStrip", "action", self.ACTION_NONE)
+        self.primary = self.getPref("ledStrip", "primary", b"000000")
+        self.secondary = self.getPref("ledStrip", "secondary", b"000000")
+        self.brightness = self.getPref("ledStrip", "brightness", 255)
+        self.duration = self.getPref("ledStrip", "duration", 1000) 
         self.whiteOverride = False
 
         self.ledCount = self.basicSettings['led']['length']
@@ -234,6 +224,7 @@ class LedStripControl(BasicModule):
             b"/led/color" : self.ledcolor,
             b"/led/action" : self.ledaction,
             b"/led/brightness" : self.ledbrightness,
+            b"/led/duration" : self.ledduration,
             b"/ledstrip" : b"/modules/ledstrip/ledstrip.html"
         }
 
@@ -268,12 +259,20 @@ class LedStripControl(BasicModule):
 
     def setbrightness(self, brightness):
         self.brightness = brightness
-        self.prevaction = b"brightness"
+        self.prevaction = self.ACTION_BRIGHTNESS
+        self.saveSettings()
+
+    def setduration(self, duration):
+        self.duration = duration
+        self.prevaction = self.ACTION_NONE
         self.saveSettings()
 
     def saveSettings(self):
-        settings = LedStripSettings(self.action, self.primary, self.secondary, self.brightness)
-        settings.write()
+        self.setPref("ledStrip", "action", self.action)
+        self.setPref("ledStrip", "primary", self.primary)
+        self.setPref("ledStrip", "secondary", self.secondary)
+        self.setPref("ledStrip", "brightness", self.brightness)
+        self.setPref("ledStrip", "duration", self.duration)
 
     def maxwhite(self):
         for i in range(self.ledCount):
@@ -313,6 +312,13 @@ class LedStripControl(BasicModule):
     def ledbrightness(self, params):
         headers = okayHeader
         brightness = int(unquote(params.get(b"brightness", None)))
-        self.prevaction = b'brightness'
+        self.prevaction = self.ACTION_BRIGHTNESS
         self.setbrightness(brightness)
         return b"", headers
+
+    def ledduration(self, params):
+        headers = okayHeader
+        duration = int(unquote(params.get(b"duration", None)))
+        self.prevaction = self.ACTION_BRIGHTNESS
+        self.setduration(duration)
+        return b"", headers        

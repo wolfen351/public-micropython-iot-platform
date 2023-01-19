@@ -7,6 +7,7 @@ class BasicModule:
 
     prefs = {}
     basicSettings = {}
+    init = False
 
     def __init__(self):
         pass
@@ -53,10 +54,14 @@ class BasicModule:
         settings_string=f.read()
         f.close()
         self.prefs = ujson.loads(settings_string)
-
+        self.init = True
 
     # Returns the preference if possible, otherwise the default
     def getPref(self, node, setting, default):
+
+        if (not self.init):
+            self.ensurePrefsExists()
+            self.loadPrefs()
 
         if (node not in self.prefs):
             return default
@@ -65,9 +70,15 @@ class BasicModule:
         if (setting not in pref):
             return default
 
+        if pref[setting] == None: 
+            return default
+
         return pref[setting]
 
     def setPref(self, sectionName, settingName, value):
+
+        if (self.getPref(sectionName, settingName, None) == value):
+            return
 
         if (sectionName not in self.prefs):
             self.prefs.update({sectionName: {settingName: value}})

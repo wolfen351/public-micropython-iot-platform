@@ -717,7 +717,12 @@
         </div>
         <br>
         <br>
-
+        <h2>Duration:</h2>
+        <div class="slidecontainer">
+            <input type="range" min="100" max="20000" value="2000" class="slider" id="duration">
+        </div>
+        <br>
+        <br>
         <h2>Action:</h2>
         <div class="nav">
             <button class="btn actionbtn actionnone" name="action" onclick="clickAction('none')">None</button>
@@ -769,6 +774,14 @@
         slider.oninput = function () {
             brightness = this.value;
             url = '/led/brightness?brightness=' + this.value;
+            nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
+        }
+
+        var slider2 = document.getElementById("duration");
+        // Update the current slider value (each time you drag the slider handle)
+        slider2.oninput = function () {
+            duration = this.value;
+            url = '/led/duration?duration=' + this.value;
             nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
         }
 
