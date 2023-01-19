@@ -7,19 +7,42 @@ import ujson
 
 class LedStripControl(BasicModule):
 
-    ledCount = 120
-    np = neopixel.NeoPixel(machine.Pin(16), ledCount)
-    action = b"none"
-    prevaction = b"unset"
     primary = "000000"
     secondary = "000000"
     duration = 5000
     brightness = 255
 
+    ACTION_NONE = 0
+    ACTION_WHITE = 1
+    ACTION_CLEAR = 2
+    ACTION_SWITCH = 3
+    ACTION_FADE = 4
+    ACTION_CYCLE = 5
+    ACTION_BOUNCE = 6
+    ACTION_RAINBOW = 7
+    ACTION_COLOR = 8
+
+    ACTION_LOOKUP = { 
+        b"none" : ACTION_NONE,
+        b"white": ACTION_WHITE,
+        b"clear": ACTION_CLEAR,
+        b"switch": ACTION_SWITCH,
+        b"fade": ACTION_FADE,
+        b"cycle": ACTION_CYCLE,
+        b"bounce": ACTION_BOUNCE,
+        b"rainbow": ACTION_RAINBOW,
+        b"color": ACTION_COLOR
+    }   
+
+    action = ACTION_NONE
+    prevaction = ACTION_NONE
+
     def __init__(self):
         pass
 
     def start(self):
+        BasicModule.start(self)
+
         ledStripSettings = LedStripSettings()
         ledStripSettings.load()
         self.action = ledStripSettings.ledAction
@@ -28,27 +51,33 @@ class LedStripControl(BasicModule):
         self.brightness = ledStripSettings.ledBrightness
         self.whiteOverride = False
 
+        self.ledCount = self.basicSettings['led']['length']
+        self.ledPin = self.basicSettings['led']['pin']
+
+        self.np = neopixel.NeoPixel(machine.Pin(self.ledPin), self.ledCount)
+
+
     def tick(self):
         ms = time.ticks_ms()
         perc = (ms % self.duration) / self.duration
 
         if (self.whiteOverride):
-            if (self.prevaction != b"white"):
+            if (self.prevaction != self.ACTION_WHITE):
                 self.maxwhite()
-                self.prevaction = b"white"
+                self.prevaction = self.ACTION_WHITE
             return
 
-        if (self.action == b"none" and self.prevaction != b"none"):
+        elif (self.action == self.ACTION_NONE and self.prevaction != self.ACTION_NONE):
             self.fullstrip(self.primary)
-            self.prevaction = b"none"
+            self.prevaction = self.ACTION_NONE
 
-        if (self.action == b"switch"):
+        elif (self.action == self.ACTION_SWITCH):
             if (perc > 0.5):
                 self.fullstrip(self.primary)
             else:
                 self.fullstrip(self.secondary)
 
-        if (self.action == b"fade"):
+        elif (self.action == self.ACTION_FADE):
             p = self.hex_to_rgb(self.primary)
             s = self.hex_to_rgb(self.secondary)
 
@@ -65,7 +94,7 @@ class LedStripControl(BasicModule):
             col = (calcR, calcG, calcB)
             self.fullstrip_tuple(col)
 
-        if (self.action == b"cycle"):
+        elif (self.action == self.ACTION_CYCLE):
 
             p = self.applybrightness(self.hex_to_rgb(self.primary))
             s = self.applybrightness(self.hex_to_rgb(self.secondary))
@@ -76,7 +105,7 @@ class LedStripControl(BasicModule):
             self.np[offset % self.ledCount] = p
             self.np.write()
 
-        if (self.action == b"bounce"):
+        elif (self.action == self.ACTION_BOUNCE):
 
             p = self.applybrightness(self.hex_to_rgb(self.primary))
             s = self.applybrightness(self.hex_to_rgb(self.secondary))
@@ -91,7 +120,7 @@ class LedStripControl(BasicModule):
             self.np[offset % self.ledCount] = p
             self.np.write()
 
-        if (self.action == b"rainbow"):
+        elif (self.action == self.ACTION_RAINBOW):
 
             offset = int(perc * self.ledCount)
 
@@ -184,7 +213,7 @@ class LedStripControl(BasicModule):
             if (b"/button/onboard/1" in c):
                 SerialLog.log("WHITE COMMAND")
                 self.whiteOverride = not self.whiteOverride
-                self.prevaction = b"clear"
+                self.prevaction = self.ACTION_CLEAR
 
     def getRoutes(self):
         return { 
@@ -211,12 +240,16 @@ class LedStripControl(BasicModule):
     def setcolor(self, primary, secondary):
         self.primary = primary
         self.secondary = secondary
-        self.prevaction = b"color"
+        self.prevaction = self.ACTION_COLOR
         self.saveSettings()
 
-    def setaction(self, action):
+    def setaction(self, actionText):
+
+        newAction = self.ACTION_LOOKUP[actionText]
+        
         self.prevaction = self.action
-        self.action = action
+        self.action = newAction
+
         self.saveSettings()
 
     def setbrightness(self, brightness):

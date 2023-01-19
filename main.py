@@ -112,6 +112,9 @@ try:
         elif modname == "gps":
             from modules.gps.gps_control import GPSControl
             allModules.append(GPSControl())    
+        elif modname == "ledstrip":
+            from modules.ledstrip.ledstrip_control import LedStripControl
+            allModules.append(LedStripControl())   
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
