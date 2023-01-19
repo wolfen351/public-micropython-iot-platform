@@ -5,8 +5,9 @@ from serial_log import SerialLog
 
 class BasicModule:
 
+    # static vars
     prefs = {}
-    basicSettings = {}
+    basicSettingss = {}
     loadedPrefs = False
 
     def __init__(self):
