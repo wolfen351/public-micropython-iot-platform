@@ -29,6 +29,14 @@ class GPSControl(BasicModule):
             latdd = -latdd
         if (self.myGPS.longitude[2] == "W"): 
             londd = -londd
+
+        if (latdd == 0 and londd == 0):
+            return {
+                "gpsdate": "%s/%s/%s" % (str(self.myGPS.date[0]),str(self.myGPS.date[1]),str(self.myGPS.date[2])),
+                "gpstime": "%s:%s:%s" % (str(self.myGPS.timestamp[0]),str(self.myGPS.timestamp[1]),str(self.myGPS.timestamp[2])),
+                "satellites": self.myGPS.satellites_in_use,
+                "gpsaccuracy": self.myGPS.pdop
+            }
         
         return { 
             "latitude": latdd,
