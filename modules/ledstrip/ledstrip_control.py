@@ -9,7 +9,7 @@ class LedStripControl(BasicModule):
 
     primary = "000000"
     secondary = "000000"
-    duration = 5000
+    duration = 1000
     brightness = 255
 
     ACTION_NONE = 0
@@ -33,6 +33,17 @@ class LedStripControl(BasicModule):
         b"rainbow": ACTION_RAINBOW,
         b"color": ACTION_COLOR
     }   
+    ACTION_TEXT_LOOKUP = {
+        ACTION_NONE : b"none",
+        ACTION_WHITE : b"white",
+        ACTION_CLEAR : b"clear",
+        ACTION_SWITCH : b"switch",
+        ACTION_FADE : b"fade",
+        ACTION_CYCLE : b"cycle",
+        ACTION_BOUNCE : b"bounce",
+        ACTION_RAINBOW : b"rainbow",
+        ACTION_COLOR: b"color"
+    }
 
     action = ACTION_NONE
     prevaction = ACTION_NONE
@@ -154,22 +165,25 @@ class LedStripControl(BasicModule):
 
 
     def getTelemetry(self):
-        p = self.hex_to_rgb(self.primary)
-        s = self.hex_to_rgb(self.secondary)
-        return { 
-            "ledaction": self.action,
-            "ledprimary": self.primary,
-            "ledprimaryr": p[0], 
-            "ledprimaryg": p[1], 
-            "ledprimaryb": p[2], 
-            "ledsecondary": self.secondary,
-            "ledsecondaryr": s[0], 
-            "ledsecondaryg": s[1], 
-            "ledsecondaryb": s[2], 
-            "ledbrightness": self.brightness,
-            "ledcolormode": "rgb",
-            "ledstate": "ON" if self.brightness > 0 else "OFF"
-        }
+        try:
+            p = self.hex_to_rgb(self.primary)
+            s = self.hex_to_rgb(self.secondary)
+            return { 
+                "ledaction": self.ACTION_TEXT_LOOKUP[self.action],
+                "ledprimary": self.primary,
+                "ledprimaryr": p[0], 
+                "ledprimaryg": p[1], 
+                "ledprimaryb": p[2], 
+                "ledsecondary": self.secondary,
+                "ledsecondaryr": s[0], 
+                "ledsecondaryg": s[1], 
+                "ledsecondaryb": s[2], 
+                "ledbrightness": self.brightness,
+                "ledcolormode": "rgb",
+                "ledstate": "ON" if self.brightness > 0 else "OFF"
+            }
+        except:
+            return {}
 
     def processTelemetry(self, telemetry):
         pass
