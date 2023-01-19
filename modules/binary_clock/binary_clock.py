@@ -96,9 +96,12 @@ class BinaryClock(BasicModule):
         twos = round(decimal_ones - ones) % 4 
         fours = round(decimal_ones - ones - twos) % 8 
         eights = round(decimal_ones - ones - twos - fours) % 16
-        self.drawBit(eights, x+10, y)
-        self.drawBit(fours, x+52, y)
-        self.drawBit(twos, x+94, y) 
+        if (number == 0 or number == 8):
+            self.drawBit(eights, x+10, y)
+        if (number == 0 or number == 4 or number == 8):
+            self.drawBit(fours, x+52, y)
+        if (number % 2 == 0):
+            self.drawBit(twos, x+94, y) 
         self.drawBit(ones, x+136, y)
 
     # draws one bit (led circle)
