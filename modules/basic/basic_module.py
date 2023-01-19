@@ -5,8 +5,11 @@ from serial_log import SerialLog
 
 class BasicModule:
 
+    prefs = {}
+    basicSettings = {}
+
     def __init__(self):
-        self.basicSettings = {}
+        pass
 
     def start(self):
         f = open("profile.json",'r')
@@ -14,6 +17,7 @@ class BasicModule:
         f.close()
         self.basicSettings = ujson.loads(settings_string)
         self.ensurePrefsExists()
+        self.loadPrefs()
 
     def tick(self):
         pass
@@ -44,40 +48,34 @@ class BasicModule:
             f.write("{}")
             f.close()
 
-
-    # Returns the preference if possible, otherwise the default
-    def getPref(self, node, setting, default):
-        self.ensurePrefsExists()
-
+    def loadPrefs(self):
         f = open("prefs.json",'r')
         settings_string=f.read()
         f.close()
-        prefs = ujson.loads(settings_string)
+        self.prefs = ujson.loads(settings_string)
 
-        if (node not in prefs):
+
+    # Returns the preference if possible, otherwise the default
+    def getPref(self, node, setting, default):
+
+        if (node not in self.prefs):
             return default
 
-        pref = prefs[node]
+        pref = self.prefs[node]
         if (setting not in pref):
             return default
 
         return pref[setting]
 
     def setPref(self, sectionName, settingName, value):
-        self.ensurePrefsExists()
 
-        f = open("prefs.json",'r')
-        settings_string=f.read()
-        f.close()
-        fullDoc = ujson.loads(settings_string)
+        if (sectionName not in self.prefs):
+            self.prefs.update({sectionName: {settingName: value}})
 
-        if (sectionName not in fullDoc):
-            fullDoc.update({sectionName: {settingName: value}})
-
-        section = fullDoc[sectionName]
+        section = self.prefs[sectionName]
         section.update({settingName: value})
 
-        data = ujson.dumps(fullDoc)
+        data = ujson.dumps(self.prefs)
         SerialLog.log("New prefs.json: ", data)
 
         f = open("prefs.json", "w")
