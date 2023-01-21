@@ -4,6 +4,7 @@ import json
 
 #public static vars
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
+refreshDoc = b"<html><head><meta http-equiv='refresh' content='10'></head><body></body></html>"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
 # public static methods
@@ -112,7 +113,7 @@ class WebProcessor(BasicModule):
 
     # Simple reboot
     def webReboot(self, params):
-        return "", okayHeader, True
+        return refreshDoc, okayHeader, True # true for reboot
      
     def webSaveName(self, params):
         name = unquote(params.get(b"name", None))
