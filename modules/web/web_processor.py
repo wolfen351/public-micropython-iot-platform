@@ -1,12 +1,12 @@
 from modules.basic.basic_module import BasicModule
 from modules.web.web_server import WebServer
 import json
-from modules.web.web_settings import WebSettings
 
-#public static code
+#public static vars
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
+# public static methods
 def unquote(string):
     if not string:
         return b''
@@ -38,23 +38,21 @@ class WebProcessor(BasicModule):
     def __init__(self):
         self.telemetry = {}
         self.panels = {}
+        self.boardName = self.getPref("web", "name", self.basicSettings["name"])
+        self.statusLedEnabled = self.getPref("web", "statusLedEnabled", True)     
 
-     
     def start(self):
+        BasicModule.start(self)
         self.server = WebServer()
         self.server.start()
-        self.webSettings = WebSettings()
-        self.webSettings.load()
-
      
     def tick(self):
         self.server.tick()
-
      
     def getTelemetry(self):
         return { 
-            "name": self.webSettings.Name,
-            "onboard/led": self.webSettings.Led
+            "name": self.boardName,
+            "onboard/led": "Enabled" if self.statusLedEnabled else "Disabled"
         }
 
      
@@ -97,33 +95,29 @@ class WebProcessor(BasicModule):
         self.panels = panels
 
     # special code called from main to see if Led must be on
-     
     def getLedEnabled(self):
-        return self.webSettings.Led != b"Disabled"
+        return self.statusLedEnabled
 
     # return json telemetry to ui
-     
     def webTelemetry(self, params):
         headers = okayHeader
         data = json.dumps(self.telemetry)
         return data, headers  
 
     # return json panel list to ui
-     
     def webPanels(self, params):
         headers = okayHeader
         data = json.dumps(self.panels)
         return data, headers  
 
     # Simple reboot
-     
     def webReboot(self, params):
         return "", okayHeader, True
      
     def webSaveName(self, params):
         name = unquote(params.get(b"name", None))
-        self.webSettings.Name = name
-        self.webSettings.write()
+        self.boardName = name
+        self.setPref("web", "name", name)
         headers = okayHeader
         data = name
         return data, headers  
@@ -132,11 +126,8 @@ class WebProcessor(BasicModule):
     def switchLed(self, params):
         headers = okayHeader
         data = "ok"
-        if (self.webSettings.Led == b"Enabled"):
-            self.webSettings.Led = b"Disabled"
-        else:
-            self.webSettings.Led = b"Enabled"
-        self.webSettings.write()
+        self.statusLedEnabled = not self.statusLedEnabled
+        self.setPref("web", "statusLedEnabled", self.statusLedEnabled)
         return data, headers    
 
 
