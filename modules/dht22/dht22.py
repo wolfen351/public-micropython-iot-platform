@@ -32,12 +32,17 @@ class Dht22Monitor(BasicModule):
 
      
     def getTelemetry(self):
-        telemetry = {
-            "temperature/dht22" : self.currentT,
-            "humidity/dht22" : self.currentH,
-            "tempReadAt": self.lastConvert
-        }
-        return telemetry
+        # only return telemetry if we got readings
+        if (self.currentT != 0 or self.currentH != 0):
+            telemetry = {
+                "temperature/dht22" : self.currentT,
+                "humidity/dht22" : self.currentH,
+                "tempReadAt": self.lastConvert
+            }
+            return telemetry
+        else:
+            return {} 
+
      
     def processTelemetry(self, telemetry):
         pass

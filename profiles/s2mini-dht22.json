@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini DHT22",
     "shortName": "s2mini-dht22",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "dht22"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "dht22", "temphistory"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "dht22": {
