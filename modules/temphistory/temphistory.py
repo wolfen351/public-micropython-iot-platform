@@ -2,14 +2,15 @@ import json
 from modules.basic.basic_module import BasicModule
 from modules.web.web_processor import okayHeader
 from serial_log import SerialLog
+import ujson
 
 class TempHistory(BasicModule):
 
     def __init__(self):
         pass
 
-
     def start(self):
+        self.historyYesterday = [None for i in range(24)]
         self.historyToday = [None for i in range(24)]
         self.historyMonth = [None for i in range(32)]
         self.min = 200
@@ -24,6 +25,8 @@ class TempHistory(BasicModule):
         self.currentDay = -1
         self.currentMonth = -1
         self.lastRead = 0 # last time we got fresh temp data
+
+        self.loadHistoryFromDisk()
 
     def tick(self):
         pass
@@ -44,7 +47,7 @@ class TempHistory(BasicModule):
 
     def processTelemetry(self, telemetry):
 
-        if (telemetry["time"][0] == 2000): # exclude when we dont have ntp time
+        if (telemetry["time"][0] == 2000): # exclude when we dont have ntp time (year 2000)
             return
 
         if (not "tempReadAt" in telemetry): # quit if we havent read a temp
@@ -82,6 +85,7 @@ class TempHistory(BasicModule):
 
                 # reset counters every day
                 if (self.currentDay != day):
+                    self.historyYesterday = self.historyToday
                     self.historyToday = [None for i in range(24)]
                     self.daymin = 200
                     self.daymax = -200
@@ -91,6 +95,7 @@ class TempHistory(BasicModule):
 
                 # reset counters every hour
                 if (self.currentHour != hour):
+                    self.saveHistoryToDisk()
                     self.min = 200
                     self.max = -200
                     self.count = 0
@@ -140,4 +145,32 @@ class TempHistory(BasicModule):
         return {"temphistory": "/modules/temphistory/temphistory_index.html"}
                
     # Internal code here
+    def loadHistoryFromDisk(self):
+        try:
+            f = open("temphistory.json",'r')
+            settings_string=f.read()
+            f.close()
+            hist = ujson.loads(settings_string)
+            self.historyYesterday = hist["yesterday"]
+            self.historyToday = hist["today"]
+            self.historyMonth = hist["month"] 
+            self.currentHour = hist["currentHour"]
+            self.currentDay = hist["currentDay"]
+            self.currentMonth = hist["currentMonth"]
 
+            SerialLog.log("Temp history loaded from disk")
+        except:
+            SerialLog.log("Error: Unable to load history from disk.")
+
+    def saveHistoryToDisk(self):
+        hist = {
+            "yesterday": self.historyYesterday,
+            "today": self.historyToday,
+            "month": self.historyMonth,
+            "currentHour" : self.currentHour,
+            "currentDay" : self.currentDay,
+            "currentMonth" : self.currentMonth
+        }
+        f = open("temphistory.json", "w")
+        f.write(ujson.dumps(hist))
+        f.close()
