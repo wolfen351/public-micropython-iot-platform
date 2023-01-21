@@ -87,9 +87,6 @@ class BasicModule:
         section = self.prefs[sectionName]
         section.update({settingName: value})
 
-        data = ujson.dumps(self.prefs)
-        SerialLog.log("New prefs.json: ", data)
-
         f = open("prefs.json", "w")
-        f.write(data)
+        f.write(ujson.dumps(self.prefs))
         f.close()

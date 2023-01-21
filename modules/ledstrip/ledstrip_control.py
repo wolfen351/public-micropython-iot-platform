@@ -152,6 +152,7 @@ class LedStripControl(BasicModule):
                 "ledsecondaryg": s[1], 
                 "ledsecondaryb": s[2], 
                 "ledbrightness": self.brightness,
+                "ledduration": self.duration,
                 "ledcolormode": "rgb",
                 "ledstate": "ON" if self.brightness > 0 else "OFF"
             }
@@ -208,11 +209,11 @@ class LedStripControl(BasicModule):
             b"/led/action" : self.webSetAction,
             b"/led/brightness" : self.webSetBrightness,
             b"/led/duration" : self.webSetDuration,
-            b"/ledstrip" : b"/modules/ledstrip/ledstrip.html"
+            b"/ledstrip" : b"/modules/ledstrip/settings.html"
         }
 
     def getIndexFileName(self):
-        return { "ledstrip" : "/modules/ledstrip/ledstrip_index.html" }
+        return { "ledstrip" : "/modules/ledstrip/index.html" }
 
 
     # private methods
@@ -240,8 +241,8 @@ class LedStripControl(BasicModule):
                 inThird = led - third*2
                 g = 255 - int(inThird / third * 255)
                 b = int(inThird / third * 255)
-            self.rainbow[led] = (r,g,b)
-        self.rainbow[self.ledCount - 1] = (0,0,255)
+            self.rainbow[led] = self.applybrightness((r,g,b))
+        self.rainbow[self.ledCount - 1] = self.applybrightness((0,0,255))
 
     def hexStringToRgbTuple(self, hexColorString):
         return (int(hexColorString[0:2], 16), int(hexColorString[2:4], 16), int(hexColorString[4:6], 16))
@@ -267,8 +268,11 @@ class LedStripControl(BasicModule):
         self.brightness = brightness
         self.prevaction = self.ACTION_BRIGHTNESS
         self.saveSettings()
+        self.calculateRainbow()
 
     def setduration(self, duration):
+        if (duration <= 0):
+            duration = 32
         self.duration = duration
         self.prevaction = self.ACTION_NONE
         self.saveSettings()
@@ -281,7 +285,7 @@ class LedStripControl(BasicModule):
         self.setPref("ledStrip", "duration", self.duration)
 
     def maxwhite(self):
-        self.neoPixel.fill(255,255,255)
+        self.neoPixel.fill((255,255,255))
         self.neoPixel.write()
 
     def fullstrip(self, hexColorString):
