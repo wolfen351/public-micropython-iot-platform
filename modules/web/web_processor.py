@@ -5,7 +5,7 @@ import json
 #public static vars
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 okayHeaderHtml = b"HTTP/1.1 200 Ok\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n"
-refreshDoc = b"<html><head><meta http-equiv='refresh' content='10'></head><body></body></html>"
+refreshDoc = b"<html><head><meta http-equiv='refresh' content='15; url=/'></head><body>Rebooting, please wait...</body></html>"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
 # public static methods

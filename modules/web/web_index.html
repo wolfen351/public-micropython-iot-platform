@@ -207,11 +207,15 @@
                 }
               }
               else {
-                // FALLBACK FOR UNHANDLED
-                for (const h of window.telHandlers) {
-                  h(key);
+                // IGNORE IT
+                if (key != 'tempReadAt')
+                {
+                  // FALLBACK FOR UNHANDLED
+                  for (const h of window.telHandlers) {
+                    h(key);
+                  }
+                  html += "<p>" + key + ": " + s[key] + "</p>"
                 }
-                html += "<p>" + key + ": " + s[key] + "</p>"
               }
             }
             $('#rawdisplay').html(html);
