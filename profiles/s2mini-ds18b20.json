@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini ds18b20",
     "shortName": "s2mini-ds18b20",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "ds18b20temp"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "ds18b20temp", "temphistory"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ds18b20": {

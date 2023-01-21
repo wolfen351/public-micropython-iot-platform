@@ -44,12 +44,11 @@ class DS18B20Temp(BasicModule):
                 self.lastConvert = time.ticks_ms()
 
     def getTelemetry(self): 
-        telemetry = {}
+        telemetry = {"tempReadAt": self.lastConvert}
         for rom in self.roms:
             sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))
             current = self.lastTemp[str(rom)]
             telemetry.update({sensorName:current})
-        telemetry.update({"tempReadAt": self.lastConvert})
         return telemetry
 
     def processTelemetry(self, telemetry):
@@ -75,6 +74,7 @@ class DS18B20Temp(BasicModule):
 
     def gettemp(self, params):
         telemetry = self.getTelemetry()
+        del telemetry['tempReadAt']
         headers = okayHeader
         data = json.dumps(telemetry)
         return data, headers            
