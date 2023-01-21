@@ -39,13 +39,14 @@ class WebProcessor(BasicModule):
     def __init__(self):
         self.telemetry = {}
         self.panels = {}
-        self.boardName = self.getPref("web", "name", self.basicSettings["name"])
+        self.boardName = ""
         self.statusLedEnabled = self.getPref("web", "statusLedEnabled", True)     
 
     def start(self):
         BasicModule.start(self)
         self.server = WebServer()
         self.server.start()
+        self.boardName = self.getPref("web", "name", self.basicSettings["name"])
      
     def tick(self):
         self.server.tick()
