@@ -48,7 +48,8 @@ class DS18B20Temp(BasicModule):
         for rom in self.roms:
             sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))
             current = self.lastTemp[str(rom)]
-            telemetry.update({sensorName:current})
+            if (current != -127):
+                telemetry.update({sensorName:current})
         return telemetry
 
     def processTelemetry(self, telemetry):
