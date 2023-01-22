@@ -93,5 +93,7 @@ foreach ($profile in $profiles){
 }
 
 # TAG GIT
+git add .\version
+git commit -m "Packaged version: $(cat version)"
 git tag "$(cat version)"
 git push --tags
