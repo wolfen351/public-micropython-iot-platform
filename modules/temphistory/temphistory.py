@@ -157,6 +157,14 @@ class TempHistory(BasicModule):
             self.currentHour = hist["currentHour"]
             self.currentDay = hist["currentDay"]
             self.currentMonth = hist["currentMonth"]
+            self.min = hist["min"]
+            self.max = hist["max"]
+            self.count = hist["count"]
+            self.sum = hist["sum"]
+            self.daymin = hist["daymin"]
+            self.daymax = hist["daymax"]
+            self.daycount = hist["daycount"]
+            self.daysum = hist["daysum"]
 
             SerialLog.log("Temp history loaded from disk")
         except:
@@ -169,8 +177,17 @@ class TempHistory(BasicModule):
             "month": self.historyMonth,
             "currentHour" : self.currentHour,
             "currentDay" : self.currentDay,
-            "currentMonth" : self.currentMonth
+            "currentMonth" : self.currentMonth,
+            "min": self.min,
+            "max": self.max,
+            "count": self.count,
+            "sum": self.sum,
+            "daymin": self.daymin,
+            "daymax": self.daymax,
+            "daycount": self.daycount,
+            "daysum": self.daysum,
         }
         f = open("temphistory.json", "w")
         f.write(ujson.dumps(hist))
         f.close()
+
