@@ -24,7 +24,12 @@ class NtpSync(BasicModule):
     def start(self):
         self.sta_if = network.WLAN(network.STA_IF)
         self.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 0) * 60 * 60
-        self.UTC_OFFSET = self.UTC_BASE_OFFSET # TODO: Implement DST here
+        self.tzName = self.getPref("ntp", "tzIANA", "pacific/auckland")
+
+        # Implement DST here
+        self.UTC_OFFSET = self.UTC_BASE_OFFSET
+        if (self.tzName == "pacific/auckland"):
+            self.UTC_OFFSET += 3600
 
     def tick(self):
 
@@ -49,7 +54,7 @@ class NtpSync(BasicModule):
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
         telemetry = {
             "time" : localTime,
-            "timeZone": self.getPref("ntp", "tzIANA", "pacific/auckland")
+            "timeZone": self.tzName
         }
         return telemetry
 
