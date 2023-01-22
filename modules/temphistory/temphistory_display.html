@@ -81,8 +81,9 @@
 
 
     <div style="display:flex;">
-    <div id="today">Data</div>
-    <div id="month">Data</div>
+    <div id="today">Loading data...</div>
+    <div id="yesterday">Loading data...</div>
+    <div id="month">Loading data...</div>
   </div>
 
   </div>
@@ -106,6 +107,18 @@
           }
           table += "</table>";
           $("#today").html(table);
+
+          hour = 0;
+          table = "<div class='thh'>Yesterday</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s.yesterday)) {
+            if (!s.yesterday[hour])
+              s.yesterday[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s.yesterday[hour].min.toFixed(1)} °C</td><td>${s.yesterday[hour].max.toFixed(1)} °C</td><td>${(s.yesterday[hour].sum / s.yesterday[hour].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            hour++;;
+          }
+          table += "</table>";
+          $("#yesterday").html(table);
 
           day = 0;
           table = "<div class='thh'>This Month</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Day</th><th>Min</th><th>Max</th><th>Avg</th></tr>";

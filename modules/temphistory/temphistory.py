@@ -136,6 +136,7 @@ class TempHistory(BasicModule):
         headers = okayHeader
         telemetry = {
             'today': self.historyToday,
+            'yesterday': self.historyYesterday,
             'month': self.historyMonth
         }
         data = json.dumps(telemetry)
