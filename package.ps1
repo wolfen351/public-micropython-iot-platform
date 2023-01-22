@@ -90,6 +90,8 @@ foreach ($profile in $profiles){
 
     # CLEANUP
     rmdir -recurse ".package" 2> $null
-
 }
 
+# TAG GIT
+git tag "$(cat version)"
+git push --tags
