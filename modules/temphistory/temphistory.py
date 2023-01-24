@@ -82,6 +82,7 @@ class TempHistory(BasicModule):
                 # reset counters every month
                 if (self.currentMonth != month):
                     self.historyMonth = [None for i in range(32)]
+                    self.currentMonth = month
 
                 # reset counters every day
                 if (self.currentDay != day):
