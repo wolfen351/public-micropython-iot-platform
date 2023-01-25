@@ -204,6 +204,7 @@ class WebServer():
                 # either we wrote no bytes, or we wrote < TCP MSS of bytes
                 # so we're done with this connection
                 self.close(sock)
+                gc.collect()
             else:
                 # more to write, so read the next portion of the data into
                 # the memoryview for the next send event
