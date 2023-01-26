@@ -129,7 +129,7 @@ class TempHistory(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/temphistory": b"/modules/temphistory/temphistory_display.html",
+            b"/temphistory": b"/modules/temphistory/history.html",
             b"/temphistorydetail": self.tempHistoryDetail
         }
 
@@ -144,7 +144,7 @@ class TempHistory(BasicModule):
         return data, headers  
 
     def getIndexFileName(self):
-        return {"temphistory": "/modules/temphistory/temphistory_index.html"}
+        return {"temphistory": "/modules/temphistory/index.html"}
                
     # Internal code here
     def loadHistoryFromDisk(self):
