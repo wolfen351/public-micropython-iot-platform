@@ -1,10 +1,11 @@
 from modules.basic.basic_module import BasicModule
-import ds18x20, onewire, machine
+from machine import Pin
+import ds18x20, onewire
 from serial_log import SerialLog
 import time
 from modules.web.web_processor import okayHeader
 import ubinascii
-import json
+from json import dumps
 
 class DS18B20Temp(BasicModule):
 
@@ -20,7 +21,7 @@ class DS18B20Temp(BasicModule):
         self.pinNumber = self.basicSettings['ds18b20']['pin'] # default is 18
         self.readEveryMs = self.basicSettings['ds18b20']['readEveryMs'] # default is 1000
         SerialLog.log("Configured to look for ds18b20 on pin: ", self.pinNumber)
-        self.ds_pin = machine.Pin(self.pinNumber)
+        self.ds_pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         self.roms = self.ds_sensor.scan()
         SerialLog.log('Found DS devices: ', self.roms)
@@ -77,5 +78,5 @@ class DS18B20Temp(BasicModule):
         telemetry = self.getTelemetry()
         del telemetry['tempReadAt']
         headers = okayHeader
-        data = json.dumps(telemetry)
+        data = dumps(telemetry)
         return data, headers            
