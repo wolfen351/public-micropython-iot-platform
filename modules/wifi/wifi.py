@@ -25,7 +25,6 @@ class WifiHandler(BasicModule):
         self.lastReconnectTime = 0
         self.version = "unknown"
         self.freeram = -1
-        self.apModeGaveUp = False
 
     def preStart(self):
 
@@ -59,6 +58,28 @@ class WifiHandler(BasicModule):
 
     def tick(self):
         if (not self.apMode):
+            if (self.sta_if.isconnected() and not self.connected):
+                # New connection
+                self.connected = True
+                SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
+                # Disable AP on station mode successful connection
+                ap_if = network.WLAN(network.AP_IF)
+                ap_if.active(False)
+
+
+            if (not self.sta_if.isconnected() and self.connected):
+                # Connection lost
+                now = time.ticks_ms()
+                diff = time.ticks_diff(now, self.lastReconnectTime)
+                if (diff > 10000):
+                    SerialLog.log('Wifi Connection lost, reconnecting..')
+                    self.lastReconnectTime = now
+                    self.station()
+
+            if (not self.sta_if.isconnected() and not self.connected and self.downTimeStart + 30 < time.time()):
+                # Never connected, run an AP after 30s of downtime
+                SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
+                self.ap()
 
             if (self.sta_if.isconnected() and self.connected):
                 # Ongoing connection
@@ -69,53 +90,18 @@ class WifiHandler(BasicModule):
                     self.lastrssitime = now
                     self.freeram = gc.mem_free()
 
-                if (self.freeram == -1):
-                    self.freeram = gc.mem_free()
-                return
-
-            if (self.sta_if.isconnected() and not self.connected):
-                # New connection
-                self.connected = True
-                SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
-                # Disable AP on station mode successful connection
-                ap_if = network.WLAN(network.AP_IF)
-                ap_if.active(False)
-                return
-
-            if (not self.sta_if.isconnected() and self.connected):
-                self.downTimeStart = time.ticks_ms()
-                self.connected = False
-                SerialLog.log('Wifi Connection lost')
-
-            if (not self.sta_if.isconnected()):
-                # Connection lost
-                now = time.ticks_ms()
-                diff = time.ticks_diff(now, self.lastReconnectTime)
-                if (diff > 10000):
-                    SerialLog.log('Reconnecting..')
-                    self.lastReconnectTime = now
-                    self.connected = False
-                    self.station()
-
-                diff = time.ticks_diff(now, self.downTimeStart)
-                if (diff > 30000 and not self.apModeGaveUp):
-                    SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
-                    self.ap()
+            if (self.freeram == -1):
+                self.freeram = gc.mem_free()
 
         else:
             if (len(self.ap_if.status('stations')) == 0):
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastReconnectTime)
                 if (diff > 300000):
-                    SerialLog.log("No stations connected to AP, shutting down AP")
-                    self.ap_if.active(False)
-
-                    # switch back to Station mode
+                    SerialLog.log("No stations connected to AP, retrying station mode too")
                     self.lastReconnectTime = now
                     self.downTimeStart = now
                     self.apMode = False
-                    self.connected = False
-                    self.apModeGaveUp = True # this prevents a second AP mode if wifi drops later
                     self.station()
 
     def getTelemetry(self):
@@ -213,23 +199,20 @@ class WifiHandler(BasicModule):
             self.sta_if.active(True)
             self.sta_if.config(dhcp_hostname=self.essid)
 
-            # set static ip
-            type = self.getPref("wifi", "type", "DHCP")
-            if (type == "Static"):
-                ip = self.getPref("wifi", "ip", "")
-                SerialLog.log('Assigning Static IP:', ip)
-                netmask = self.getPref("wifi", "netmask", "")
-                gateway = self.getPref("wifi", "gateway", "")
-                self.sta_if.ifconfig((ip, netmask, gateway, '8.8.8.8'))
-
-            # actually connect
             password = self.getPref("wifi", "password", "password")
             self.sta_if.connect(ssid, password)
 
+            type = self.getPref("wifi", "type", "DHCP")
+            if (type == "Static"):
+                ip = self.getPref("wifi", "ip", "")
+                netmask = self.getPref("wifi", "netmask", "")
+                gateway = self.getPref("wifi", "gateway", "")
+                self.sta_if.ifconfig((ip, netmask, gateway, '8.8.8.8'))
+            SerialLog.log("Wifi connection starting..")
         except KeyboardInterrupt:
             raise
         except Exception as e:
             SerialLog.log("Error connecting to wifi:", e)
-            from sys import print_exception
-            print_exception(e)
-        
+            import sys
+            sys.print_exception(e)
+            pass
