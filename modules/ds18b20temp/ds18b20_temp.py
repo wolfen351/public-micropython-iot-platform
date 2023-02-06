@@ -38,9 +38,9 @@ class DS18B20Temp(BasicModule):
             if (diff > self.readEveryMs and diff > 750): 
                 for rom in self.roms:
                     current = self.ds_sensor.read_temp(rom)
+                    SerialLog.log("%s = %s'C" % (ubinascii.hexlify(rom).decode('ascii'), current))
                     if (current != self.lastTemp[str(rom)]):
                         self.lastTemp[str(rom)] = current
-                        SerialLog.log("%s = %s'C" % (ubinascii.hexlify(rom).decode('ascii'), current))
                 self.ds_sensor.convert_temp()
                 self.lastConvert = time.ticks_ms()
 
