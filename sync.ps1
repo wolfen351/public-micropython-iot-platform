@@ -26,7 +26,13 @@ catch {
 
 # Connect to the board
 $port = Find-MicrocontrollerPort
+if ($port -eq "COM1")
+{
+    Write-Error "Board not detected. Aborting." -ErrorAction Stop
+}
+
 Start-Sleep 4
+
 Write-Host "Checking when board was last updated.."
 Remove-Item ./lastedit.dat
 ampy --port $port get lastedit.dat > lastedit.dat # 2> $null

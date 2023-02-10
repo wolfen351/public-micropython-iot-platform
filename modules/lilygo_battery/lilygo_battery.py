@@ -11,6 +11,7 @@ class LilyGoBattery:
     voltage = 0
     voltagePercent = 0
     lastBatteryCheck = 0
+    bootTime = 0
 
     def __init__(self):
         pass
@@ -20,18 +21,23 @@ class LilyGoBattery:
         self.pot.atten(ADC.ATTN_11DB)       #Full range: 3.3v
         self.sta_if = network.WLAN(network.STA_IF)
         self.ap_if = network.WLAN(network.AP_IF)
+        self.bootTime = time.ticks_ms()
+        self.lastSleepTime = 0
 
     def tick(self):
-        if (not self.sta_if.isconnected()): # no wifi, so enable sleep
-            self.loopcount += 1
-            if (self.loopcount > 600 and (self.loopcount % 800) == 0):
-                if (not self.ap_if.active()): # suppress sleep if AP is active
-                    CpuHardware.lightSleep(600000) # sleep for 10min
-                else:
-                    SerialLog.log("Staying awake, AP is active")
+        currentTime = time.ticks_ms()
+        self.loopcount += 1
+
+        uptimeMs = time.ticks_diff(currentTime, self.bootTime)
+        hasBeenRunningForMoreThan2Mins = uptimeMs > 120000
+        wifiConnected = self.sta_if.isconnected()
+        timeSinceLastSleepMs = time.ticks_diff(currentTime, self.lastSleepTime)
+        apRunning = self.ap_if.active()
+
+        if (timeSinceLastSleepMs > 1000 and not wifiConnected and not apRunning and hasBeenRunningForMoreThan2Mins):
+            CpuHardware.lightSleep(600000) # sleep for 10min
 
         # check battery voltage every 5s
-        currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastBatteryCheck)
         if (diff > 5000):
             pot_value = self.pot.read()

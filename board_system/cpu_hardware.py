@@ -3,6 +3,7 @@ import ujson
 import machine
 from serial_log import SerialLog
 from machine import Pin
+from time import sleep
 
 class CpuHardware():
 
@@ -52,10 +53,13 @@ class CpuHardware():
 
     @staticmethod
     def lightSleep(timeToNapInMs):
-        SerialLog.log("Going to sleep..")
+        SerialLog.log("Going to sleep for", timeToNapInMs, "ms...")
         # lights out
         led = Pin(3, Pin.OUT)
         led.off()
-        machine.lightsleep(timeToNapInMs) # Sleep for 10 min to save power 
+        sleep(0.1)
+        SerialLog.log("Zzz")
+        if (timeToNapInMs-100 > 0):
+            machine.lightsleep(timeToNapInMs-100) # Sleep to save power 
         SerialLog.log("Woke up..")
 
