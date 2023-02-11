@@ -115,6 +115,12 @@ try:
         elif modname == "ledstrip":
             from modules.ledstrip.ledstrip_control import LedStripControl
             allModules.append(LedStripControl())   
+        elif modname == "us_range":
+            from modules.us_range.us_range_sensor import USRangeSensor
+            allModules.append(USRangeSensor())
+        elif modname == "garage_door_closer":
+            from modules.garage_door_closer.garage_door_control import GarageDoorControl
+            allModules.append(GarageDoorControl())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
