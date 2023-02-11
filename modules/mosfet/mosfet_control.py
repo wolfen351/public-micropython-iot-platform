@@ -47,6 +47,10 @@ class MosfetControl(BasicModule):
             if (c.startswith(b"/mosfet/off/")):
                 s = int(c.replace(b"/mosfet/off/", b""))
                 self.off(s)
+            if (c.startswith(b"/mosfet/allon")):
+                self.allOn()
+            if (c.startswith(b"/mosfet/alloff")):
+                self.allOff()
 
     def getRoutes(self):
         return { 
