@@ -30,7 +30,6 @@ class GarageDoorControl(BasicModule):
             self.openForMs = time.ticks_diff(currentTime, self.lastOpenAt)
 
             if (self.openForMs > 600000 and self.openForMs < 602000):
-                SerialLog.log("CLOSING DOOR!!!")
                 self.commands.append("/mosfet/allon")
             if (self.openForMs > 602000):
                 self.commands.append("/mosfet/alloff")
