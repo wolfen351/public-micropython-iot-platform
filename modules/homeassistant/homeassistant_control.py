@@ -193,7 +193,7 @@ class HomeAssistantControl(BasicModule):
 
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
-            "name": name,
+            "name": self.getPref("web", "name", self.basicSettings["name"]) + " " + name,
             "unique_id": uniqueid,
             "device": {
                 "connections": [["mac", my_mac_addr]],
