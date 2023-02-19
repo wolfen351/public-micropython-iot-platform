@@ -12,7 +12,7 @@ class USRangeSensor(BasicModule):
     def start(self):
         BasicModule.start(self)
         self.sensor = HCSR04(trigger_pin=18, echo_pin=16)
-        self.lastDetectTime = 0
+        self.lastDetectTime = time.ticks_ms()
 
     def tick(self):
 
@@ -20,7 +20,7 @@ class USRangeSensor(BasicModule):
         diff = time.ticks_diff(currentTime, self.lastDetectTime)
         if (diff > 2000):
             self.distance_cm = self.sensor.distance_cm()
-            self.lastDetectTime = time.ticks_ms()
+            self.lastDetectTime = currentTime
 
     def getTelemetry(self): 
         telemetry = { "distancecm": self.distance_cm }
