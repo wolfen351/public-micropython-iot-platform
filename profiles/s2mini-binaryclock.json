@@ -1,5 +1,5 @@
 {
-    "name": "S2 Mini AC Remote",
+    "name": "S2 Mini Binary Clock",
     "shortName": "s2mini-binaryclock",
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "binary_clock", "touchscreen"],
     "cpuSpeed": 240000000,

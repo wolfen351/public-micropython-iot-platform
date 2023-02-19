@@ -1,6 +1,8 @@
 """XGLCD Font Utility."""
 from math import ceil, floor
 
+from serial_log import SerialLog
+
 
 class XglcdFont(object):
     """Font data in X-GLCD format.
@@ -55,6 +57,7 @@ class XglcdFont(object):
         self.letters = bytearray(bytes_per_letter * self.letter_count)
         mv = memoryview(self.letters)
         offset = 0
+        SerialLog.log("Loading font:", path)
         with open(path, 'r') as f:
             for line in f:
                 # Skip lines that do not start with hex values

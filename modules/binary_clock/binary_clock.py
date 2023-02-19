@@ -18,7 +18,7 @@ class BinaryClock(BasicModule):
     spi = None
     display = None
     xpt = None
-    font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57, 32, 97, 228)
+    font = XglcdFont('modules/touchscreen/font25x57.c', 25, 57, 32, 97, 228)
     gotTime = False
     ntptime.host = "0.nz.pool.ntp.org"
     UTC_BASE_OFFSET = 12 * 60 * 60

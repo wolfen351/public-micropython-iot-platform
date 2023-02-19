@@ -46,6 +46,9 @@ class NtpSync(BasicModule):
                     self.gotTime = True
                 except Exception as e:
                     SerialLog.log(b"Error syncing time: ", e)
+                    import sys
+                    sys.print_exception(e)
+
         if (not self.sta_if.isconnected()):
             self.gotTime = False # resync time when wifi comes back
         

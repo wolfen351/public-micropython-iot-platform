@@ -121,6 +121,9 @@ try:
         elif modname == "garage_door_closer":
             from modules.garage_door_closer.garage_door_control import GarageDoorControl
             allModules.append(GarageDoorControl())
+        elif modname == "touchscreen":
+            from modules.touchscreen.touchscreen import TouchScreen
+            allModules.append(TouchScreen())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())

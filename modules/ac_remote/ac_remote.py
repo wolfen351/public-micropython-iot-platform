@@ -16,7 +16,7 @@ class AcRemote(BasicModule):
     spi = None
     display = None
     xpt = None
-    font = XglcdFont('modules/touchscreen/fonts/font25x57.c', 25, 57, 32, 97, 228)
+    font = XglcdFont('modules/touchscreen/font25x57.c', 25, 57, 32, 97, 228)
     mode = "OFF"
     detectedTemp = 23
     setpoint = 23

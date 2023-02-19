@@ -54,8 +54,7 @@ class Touch(object):
             self.int_pin.init(int_pin.IN)
             self.int_handler = int_handler
             self.int_locked = False
-            int_pin.irq(trigger=int_pin.IRQ_FALLING | int_pin.IRQ_RISING,
-                        handler=self.int_press)
+            int_pin.irq(trigger=int_pin.IRQ_FALLING | int_pin.IRQ_RISING, handler=self.int_press)
 
     def get_rawtouch(self):
         sample = self.raw_touch()  # get a touch
