@@ -41,7 +41,9 @@ class GarageDoorControl(BasicModule):
         return telemetry
 
     def processTelemetry(self, telemetry):
-        if (telemetry["distancecm"] > 90):
+        if (telemetry["distancecm"] == -1):
+          self.doorState = "Unknown"
+        elif (telemetry["distancecm"] > 90):
           self.doorState = "Closed"
         else:
           self.doorState = "Open"

@@ -11,7 +11,7 @@ class USRangeSensor(BasicModule):
 
     def start(self):
         BasicModule.start(self)
-        self.sensor = HCSR04(trigger_pin=18, echo_pin=16)
+        self.sensor = HCSR04(trigger_pin=16, echo_pin=18)
         self.lastDetectTime = 0
 
     def tick(self):
