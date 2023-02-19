@@ -196,12 +196,13 @@ class HomeAssistantControl(BasicModule):
             "name": "%s %s %s" % (self.basicSettings['shortName'], self.client_id.decode('ascii'), name),
             "unique_id": uniqueid,
             "device": {
-                "connections": ["mac", my_mac_addr],
+                "connections": [["mac", my_mac_addr]],
                 "manufacturer": "Wolfen",
                 "name": self.basicSettings["name"] + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
-                "identifiers": [ "mqtt_device",  self.client_id.decode('ascii') + "," + self.basicSettings["shortName"] ],
-                #"configuration_url": "http://" + self.ip,
+#                "identifiers": [ "mqtt_device",  self.client_id.decode('ascii') + "," + self.basicSettings["shortName"] ],
+                "model": self.basicSettings["shortName"],
+                "configuration_url": "http://" + self.ip + "/index.html"
             },
             "stat_t": "~/state",
             "val_tpl": "{{ value_json.%s }}" % (attr)
