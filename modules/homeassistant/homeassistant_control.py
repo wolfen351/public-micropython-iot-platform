@@ -187,15 +187,20 @@ class HomeAssistantControl(BasicModule):
 
     
     def get_basic_payload(self, name, uniqueid, attr):
+
+        wlan_mac = self.sta_if.config('mac')
+        my_mac_addr = ubinascii.hexlify(wlan_mac, ':').decode().upper()
+
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
             "name": "%s %s %s" % (self.basicSettings['shortName'], self.client_id.decode('ascii'), name),
             "unique_id": uniqueid,
             "device": {
+                "connections": ["mac", my_mac_addr],
                 "manufacturer": "Wolfen",
                 "name": self.basicSettings["name"] + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
-                "identifiers": [ self.client_id.decode('ascii'), self.basicSettings["shortName"], self.basicSettings["name"] ],
+                "identifiers": [ "mqtt_device",  self.client_id.decode('ascii') + "," + self.basicSettings["shortName"] ],
                 #"configuration_url": "http://" + self.ip,
             },
             "stat_t": "~/state",
