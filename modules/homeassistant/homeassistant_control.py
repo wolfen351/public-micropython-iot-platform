@@ -193,14 +193,13 @@ class HomeAssistantControl(BasicModule):
 
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
-            "name": "%s %s %s" % (self.basicSettings['shortName'], self.client_id.decode('ascii'), name),
+            "name": name,
             "unique_id": uniqueid,
             "device": {
                 "connections": [["mac", my_mac_addr]],
                 "manufacturer": "Wolfen",
                 "name": self.getPref("web", "name", self.basicSettings["name"]) + " - " + self.client_id.decode('ascii'),
                 "sw_version": self.version,
-#                "identifiers": [ "mqtt_device",  self.client_id.decode('ascii') + "," + self.basicSettings["shortName"] ],
                 "model": self.basicSettings["shortName"],
                 "configuration_url": "http://" + self.ip
             },
