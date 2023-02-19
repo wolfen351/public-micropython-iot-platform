@@ -221,12 +221,12 @@ class HomeAssistantControl(BasicModule):
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/')):
                 payload = self.get_basic_payload("Temperature", safeid, attr) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
+                payload.update({ "dev_cla": "temperature"})
                 SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
             elif (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr) 
-                payload.update({ "dev_cla": "humidity", "unit_of_meas": "%RH"})
+                payload.update({ "dev_cla": "humidity"})
                 SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
             elif (key.startswith(b'rssi')):
