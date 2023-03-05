@@ -24,6 +24,7 @@ class BinaryClock(BasicModule):
     UTC_BASE_OFFSET = 12 * 60 * 60
     UTC_OFFSET = 12 * 60 * 60
     previous = [-1,-1,-1,-1,-1,-1,-1]
+    hideDecimal = False
 
     def __init__(self):
         pass
@@ -67,13 +68,16 @@ class BinaryClock(BasicModule):
         spacing = 65
         leftspacing = 60
         if (self.previous[5] != localTime[5] or full == True):
-            self.drawNumber(localTime[5], 200, leftspacing, False) # seconds
+            if (not self.hideDecimal):
+                self.drawNumber(localTime[5], 200, leftspacing, False) # seconds
             self.drawBinary(localTime[5], 0, 10, full)
         if (self.previous[4] != localTime[4] or full == True):
-            self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
+            if (not self.hideDecimal):
+                self.drawNumber(localTime[4], 200, leftspacing+spacing) # mins
             self.drawBinary(localTime[4], 0, 110, full)
         if (self.previous[3] != localTime[3] or full == True):
-            self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # hours
+            if (not self.hideDecimal):
+                self.drawNumber(localTime[3], 200, leftspacing+spacing*2) # hours
             self.drawBinary(localTime[3], 0, 210, full)
         self.previous = localTime
 
@@ -130,8 +134,9 @@ class BinaryClock(BasicModule):
     def processCommands(self, commands):
         for c in commands:
             if ("/touch" in c):
-                self.display.clear(color565(64, 0, 0))
                 self.display.clear(color565(0, 0, 0))                
+                self.hideDecimal = not self.hideDecimal
+                self.displayTime(True)
 
     def getRoutes(self):
         return {

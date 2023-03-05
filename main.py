@@ -161,7 +161,8 @@ try:
         # get all telemetry
         for mod in allModules:
             # merge all telemetry into the telemetry object
-            telemetry.update(runSafe(mod.getTelemetry))
+            newTel = runSafe(mod.getTelemetry)
+            runSafe(telemetry.update, newTel)
 
         # process all telemetry
         for mod in allModules:

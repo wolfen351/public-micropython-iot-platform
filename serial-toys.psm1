@@ -52,6 +52,12 @@ function Show-SerialLog {
         $port
     )
 
+    if ($port -eq $null)
+    {
+        Write-Host "No Port Specified, Auto Detecting.."
+        $port = Find-MicrocontrollerPort
+    }
+
     Write-Host "-------------------------------------------------------------------------------"
     Write-Host "Listening on $port. Serial Log follows - Press any key to disconnect!" 
     Write-Host "-------------------------------------------------------------------------------"

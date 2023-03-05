@@ -5,6 +5,7 @@ from modules.touchscreen.ili9341 import Display, color565
 from modules.touchscreen.xglcd_font import XglcdFont
 from machine import Pin, SPI
 from modules.touchscreen.xpt2046 import Touch
+from serial_log import SerialLog
 
 class TouchScreen(BasicModule):
 
@@ -26,7 +27,7 @@ class TouchScreen(BasicModule):
         self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         self.xpt = Touch(self.spi, cs=Pin(18))
 
-        lastTouchAt = time.ticks_ms()
+        self.lastTouchAt = time.ticks_ms()
 
     
     def tick(self):
@@ -34,6 +35,7 @@ class TouchScreen(BasicModule):
         diff = time.ticks_diff(currentTime, self.lastTouchAt)
         self.lastTouch = None
         if (diff > 200):
+            self.lastTouchAt = time.ticks_ms()
             # Slow down SPI for touch
             self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
             t = self.xpt.get_rawtouch()
@@ -42,7 +44,11 @@ class TouchScreen(BasicModule):
     def getTelemetry(self):
         telemetry = {}
         if (self.lastTouch != None):
-            telemetry = { "touch", self.lastTouch }
+            telemetry = { 
+                "touchX": self.lastTouch[0],
+                "touchY": self.lastTouch[1]
+            }
+            SerialLog.log("Telemetry", telemetry)
         return telemetry
 
     def processTelemetry(self, telemetry):
