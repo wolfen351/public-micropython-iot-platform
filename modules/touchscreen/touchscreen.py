@@ -39,12 +39,12 @@ class TouchScreen(BasicModule):
 
     def getCommands(self):
         if (self.lastTouch != None):
-            return ["touch/" + self.lastTouch[0] + "/" + self.lastTouch[1]]
+            return ["touch/0/0"]
         return []
 
     def processCommands(self, commands):
         pass
-    
+
     def getRoutes(self):
         return {
         }
