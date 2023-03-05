@@ -35,6 +35,7 @@ class BinaryClock(BasicModule):
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
         self.sta_if = network.WLAN(network.STA_IF)
+        self.displayTime(True)
 
     def tick(self):
 
