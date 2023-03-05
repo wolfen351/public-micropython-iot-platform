@@ -34,6 +34,8 @@ class TouchScreen(BasicModule):
         diff = time.ticks_diff(currentTime, self.lastTouchAt)
         self.lastTouch = None
         if (diff > 200):
+            # Slow down SPI for touch
+            self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
             t = self.xpt.get_rawtouch()
             self.lastTouch = t
 

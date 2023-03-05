@@ -31,7 +31,7 @@ class BinaryClock(BasicModule):
 
     def start(self):
         # High Speed SPI for drawing
-        self.spi = SPI(1, baudrate=40000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+        self.spi = SPI(1, baudrate=100000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
         self.sta_if = network.WLAN(network.STA_IF)
@@ -61,6 +61,8 @@ class BinaryClock(BasicModule):
         self.displayTime()
 
     def displayTime(self, full = False):
+        # Speed up SPI for drawing
+        self.spi = SPI(1, baudrate=100000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
         spacing = 65
         leftspacing = 60
