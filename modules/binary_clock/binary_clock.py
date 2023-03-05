@@ -131,7 +131,6 @@ class BinaryClock(BasicModule):
                 self.display.clear(color565(64, 0, 0))
                 self.display.clear(color565(0, 0, 0))                
 
-
     def getRoutes(self):
         return {
         }

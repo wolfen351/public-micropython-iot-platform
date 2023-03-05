@@ -1,4 +1,5 @@
 
+import time
 from modules.basic.basic_module import BasicModule
 from modules.touchscreen.ili9341 import Display, color565
 from modules.touchscreen.xglcd_font import XglcdFont
@@ -12,6 +13,7 @@ class TouchScreen(BasicModule):
     xpt = None
     robotron = XglcdFont('modules/touchscreen/ArcadePix9x11.c', 9, 11)
     lastTouch = None
+    lastTouchAt = 0
 
     def __init__(self):
         pass
@@ -23,10 +25,17 @@ class TouchScreen(BasicModule):
         # Low speed SPI for touch
         self.spi = SPI(1, baudrate=2000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         self.xpt = Touch(self.spi, cs=Pin(18))
+
+        lastTouchAt = time.ticks_ms()
+
     
     def tick(self):
-        t = self.xpt.get_rawtouch()
-        self.lastTouch = t
+        currentTime = time.ticks_ms()
+        diff = time.ticks_diff(currentTime, self.lastTouchAt)
+        self.lastTouch = None
+        if (diff > 200):
+            t = self.xpt.get_rawtouch()
+            self.lastTouch = t
 
     def getTelemetry(self):
         telemetry = {}
@@ -39,7 +48,7 @@ class TouchScreen(BasicModule):
 
     def getCommands(self):
         if (self.lastTouch != None):
-            return ["touch/0/0"]
+            return [b"/touch/0/0"]
         return []
 
     def processCommands(self, commands):
