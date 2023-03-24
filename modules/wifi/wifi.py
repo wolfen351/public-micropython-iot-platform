@@ -50,10 +50,16 @@ class WifiHandler(BasicModule):
                 # New connection
                 self.connected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
-                # Check for update and update if needed
-                if ota.check_for_updates():
-                    ota.install_new_firmware()
-                    reset()
+
+                # Squash OTA exceptions
+                try:
+                    # Check for update and update if needed
+                    if ota.check_for_updates():
+                        ota.install_new_firmware()
+                        reset()
+                except Exception as e:
+                    SerialLog.log('OTA failed: ' + str(e))
+                    
             else:
                 SerialLog.log('No Wifi available, skipping OTA')
 
