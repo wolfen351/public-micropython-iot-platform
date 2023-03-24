@@ -10,7 +10,7 @@ import gc
 
 class WifiHandler(BasicModule):
 
-    essid = "ElectronicAP"
+    essid = "Wolfen-Sensor-AP"
     defaultSSID = "NOT-CONFIGURED"
     defaultPassword = "no-password-set"
 
@@ -59,7 +59,7 @@ class WifiHandler(BasicModule):
                         reset()
                 except Exception as e:
                     SerialLog.log('OTA failed: ' + str(e))
-                    
+
             else:
                 SerialLog.log('No Wifi available, skipping OTA')
 
@@ -246,12 +246,7 @@ class WifiHandler(BasicModule):
         self.apMode = True
 
     def station(self):
-
-        SerialLog.log('\nPower cycling wifi station interface...')
-        self.sta_if.active(False)
-        time.sleep(2)
-        self.sta_if.active(True)
-
+        self.powerCycleWifi()
 
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         SerialLog.log('\nConnecting to wifi...', ssid)
@@ -278,3 +273,8 @@ class WifiHandler(BasicModule):
             from sys import print_exception
             print_exception(e)
         
+    def powerCycleWifi(self):
+        SerialLog.log('Power cycling wifi station interface...')
+        self.sta_if.active(False)
+        time.sleep(2)
+        self.sta_if.active(True)
