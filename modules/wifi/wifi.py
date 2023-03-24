@@ -106,14 +106,14 @@ class WifiHandler(BasicModule):
                 # Connection lost
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastReconnectTime)
-                if (diff > 10000):
+                if (diff > 30000):
                     SerialLog.log('Reconnecting..')
                     self.lastReconnectTime = now
                     self.connected = False
                     self.station()
 
                 diff = time.ticks_diff(now, self.downTimeStart)
-                if (diff > 30000 and not self.apModeGaveUp):
+                if (diff > 60000 and not self.apModeGaveUp):
                     SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
                     self.ap()
 
@@ -240,12 +240,16 @@ class WifiHandler(BasicModule):
         self.apMode = True
 
     def station(self):
+
+        SerialLog.log('\nPower cycling wifi station interface...')
+        self.sta_if.active(False)
+        time.sleep(2)
+        self.sta_if.active(True)
+
+
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         SerialLog.log('\nConnecting to wifi...', ssid)
         try:
-            if (self.sta_if.isconnected()):
-                self.sta_if.disconnect()
-            self.sta_if.active(True)
             self.sta_if.config(dhcp_hostname=self.essid)
 
             # set static ip
