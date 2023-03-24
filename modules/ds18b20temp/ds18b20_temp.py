@@ -26,6 +26,15 @@ class DS18B20Temp(BasicModule):
         time.sleep(0.5)
         self.roms = self.ds_sensor.scan()
         SerialLog.log('Found DS devices: ', self.roms)
+
+        # try again if no devices found
+        tries = 0
+        while (len(self.roms) == 0 and tries < 5):
+            SerialLog.log('No devices found. Trying again...')
+            self.roms = self.ds_sensor.scan()
+            SerialLog.log('Found DS devices: ', self.roms)
+            tries += 1
+
         if (len(self.roms) > 0):
             self.ds_sensor.convert_temp()
             self.lastConvert = time.ticks_ms()
