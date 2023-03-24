@@ -41,11 +41,11 @@ class WifiHandler(BasicModule):
             self.version = ota.local_version()
             startTime = time.ticks_ms()
 
+            # wait up to 20s for a connection
             SerialLog.log('Waiting for wifi...')
-            while (time.ticks_diff(time.ticks_ms(), startTime) < 5000 and not self.sta_if.isconnected()):
+            while (time.ticks_diff(time.ticks_ms(), startTime) < 20000 and not self.sta_if.isconnected()):
                 time.sleep(0.1)
 
-            # wait up to 5s for a connection
             if self.sta_if.isconnected():
                 # New connection
                 self.connected = True
