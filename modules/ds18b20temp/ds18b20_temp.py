@@ -11,6 +11,7 @@ class DS18B20Temp(BasicModule):
 
     lastTemp = {}
     lastConvert = 0
+    roms = []
 
     def __init__(self):
         pass
@@ -24,16 +25,7 @@ class DS18B20Temp(BasicModule):
         self.ds_pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         time.sleep(0.5)
-        self.roms = self.ds_sensor.scan()
-        SerialLog.log('Found DS devices: ', self.roms)
-
-        # try again if no devices found
-        tries = 0
-        while (len(self.roms) == 0 and tries < 5):
-            SerialLog.log('No devices found. Trying again...')
-            self.roms = self.ds_sensor.scan()
-            SerialLog.log('Found DS devices: ', self.roms)
-            tries += 1
+        self.roms = self.getSensors()
 
         if (len(self.roms) > 0):
             self.ds_sensor.convert_temp()
@@ -42,6 +34,9 @@ class DS18B20Temp(BasicModule):
                 self.lastTemp[str(rom)] = -127
 
     def tick(self):
+        if (len(self.roms) == 0):
+            self.roms = self.getSensors()
+
         if (len(self.roms) > 0):
             currentTime = time.ticks_ms()
             diff = time.ticks_diff(currentTime, self.lastConvert)
@@ -90,3 +85,13 @@ class DS18B20Temp(BasicModule):
         headers = okayHeader
         data = dumps(telemetry)
         return data, headers            
+    
+    def getSensors(self):
+        # try again if no devices found
+        tries = 0
+        while (len(self.roms) == 0 and tries < 5):
+            SerialLog.log('No devices found. Trying again...')
+            self.roms = self.ds_sensor.scan()
+            SerialLog.log('Found DS devices: ', self.roms)
+            tries += 1
+        return self.roms
