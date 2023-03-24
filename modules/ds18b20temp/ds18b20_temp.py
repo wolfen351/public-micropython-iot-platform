@@ -24,6 +24,7 @@ class DS18B20Temp(BasicModule):
         self.ds_pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         self.roms = self.ds_sensor.scan()
+        time.sleep(0.5)
         SerialLog.log('Found DS devices: ', self.roms)
         if (len(self.roms) > 0):
             self.ds_sensor.convert_temp()
