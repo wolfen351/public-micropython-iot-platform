@@ -27,6 +27,7 @@ class WifiHandler(BasicModule):
         self.version = "unknown"
         self.freeram = -1
         self.apModeGaveUp = False
+        self.everConnected = False
 
     def preStart(self):
 
@@ -49,6 +50,7 @@ class WifiHandler(BasicModule):
             if self.sta_if.isconnected():
                 # New connection
                 self.connected = True
+                self.everConnected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
 
                 # Squash OTA exceptions
@@ -90,6 +92,7 @@ class WifiHandler(BasicModule):
             if (self.sta_if.isconnected() and not self.connected):
                 # New connection
                 self.connected = True
+                self.everConnected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
                 # Disable AP on station mode successful connection
                 ap_if = network.WLAN(network.AP_IF)
@@ -118,12 +121,11 @@ class WifiHandler(BasicModule):
                     self.connected = False
                     self.station()
 
+            if (not self.sta_if.isconnected() and not self.everConnected and not self.apModeGaveUp):
                 diff = time.ticks_diff(now, self.downTimeStart)
-                if (diff > 60000 and not self.apModeGaveUp):
+                if (diff > 60000):
                     SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
                     self.ap()
-
-
 
         else:
             if (self.ap_if.active()):

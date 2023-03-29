@@ -101,7 +101,7 @@ git push --tags
 # While loop for 30 seconds
 Write-Host "Waiting for update to be live"
 $startTime = Get-Date
-$endTime = $startTime.AddSeconds(60)
+$endTime = $startTime.AddSeconds(90)
 while ((Get-Date) -lt $endTime) {
     Start-Sleep -Seconds 2
     curl https://firmware.wolfen.nz/firmware/s2mini-dht22/version
