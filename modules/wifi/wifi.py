@@ -254,6 +254,10 @@ class WifiHandler(BasicModule):
             time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
             self.sta_if.config(dhcp_hostname=self.essid)
 
+            # Make sure the interface is active
+            if (not self.sta_if.active()):
+                self.sta_if.active(True)
+
             # set static ip
             type = self.getPref("wifi", "type", "DHCP")
             if (type == "Static"):
