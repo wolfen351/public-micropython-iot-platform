@@ -248,8 +248,6 @@ class WifiHandler(BasicModule):
         self.apMode = True
 
     def station(self):
-        self.powerCycleWifi()
-
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         SerialLog.log('\nConnecting to wifi...', ssid)
         try:
@@ -274,6 +272,7 @@ class WifiHandler(BasicModule):
             SerialLog.log("Error connecting to wifi:", e)
             from sys import print_exception
             print_exception(e)
+            self.powerCycleWifi()
         
     def powerCycleWifi(self):
         SerialLog.log('Power cycling wifi station interface...')
