@@ -34,7 +34,8 @@ class LilyGoBattery:
         timeSinceLastSleepMs = time.ticks_diff(currentTime, self.lastSleepTime)
         apRunning = self.ap_if.active()
 
-        if (timeSinceLastSleepMs > 1000 and not wifiConnected and not apRunning and hasBeenRunningForMoreThan2Mins):
+        # stay awake for 10s every 10min
+        if (timeSinceLastSleepMs > 10000 and not wifiConnected and not apRunning and hasBeenRunningForMoreThan2Mins):
             CpuHardware.lightSleep(600000) # sleep for 10min
 
         # check battery voltage every 5s
