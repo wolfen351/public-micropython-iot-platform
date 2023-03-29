@@ -251,6 +251,7 @@ class WifiHandler(BasicModule):
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         SerialLog.log('\nConnecting to wifi...', ssid)
         try:
+            time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
             self.sta_if.config(dhcp_hostname=self.essid)
 
             # set static ip
@@ -277,5 +278,6 @@ class WifiHandler(BasicModule):
     def powerCycleWifi(self):
         SerialLog.log('Power cycling wifi station interface...')
         self.sta_if.active(False)
+        self.ap_if.active(False)
         time.sleep(2)
         self.sta_if.active(True)
