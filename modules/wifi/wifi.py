@@ -251,12 +251,13 @@ class WifiHandler(BasicModule):
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         SerialLog.log('\nConnecting to wifi...', ssid)
         try:
-            time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
-            self.sta_if.config(dhcp_hostname=self.essid)
-
             # Make sure the interface is active
             if (not self.sta_if.active()):
                 self.sta_if.active(True)
+                time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
+
+            # Set The DCHP Hostname
+            self.sta_if.config(dhcp_hostname=self.essid)
 
             # set static ip
             type = self.getPref("wifi", "type", "DHCP")
