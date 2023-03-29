@@ -1,6 +1,7 @@
 Import-Module .\serial-toys.psm1
 
 # increment the version
+$oldVersion = $(cat version)
 Step-Version
 
 # make firmware archives for ota
@@ -97,3 +98,13 @@ git add .\version
 git commit -m "Packaged version: $(cat version)"
 git tag "$(cat version)"
 git push --tags
+
+# While loop until string changes
+$version = $(curl https://firmware.wolfen.nz/firmware/s2mini-dht22/version)
+$oldversion = $(curl https://firmware.wolfen.nz/firmware/s2mini-dht22/version)
+
+while($oldVersion -eq $version){
+    Write-Host "Waiting for update to be live"
+    Start-Sleep -Seconds 5
+    $version = $(curl https://firmware.wolfen.nz/firmware/s2mini-dht22/version)
+}
