@@ -291,7 +291,10 @@ class HomeAssistantControl(BasicModule):
                 SerialLog.log("HA MQTT Sending: ")
                 self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
             else:
-                SerialLog.log("Unknown Sensor, ignoring.")
+                SerialLog.log("Unknown Sensor Attribute, configuring as a string.")
+                payload = self.get_basic_payload(attr, safeid, attr) 
+                SerialLog.log("HA MQTT Sending: ")
+                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))                
     
     def settings(self, settingsVals):
         # Apply the new settings
