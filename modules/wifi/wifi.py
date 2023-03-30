@@ -272,6 +272,12 @@ class WifiHandler(BasicModule):
             password = self.getPref("wifi", "password", self.defaultPassword)
             self.sta_if.connect(ssid, password)
 
+            # wait up to 20s for a connection
+            SerialLog.log('Waiting for wifi...')
+            startTime = time.ticks_ms()
+            while (time.ticks_diff(time.ticks_ms(), startTime) < 20000 and not self.sta_if.isconnected()):
+                time.sleep(0.1)
+
         except KeyboardInterrupt:
             raise
         except Exception as e:
