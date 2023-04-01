@@ -10,6 +10,9 @@ class GarageDoorControl(BasicModule):
 
     def start(self):
         BasicModule.start(self)
+        self.sensorState = "Closed"
+        self.sensorChangedAt = 0
+
         self.doorState = "Closed"
         self.lastOpenAt = 0
         self.openForMs = 0
@@ -41,12 +44,26 @@ class GarageDoorControl(BasicModule):
         return telemetry
 
     def processTelemetry(self, telemetry):
+        oldSensorState = self.sensorState
+
+        # See if the sensor is open or closed
         if (telemetry["distancecm"] == -1):
-          self.doorState = "Unknown"
+          self.sensorState = "Unknown"
         elif (telemetry["distancecm"] > 90):
-          self.doorState = "Closed"
+          self.sensorState = "Closed"
         else:
-          self.doorState = "Open"
+          self.sensorState = "Open"
+
+        # Detect Sensor Changes
+        if (oldSensorState != self.sensorState):
+          self.sensorChangedAt = time.ticks_ms()
+
+        # Check if 3 seconds have passed since last sensor change
+        if (self.sensorChangedAt != 0 and self.doorState != self.sensorState):
+            currentTime = time.ticks_ms()
+            diff = time.ticks_diff(currentTime, self.sensorChangedAt)
+            if (diff > 3000):
+                self.doorState = self.sensorState
 
     def getCommands(self):
         toSend = self.commands
