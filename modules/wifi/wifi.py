@@ -53,14 +53,7 @@ class WifiHandler(BasicModule):
                 self.everConnected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
 
-                # Squash OTA exceptions
-                try:
-                    # Check for update and update if needed
-                    if ota.check_for_updates():
-                        ota.install_new_firmware()
-                        reset()
-                except Exception as e:
-                    SerialLog.log('OTA failed: ' + str(e))
+                self.ota()
 
             else:
                 SerialLog.log('No Wifi available, skipping OTA')
@@ -97,6 +90,9 @@ class WifiHandler(BasicModule):
                 # Disable AP on station mode successful connection
                 ap_if = network.WLAN(network.AP_IF)
                 ap_if.active(False)
+
+                self.ota()
+
                 return
 
             if (not self.sta_if.isconnected() and self.connected):
@@ -292,3 +288,14 @@ class WifiHandler(BasicModule):
         self.ap_if.active(False)
         time.sleep(2)
         self.sta_if.active(True)
+
+    def ota(self):
+        # Squash OTA exceptions
+        try:
+            # Check for update and update if needed
+            if ota.check_for_updates():
+                ota.install_new_firmware()
+                reset()
+        except Exception as e:
+            SerialLog.log('OTA failed: ' + str(e))
+
