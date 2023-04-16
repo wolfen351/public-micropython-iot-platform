@@ -7,6 +7,7 @@ import machine
 import network
 from modules.web.web_processor import okayHeader, unquote
 import ujson
+import time
 
 class HomeAssistantControl(BasicModule):
 
@@ -27,7 +28,7 @@ class HomeAssistantControl(BasicModule):
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
         self.commands = []
-
+        self.lastHourCheck = 0
     
     def start(self):
         BasicModule.start(self)
@@ -82,6 +83,11 @@ class HomeAssistantControl(BasicModule):
                 self.ip = value
             if (attr == "version"):
                 self.version = value
+
+        # wipe configured keys every hour, so we reregister with ha 
+        if (time.time() - self.lastHourCheck > 3600):
+            self.lastHourCheck = time.time()
+            self.configuredKeys = []         
 
         # tell home assistant about any new keys
         for attr, value in self.telemetry.items():
@@ -142,7 +148,6 @@ class HomeAssistantControl(BasicModule):
         }
 
     # Internal Code 
-
     def hasTelemetryChanged(self, newTelemetry):
         thingsThatChanged = 0
         for attr, value in newTelemetry.items():

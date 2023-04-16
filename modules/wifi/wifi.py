@@ -37,6 +37,10 @@ class WifiHandler(BasicModule):
         password = self.getPref("wifi", "password", self.defaultPassword)
 
         if (self.defaultSSID != ssid or self.defaultPassword != password):
+            # Set the essid, so the dhcp hostname is set
+            BasicModule.start(self)
+            self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+
             self.station()
 
             self.version = ota.local_version()
@@ -112,10 +116,14 @@ class WifiHandler(BasicModule):
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastReconnectTime)
                 if (diff > 30000):
-                    SerialLog.log('Reconnecting..')
+                    SerialLog.log('No wifi for 30s, attempting to reconnect ...')
                     self.lastReconnectTime = now
                     self.connected = False
                     self.station()
+                diff = time.ticks_diff(now, self.downTimeStart)
+                if (diff > 86400000):
+                    SerialLog.log("Failed to connect to wifi for 24h, rebooting ...")
+                    reset()
 
             if (not self.sta_if.isconnected() and not self.everConnected and not self.apModeGaveUp):
                 diff = time.ticks_diff(now, self.downTimeStart)
@@ -128,7 +136,8 @@ class WifiHandler(BasicModule):
                 if (len(self.ap_if.status('stations')) == 0):
                     now = time.ticks_ms()
                     diff = time.ticks_diff(now, self.lastReconnectTime)
-                    if (diff > 120000):
+                    # Turn off AP after 3 mins if no one connects
+                    if (diff > 180000): 
                         SerialLog.log("No stations connected to AP, shutting down AP")
                         self.apModeGaveUp = True # this prevents a second AP mode if wifi drops later
                         self.ap_if.active(False)
