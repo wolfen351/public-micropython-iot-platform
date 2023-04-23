@@ -142,6 +142,7 @@ class MqttControl(BasicModule):
         # Tell the server we are online
         self.client.publish(self.topic_pub + "/online", "1")
         # Tell the server if we lose connection
+        self.client.keepalive = 300 # 5 minutes
         self.client.lw_topic = self.topic_pub + "/online"
         self.client.lw_msg = "0"
         self.client.lw_retain = True
