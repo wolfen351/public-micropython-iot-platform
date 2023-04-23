@@ -135,6 +135,7 @@ $mqttClient = [uPLibrary.Networking.M2Mqtt.MqttClient]("mqtt.wolfen.za.net")
 $mqttClient.Connect("package.ps1")
 $mqttClient.Publish("iot-platform/version", [System.Text.Encoding]::UTF8.GetBytes($vers), 0, $true)
 $mqttClient.Disconnect()
+Write-Host "New version $vers published to mqtt server topic iot-platform/version"
 
 # Clean up
 Remove-Item $nugetExe
