@@ -101,8 +101,41 @@ git push --tags
 # While loop for 30 seconds
 Write-Host "Waiting for update to be live"
 $startTime = Get-Date
-$endTime = $startTime.AddSeconds(90)
+$endTime = $startTime.AddSeconds(120)
+$vers = Get-Content -Path .\version
 while ((Get-Date) -lt $endTime) {
     Start-Sleep -Seconds 2
-    curl https://firmware.wolfen.nz/firmware/s2mini-dht22/version
+
+    # Get version from above url, hide output
+    $serverVersion = curl -s https://firmware.wolfen.nz/firmware/s2mini-dht22/version 
+    if ($serverVersion -eq $vers) {
+        Write-Host "Update $vers is live!"
+        break
+    }
+    else 
+    {
+        Write-Host "Update is not live yet ($serverVersion vs $vers)..."
+    }
+
 }
+
+#Download nuget.exe
+$nugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+$nugetExe = ".\nuget.exe"
+if (!(Test-Path $nugetExe)) {
+    Invoke-WebRequest $nugetUrl -OutFile $nugetExe
+}
+
+# Install MQTT Library
+./nuget.exe install M2Mqtt -o .\lib
+Add-Type -Path ".\lib\M2Mqtt.4.3.0.0\lib\net45\M2Mqtt.Net.dll"
+
+# Publish new version to mqtt
+$mqttClient = [uPLibrary.Networking.M2Mqtt.MqttClient]("mqtt.wolfen.za.net")
+$mqttClient.Connect("package.ps1")
+$mqttClient.Publish("iot-platform/version", [System.Text.Encoding]::UTF8.GetBytes($vers), 0, $true)
+$mqttClient.Disconnect()
+
+# Clean up
+Remove-Item $nugetExe
+Remove-Item -recurse ".\lib" 2> $null

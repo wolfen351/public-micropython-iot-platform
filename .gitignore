@@ -5,3 +5,4 @@ version
 /Deploy/
 profile.json
 .package
+/lib/
