@@ -136,13 +136,12 @@ class MqttControl(BasicModule):
                 SerialLog.log("Firmware version match, no action (we are on: ", local_version(), ")")
 
     def connect_and_subscribe(self):
-        self.client = MQTTClient(b"mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+        self.client = MQTTClient(b"mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password, 300) # 300 second keepalive
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         # Tell the server we are online
         self.client.publish(self.topic_pub + "/online", "1")
         # Tell the server if we lose connection
-        self.client.keepalive = 300 # 5 minutes
         self.client.lw_topic = self.topic_pub + "/online"
         self.client.lw_msg = "0"
         self.client.lw_retain = True
