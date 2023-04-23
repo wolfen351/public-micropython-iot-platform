@@ -139,7 +139,7 @@ class MQTTClient:
     def publish(self, topic, msg, retain=False, qos=0):
         SerialLog.log("MQTT Sending: ", topic, msg)
         try:
-            self.publishInternal(topic, msg)
+            self.publishInternal(topic, msg, retain=retain, qos=qos)
         except Exception as e:
             SerialLog.log("MQTT failed, reconnecting: ", e)
             try:

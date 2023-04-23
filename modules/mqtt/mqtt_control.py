@@ -68,7 +68,7 @@ class MqttControl(BasicModule):
         if (self.client != None and self.hasTelemetryChanged(telemetry)):
             for attr, value in telemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    self.client.publish(self.topic_pub + b"/%s" % (attr), str(telemetry[attr]), True)
+                    self.client.publish(self.topic_pub + b"/%s" % (attr), str(telemetry[attr]), retain=True)
             self.telemetry = telemetry.copy()
 
     def getCommands(self):
@@ -91,7 +91,7 @@ class MqttControl(BasicModule):
             thingsThatChanged = 0
             for attr, value in newTelemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second
+                    if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time, voltage or rssi every second
                         thingsThatChanged += 1
             return thingsThatChanged > 0
 
