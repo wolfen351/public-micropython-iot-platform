@@ -2,17 +2,17 @@ from modules.basic.basic_module import BasicModule
 from modules.homeassistant.homeassistant_settings import HomeAssistantSettings
 from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
-import ubinascii
-import machine
+from ubinascii import hexlify
+from machine import unique_id
 import network
 from modules.web.web_processor import okayHeader, unquote
-import ujson
-import time
+from ujson import dumps
+from time import time
 
 class HomeAssistantControl(BasicModule):
 
     def __init__(self):
-        self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.client_id = hexlify(unique_id())
         self.init = False
         self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
@@ -85,8 +85,8 @@ class HomeAssistantControl(BasicModule):
                 self.version = value
 
         # wipe configured keys every hour, so we reregister with ha 
-        if (time.time() - self.lastHourCheck > 3600):
-            self.lastHourCheck = time.time()
+        if (time() - self.lastHourCheck > 3600):
+            self.lastHourCheck = time()
             self.configuredKeys = []         
 
         # tell home assistant about any new keys
@@ -96,7 +96,7 @@ class HomeAssistantControl(BasicModule):
 
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
-            messageToSend = ujson.dumps(telemetry).replace("/","_")
+            messageToSend = dumps(telemetry).replace("/","_")
             SerialLog.log("Sending HA MQTT: ")
             self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend)
 
@@ -112,7 +112,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", ujson.dumps(state))
+                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", dumps(state))
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -126,7 +126,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", ujson.dumps(state))
+                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", dumps(state))
             self.telemetry = telemetry.copy()
 
     
@@ -194,7 +194,7 @@ class HomeAssistantControl(BasicModule):
     def get_basic_payload(self, name, uniqueid, attr):
 
         wlan_mac = self.sta_if.config('mac')
-        my_mac_addr = ubinascii.hexlify(wlan_mac, ':').decode().upper()
+        my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
@@ -228,37 +228,37 @@ class HomeAssistantControl(BasicModule):
                 payload = self.get_basic_payload("Temperature", safeid, attr) 
                 payload.update({ "dev_cla": "temperature"})
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr) 
                 payload.update({ "dev_cla": "humidity"})
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'rssi')):
                 payload = self.get_basic_payload("RSSI", safeid, attr) 
                 payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ip')):
                 payload = self.get_basic_payload("IP", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ssid')):
                 payload = self.get_basic_payload("SSID", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_mode')):
                 payload = self.get_basic_payload("ac_mode", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_setpoint')):
                 payload = self.get_basic_payload("ac_setpoint", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ledprimaryb')):
                 payload = self.get_basic_payload("Primary Colour", safeid, attr) 
                 payload.pop("val_tpl")
@@ -276,7 +276,7 @@ class HomeAssistantControl(BasicModule):
                         "stat_t": "~/ledprimaryrgbstate",
                 })
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
             elif (key.startswith(b'ledsecondaryb')):
                 payload = self.get_basic_payload("Secondary Colour", safeid, attr) 
                 payload.pop("val_tpl")
@@ -294,12 +294,12 @@ class HomeAssistantControl(BasicModule):
                         "stat_t": "~/ledsecondaryrgbstate",
                 })
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), ujson.dumps(payload))
+                self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
             else:
                 SerialLog.log("Unknown Sensor Attribute, configuring as a string.")
                 payload = self.get_basic_payload(attr, safeid, attr) 
                 SerialLog.log("HA MQTT Sending: ")
-                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), ujson.dumps(payload))                
+                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
     
     def settings(self, settingsVals):
         # Apply the new settings

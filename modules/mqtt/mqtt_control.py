@@ -2,15 +2,17 @@ from modules.basic.basic_module import BasicModule
 from modules.mqtt.mqtt import MQTTClient
 from modules.mqtt.mqtt_settings import MqttSettings
 from serial_log import SerialLog
-import ubinascii
-import machine
+from ubinascii import hexlify
+from machine import unique_id, reset
 import network
 from modules.web.web_processor import okayHeader, unquote
+from time import sleep
+from modules.ota.ota import local_version
 
 class MqttControl(BasicModule):
 
     def __init__(self):
-        self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.client_id = hexlify(unique_id())
         self.init = False
         self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
@@ -118,10 +120,34 @@ class MqttControl(BasicModule):
         topic = topic.replace(self.topic_sub.replace(b"/#", b""), b"") 
         self.commands.append(topic + b"/" + msg)
 
+        # check for firmware update
+        # if topic starts with iot-platform/version and the version is different, restart
+        if (topic.startswith(b"iot-platform/version")):
+            #convert msg to string
+            msgs = msg.decode('ascii')
+            if (msgs > local_version()):
+                SerialLog.log("Server Firmware is newer than ours, restarting (we are on: ", local_version(), ")")
+                # sleep for 5s, then reboot
+                sleep(5)
+                reset()
+            elif (msgs < local_version()):
+                SerialLog.log("Server Firmware is older than ours, not restarting (we are on: ", local_version(), ")")
+            else:
+                SerialLog.log("Firmware version match, no action (we are on: ", local_version(), ")")
+
     def connect_and_subscribe(self):
         self.client = MQTTClient(b"mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
         self.client.set_callback(self.sub_cb)
         self.client.connect()
+        # Tell the server we are online
+        self.client.publish(self.topic_pub + "/online", "1")
+        # Tell the server if we lose connection
+        self.client.lw_topic = self.topic_pub + "/online"
+        self.client.lw_msg = "0"
+        self.client.lw_retain = True
+        # subscribe to the version topic for updates
+        self.client.subscribe("iot-platform/version")
+        # subscribe to the command topic
         self.client.subscribe(self.topic_sub)
         SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))        
         # resend all telemetry on connect

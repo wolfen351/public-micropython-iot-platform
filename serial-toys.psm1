@@ -73,12 +73,10 @@ function Show-SerialLog {
             Write-Output $data
             }
         }
+        catch [TimeoutException] {
+            continue;
+        }
         catch {
-
-            if ($PSItem.Exception.Message.Contains("timeout")){
-                continue;
-            }
-
             Write-Host "Error. $_"
 
             if (! $portObj.IsOpen) {
