@@ -140,7 +140,7 @@ class MqttControl(BasicModule):
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         # Tell the server we are online
-        self.client.publish(self.topic_pub + "/online", "1")
+        self.client.publish(self.topic_pub + "/online", "1", True)
         # Tell the server if we lose connection
         self.client.lw_topic = self.topic_pub + "/online"
         self.client.lw_msg = "0"
