@@ -150,46 +150,54 @@ class TempHistory(BasicModule):
     def loadHistoryFromDisk(self):
         try:
             f = open("temphistory.json",'r')
-            settings_string=f.read()
+            self.historyYesterday = ujson.loads(f.readline())
+            self.historyToday = ujson.loads(f.readline())
+            self.historyMonth = ujson.loads(f.readline())
+            self.currentHour = ujson.loads(f.readline())
+            self.currentDay = ujson.loads(f.readline())
+            self.currentMonth = ujson.loads(f.readline())
+            self.min = ujson.loads(f.readline())
+            self.max = ujson.loads(f.readline())
+            self.count = ujson.loads(f.readline())
+            self.sum = ujson.loads(f.readline())
+            self.daymin = ujson.loads(f.readline())
+            self.daymax = ujson.loads(f.readline())
+            self.daycount = ujson.loads(f.readline())
+            self.daysum = ujson.loads(f.readline())
             f.close()
-            hist = ujson.loads(settings_string)
-            self.historyYesterday = hist["yesterday"]
-            self.historyToday = hist["today"]
-            self.historyMonth = hist["month"] 
-            self.currentHour = hist["currentHour"]
-            self.currentDay = hist["currentDay"]
-            self.currentMonth = hist["currentMonth"]
-            self.min = hist["min"]
-            self.max = hist["max"]
-            self.count = hist["count"]
-            self.sum = hist["sum"]
-            self.daymin = hist["daymin"]
-            self.daymax = hist["daymax"]
-            self.daycount = hist["daycount"]
-            self.daysum = hist["daysum"]
-
             SerialLog.log("Temp history loaded from disk")
-        except:
-            SerialLog.log("Error: Unable to load history from disk.")
+        except Exception as e:
+            SerialLog.log("Error: Unable to load history from disk.", e)
 
     def saveHistoryToDisk(self):
-        hist = {
-            "yesterday": self.historyYesterday,
-            "today": self.historyToday,
-            "month": self.historyMonth,
-            "currentHour" : self.currentHour,
-            "currentDay" : self.currentDay,
-            "currentMonth" : self.currentMonth,
-            "min": self.min,
-            "max": self.max,
-            "count": self.count,
-            "sum": self.sum,
-            "daymin": self.daymin,
-            "daymax": self.daymax,
-            "daycount": self.daycount,
-            "daysum": self.daysum,
-        }
         f = open("temphistory.json", "w")
-        f.write(ujson.dumps(hist))
+        f.write(ujson.dumps(self.historyYesterday))        
+        f.write('\n')
+        f.write(ujson.dumps(self.historyToday))
+        f.write('\n')
+        f.write(ujson.dumps(self.historyMonth))
+        f.write('\n')
+        f.write(ujson.dumps(self.currentHour))
+        f.write('\n')
+        f.write(ujson.dumps(self.currentDay))
+        f.write('\n')
+        f.write(ujson.dumps(self.currentMonth))
+        f.write('\n')
+        f.write(ujson.dumps(self.min))
+        f.write('\n')
+        f.write(ujson.dumps(self.max))
+        f.write('\n')
+        f.write(ujson.dumps(self.count))
+        f.write('\n')
+        f.write(ujson.dumps(self.sum))
+        f.write('\n')
+        f.write(ujson.dumps(self.daymin))
+        f.write('\n')
+        f.write(ujson.dumps(self.daymax))
+        f.write('\n')
+        f.write(ujson.dumps(self.daycount))
+        f.write('\n')
+        f.write(ujson.dumps(self.daysum))
+        f.write('\n')
         f.close()
 
