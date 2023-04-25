@@ -130,17 +130,24 @@ class TempHistory(BasicModule):
     def getRoutes(self):
         return {
             b"/temphistory": b"/modules/temphistory/history.html",
-            b"/temphistorydetail": self.tempHistoryDetail
+            b"/temphistorydetailtoday": self.tempHistoryDetailToday,
+            b"/temphistorydetailyesterday": self.tempHistoryDetailYesterday,
+            b"/temphistorydetailmonth": self.tempHistoryDetailMonth
         }
 
-    def tempHistoryDetail(self, params):
+    def tempHistoryDetailToday(self, params):
         headers = okayHeader
-        telemetry = {
-            'today': self.historyToday,
-            'yesterday': self.historyYesterday,
-            'month': self.historyMonth
-        }
-        data = json.dumps(telemetry)
+        data = json.dumps(self.historyToday)
+        return data, headers  
+
+    def tempHistoryDetailYesterday(self, params):
+        headers = okayHeader
+        data = json.dumps(self.historyYesterday)
+        return data, headers  
+
+    def tempHistoryDetailMonth(self, params):
+        headers = okayHeader
+        data = json.dumps(self.historyMonth)
         return data, headers  
 
     def getIndexFileName(self):

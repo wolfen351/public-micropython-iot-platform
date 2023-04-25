@@ -91,41 +91,57 @@
 
   <script type="text/javascript">
     setInterval(function () {
-      fetch('/temphistorydetail')
+      fetch('/temphistorydetailtoday')
         .then(response => response.json())
         .then(data => {
           s = data;
 
           hour = 0;
           table = "<div class='thh'>Today</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
-          for (let key of Object.keys(s.today)) {
-            if (!s.today[hour])
-              s.today[hour] = { min: 0, max: 0, count: 1, sum: 0 }
-            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s.today[hour].min.toFixed(1)} °C</td><td>${s.today[hour].max.toFixed(1)} °C</td><td>${(s.today[hour].sum / s.today[hour].count).toFixed(1)} °C</td></tr>`;
+          for (let key of Object.keys(s)) {
+            if (!s[hour])
+              s[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s[hour].min.toFixed(1)} °C</td><td>${s[hour].max.toFixed(1)} °C</td><td>${(s[hour].sum / s[hour].count).toFixed(1)} °C</td></tr>`;
             table += row;
             hour++;;
           }
           table += "</table>";
           $("#today").html(table);
+        });
+    }, 2000);
+
+    setInterval(function () {
+      fetch('/temphistorydetailyesterday')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
 
           hour = 0;
           table = "<div class='thh'>Yesterday</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
-          for (let key of Object.keys(s.yesterday)) {
-            if (!s.yesterday[hour])
-              s.yesterday[hour] = { min: 0, max: 0, count: 1, sum: 0 }
-            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s.yesterday[hour].min.toFixed(1)} °C</td><td>${s.yesterday[hour].max.toFixed(1)} °C</td><td>${(s.yesterday[hour].sum / s.yesterday[hour].count).toFixed(1)} °C</td></tr>`;
+          for (let key of Object.keys(s)) {
+            if (!s[hour])
+              s[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s[hour].min.toFixed(1)} °C</td><td>${s[hour].max.toFixed(1)} °C</td><td>${(s[hour].sum / s[hour].count).toFixed(1)} °C</td></tr>`;
             table += row;
             hour++;;
           }
           table += "</table>";
           $("#yesterday").html(table);
+        });
+    }, 2132);
+
+    setInterval(function () {
+      fetch('/temphistorydetailmonth')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
 
           day = 0;
           table = "<div class='thh'>This Month</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Day</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
-          for (let key of Object.keys(s.month)) {
-            if (!s.month[day])
-              s.month[day] = { min: 0, max: 0, count: 1, sum: 0 }
-            row = `<tr><td>${day}</td><td>${s.month[day].min.toFixed(1)} °C</td><td>${s.month[day].max.toFixed(1)} °C</td><td>${(s.month[day].sum / s.month[day].count).toFixed(1)} °C</td></tr>`;
+          for (let key of Object.keys(s)) {
+            if (!s[day])
+              s[day] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${day}</td><td>${s[day].min.toFixed(1)} °C</td><td>${s[day].max.toFixed(1)} °C</td><td>${(s[day].sum / s[day].count).toFixed(1)} °C</td></tr>`;
             table += row;
             day++;;
           }
@@ -134,7 +150,8 @@
 
 
         });
-    }, 2000);
+    }, 2482);
+
   </script>
 
   <style>
@@ -152,7 +169,7 @@
 }
 
 .dataList td {
-  background-color: ;
+  background-color: unset;
   border: 1px black solid;
   padding: 7px;
 }
