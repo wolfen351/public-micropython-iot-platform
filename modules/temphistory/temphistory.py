@@ -32,6 +32,9 @@ class TempHistory(BasicModule):
         pass
 
     def getTelemetry(self):
+        if (self.count == 0):
+            return {}
+        
         telemetry = {
             'tempmin': self.min,
             'tempmax': self.max,
