@@ -13,7 +13,7 @@ Write-Output $MAXEDITTIME | Out-File -Encoding ascii .\lastedit.dat
 foreach ($profile in $profiles){
     Write-Host "Processing Profile: $($profile.Name)"
 
-    $activeProfile = Get-Content -Raw $profile | ConvertFrom-Json 
+    $activeProfile = Get-Content -Raw "$profile" | ConvertFrom-Json 
     # load active modules
     $activeModules = $activeProfile.activeModules
     Write-Host "Flashing Profile: $($activeProfile.shortName)"
@@ -45,12 +45,23 @@ foreach ($profile in $profiles){
     {
         $dest = "$PSScriptRoot\.package\$($itemToCopy | Resolve-Path -Relative)"
         $dest = $dest.replace("\.\", "\")
-        Invoke-Expression "xcopy $itemToCopy $dest /Y /-I"
+        #Invoke-Expression "xcopy $itemToCopy $dest /Y /-I"
+
+        if (!(Test-Path (Split-Path $dest))) {
+            New-Item -ItemType Directory -Force -Path (Split-Path $dest)
+        }
+
+        Copy-Item -Path $itemToCopy -Destination $dest -Recurse -Force
     }
 
     # Profile File
     $dest = "$PSScriptRoot\.package\profile.json"
-    Invoke-Expression "xcopy .\profiles\$($profile.Name) $dest /Y /-I"
+    #Invoke-Expression "xcopy .\profiles\$($profile.Name) $dest /Y /-I"
+    if (!(Test-Path (Split-Path $dest))) {
+        New-Item -ItemType Directory -Force -Path (Split-Path $dest)
+    }
+
+    Copy-Item -Path ".\profiles\$($profile.Name)" -Destination $dest -Recurse -Force
 
     # Tar up all the files
     Push-Location .package
@@ -65,7 +76,7 @@ foreach ($profile in $profiles){
     Write-Output $V | Out-File -encoding ascii latest
 
     # Copy it to the package directory
-    $BASEFOLDER="D:\stuff\code\wolfen-iot-firmware-archive"
+    $BASEFOLDER="C:\Users\Sonia\Documents\firmware-archive"
 
     # prepare git
     Push-Location $BASEFOLDER
