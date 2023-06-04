@@ -42,19 +42,19 @@ class DionHallwayLightsControl(BasicModule):
      
     def tick(self):
         # Main Loop
-        if (self.triggerState[0] == 1):
+        if (self.triggerState[0] == 0):
             SerialLog.log(b"Light: Trigger 1")
             self.action = 1
             self.triggeredAt = time.ticks_ms()
 
-        if (self.triggerState[1] == 1):
+        if (self.triggerState[1] == 0):
             SerialLog.log(b"Light: Trigger 2")
             self.action = 2
             self.triggeredAt = time.ticks_ms()
 
         # Reset Triggers
-        self.triggerState[0] = 0
-        self.triggerState[1] = 0
+        self.triggerState[0] = 1
+        self.triggerState[1] = 1
 
         newLightState = self.lightState.copy()
 
