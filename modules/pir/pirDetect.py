@@ -29,10 +29,10 @@ class PIRDetect(BasicModule):
         self.valueA = 1 - self.pinDetectorA.value()
         self.valueB = 1 - self.pinDetectorB.value()
         
-        if (oldValueA != self.valueA and self.valueA == 1):
+        if (oldValueA != self.valueA and self.valueA == 0):
             self.commands.append(self.basicSettings['pir']['pinACommand'].encode('ascii'))
 
-        if (oldValueB != self.valueB and self.valueB == 1):
+        if (oldValueB != self.valueB and self.valueB == 0):
             self.commands.append(self.basicSettings['pir']['pinBCommand'].encode('ascii'))
 
     def getTelemetry(self):
