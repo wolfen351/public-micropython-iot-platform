@@ -139,12 +139,12 @@
             .then(panel => {
               panel.text().then(t => $("#panels").append(t));
 
-              // sort panels by id
-              $(".panel").sort(function (a, b) {  
-                console.log("a-id", $(a).id);
-                console.log("b-id", $(b).id);
-                return $(a).id < $(b).id;
-              }).appendTo($("#panels"));
+              // // sort panels by id
+              // $(".panel").sort(function (a, b) {  
+              //   console.log("a-id", $(a).id);
+              //   console.log("b-id", $(b).id);
+              //   return $(a).id < $(b).id;
+              // }).appendTo($("#panels"));
 
             })
         }
