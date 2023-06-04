@@ -45,6 +45,8 @@ class HomeAssistantControl(BasicModule):
             self.topic_pub = settings.Publish
         else:
             self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
+        self.mqtt_user = settings.Username
+        self.mqtt_password = settings.Password
 
          
     def tick(self):
@@ -181,7 +183,7 @@ class HomeAssistantControl(BasicModule):
 
     
     def connect_and_subscribe(self):
-        self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_port)
+        self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         self.client.subscribe(self.topic_sub)

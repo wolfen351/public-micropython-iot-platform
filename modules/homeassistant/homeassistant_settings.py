@@ -5,17 +5,19 @@ class HomeAssistantSettings:
 
     SETTINGS_FILE = "./ha.settings"
 
-    def __init__(self, Enable=b"Y", Server=b"mqtt.wolfen.za.net", Subscribe=b"", Publish=b""):
+    def __init__(self, Enable=b"Y", Server=b"mqtt.wolfen.za.net", Subscribe=b"", Publish=b"", Username=b"", Password=b""):
         self.Enable=Enable
         self.Server=Server
         self.Subscribe=Subscribe
         self.Publish=Publish
+        self.Username=Username
+        self.Password=Password
 
     def write(self):
         """Write settings to settings_file if valid input found."""
         if self.is_valid():
             with open(self.SETTINGS_FILE, "wb") as f:
-                f.write(b",".join([self.Enable, self.Server, self.Subscribe, self.Publish]))
+                f.write(b",".join([self.Enable, self.Server, self.Subscribe, self.Publish, self.Username, self.Password]))
             SerialLog.log("Wrote settings to {:s}".format(self.SETTINGS_FILE))
 
     def load(self):
@@ -23,11 +25,13 @@ class HomeAssistantSettings:
             with open(self.SETTINGS_FILE, "rb") as f:
                 contents = f.read().split(b",")
             SerialLog.log("Loaded settings from {:s}".format(self.SETTINGS_FILE))
-            if len(contents) == 4:
+            if len(contents) == 6:
                 self.Enable = contents[0]
                 self.Server = contents[1]
                 self.Subscribe = contents[2]
                 self.Publish = contents[3]
+                self.Username = contents[4]
+                self.Password = contents[5]
 
             if not self.is_valid():
                 self.remove()
@@ -53,6 +57,8 @@ class HomeAssistantSettings:
         self.Server = b"mqtt.wolfen.za.net"
         self.Subscribe = b""
         self.Publish = b""
+        self.Username = b""
+        self.Password = b""
 
     def is_valid(self):
         # Ensure the credentials are entered as bytes
@@ -63,6 +69,10 @@ class HomeAssistantSettings:
         if not isinstance(self.Subscribe, bytes):
             return False
         if not isinstance(self.Publish, bytes):
+            return False
+        if not isinstance(self.Username, bytes):
+            return False
+        if not isinstance(self.Password, bytes):
             return False
 
         return True
