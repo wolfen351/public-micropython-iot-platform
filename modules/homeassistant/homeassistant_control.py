@@ -161,7 +161,7 @@ class HomeAssistantControl(BasicModule):
     def loadhasettings(self, params):
         settings =  self.getsettings()
         headers = okayHeader
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (settings[0], settings[1], settings[2], settings[3], settings[4], settings[5])
         return data, headers
 
     
@@ -171,7 +171,9 @@ class HomeAssistantControl(BasicModule):
         server = unquote(params.get(b"server", None))
         subscribe = unquote(params.get(b"subscribe", None))
         publish = unquote(params.get(b"publish", None))
-        settings = (enable, server, subscribe, publish)
+        username = unquote(params.get(b"username", None))
+        password = unquote(params.get(b"password", None))
+        settings = (enable, server, subscribe, publish, username, password)
         self.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
@@ -324,11 +326,13 @@ class HomeAssistantControl(BasicModule):
         settings.Server = self.mqtt_server
         settings.Subscribe = self.topic_sub
         settings.Publish = self.topic_pub
+        settings.Username = self.mqtt_user
+        settings.Password = self.mqtt_password
         settings.write()
     
      
     def getsettings(self):
-        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
+        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.mqtt_user, self.mqtt_password)
         return s
 
     def safePublish(self, topic, message):
