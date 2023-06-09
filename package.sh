@@ -30,7 +30,9 @@ do
     rootFiles=($(ls *.py *.crt *.key version lastedit.dat))
     allFiles+=($rootFiles)
 
-    echo "All Files: $allFiles"
+    # Write all files to the console
+    echo "All Files: " ${allFiles[@]}
+    
 
 done
 
