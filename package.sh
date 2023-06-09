@@ -70,8 +70,9 @@ do
     cp -r "./profiles/$profile" "$dest"
 
     # Tar up all the files
+    mkdir artfiacts
     cd .package
-    tar -zcvf ../firmware.tar.gz *
+    tar -zcvf ../artifacts/$profile.firmware.tar.gz *
     cd ..
 
     # Calculate a h256 hash of the files
@@ -81,9 +82,4 @@ do
     echo "Firmware latest: $V"
     echo $V > latest
 
-    find .package
-
 done
-
-
-
