@@ -6,13 +6,10 @@ stages:
 
 variables:
   DOCKER_HOST: tcp://docker.ciya:2375
-  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  CI_REG: gitlab.wolfen.za.net:5050
 
 build-packages:
   stage: build
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN gitlab.wolfen.za.net
     - apk update
     - apk add git
     - ls -altrh
