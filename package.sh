@@ -74,12 +74,12 @@ do
 
     # Tar up all the files
     cd .package
-    ls -altr
     vers="$(cat ./version)"
     tar -zcvf ../$shortName.firmware.$vers.tar.gz *
     mv ../$shortName.firmware.$vers.tar.gz ../artifacts
     cd ..
 
+    find ./package
     find ./artifacts
 
 
