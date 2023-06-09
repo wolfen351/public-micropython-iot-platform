@@ -15,5 +15,6 @@ build-packages:
     - chmod +x package.sh
     - ./package.sh
   artifacts:
-    - 
+    paths:
+      - artifacts/*
 
