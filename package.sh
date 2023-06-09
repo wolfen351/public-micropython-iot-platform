@@ -8,6 +8,9 @@ newVersion=${nv%.*}
 echo "Version is now: $newVersion"
 echo $newVersion > ./version
 
+# record the current time in lastedit.dat
+date +%s > ./lastedit.dat
+
 #make firmware archives for ota
 profiles=$(ls -1 ./profiles)
 
@@ -24,7 +27,7 @@ do
     allFiles=()
 
     # Root Files
-    rootFiles=$(ls *.py *.crt *.cfg *.key version lastedit.dat)
+    rootFiles=$(ls *.py *.crt *.key version lastedit.dat)
     allFiles+=($rootFiles)
 
     echo "All Files: $allFiles"
