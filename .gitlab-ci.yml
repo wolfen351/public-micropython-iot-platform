@@ -18,5 +18,6 @@ build-packages:
     - ls -altrh
     - find / -name package.sh
     - chmod +x package.sh
+    - ls ./package.sh
     - ./package.sh
 
