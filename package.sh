@@ -14,6 +14,9 @@ date +%s > ./lastedit.dat
 #make firmware archives for ota
 profiles=$(ls -1 ./profiles)
 
+#make a spot for the archives to go
+mkdir artfiacts
+
 for profile in $profiles
 do
     echo "Processing Profile: $profile"
@@ -70,9 +73,9 @@ do
     cp -r "./profiles/$profile" "$dest"
 
     # Tar up all the files
-    mkdir artfiacts
     cd .package
-    tar -zcvf ../artifacts/$profile.firmware.tar.gz *
+    tar -zcvf ../$profile.firmware.tar.gz *
+    mv ../$profile.firmware.tar.gz ../artifacts
     cd ..
 
     # Calculate a h256 hash of the files
