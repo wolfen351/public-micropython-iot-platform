@@ -75,10 +75,11 @@ do
     # Tar up all the files
     cd .package
     vers="$(cat ./version)"
-    tar -zcvf ../$profile.firmware.$vers.tar.gz *
-    mv ../$profile.firmware.$vers.tar.gz ../artifacts
+    tar -zcvf ../$shortName.firmware.$vers.tar.gz *
+    mv ../$shortName.firmware.$vers.tar.gz ../artifacts
     cd ..
 
+    find ./artifacts
 
 
 done
