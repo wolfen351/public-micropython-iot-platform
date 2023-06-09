@@ -11,7 +11,7 @@ build-packages:
   stage: build
   script:
     - apt update
-    - apt install git
+    - apt install git -y
     - chmod +x package.sh
     - ./package.sh
 
