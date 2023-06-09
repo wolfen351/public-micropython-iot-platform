@@ -20,6 +20,15 @@ do
     echo "Flashing Profile: " $shortName
     echo "Active Modules: " $activeModules
 
+    # build up a list of all files
+    allFiles=()
+
+    # Root Files
+    rootFiles=$(ls *.py *.crt *.cfg *.key version lastedit.dat)
+    allFiles+=($rootFiles)
+
+    echo "All Files: $allFiles"
+
 done
 
 
