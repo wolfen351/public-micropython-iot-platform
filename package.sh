@@ -27,7 +27,7 @@ do
     allFiles=()
 
     # Root Files
-    rootFiles=$(ls *.py *.crt *.key version lastedit.dat)
+    rootFiles=($(ls *.py *.crt *.key version lastedit.dat))
     allFiles+=($rootFiles)
 
     echo "All Files: $allFiles"
