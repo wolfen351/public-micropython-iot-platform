@@ -74,15 +74,11 @@ do
 
     # Tar up all the files
     cd .package
-    tar -zcvf ../$profile.firmware.tar.gz *
-    mv ../$profile.firmware.tar.gz ../artifacts
+    vers="$(cat ./version)"
+    tar -zcvf ../$profile.firmware.$vers.tar.gz *
+    mv ../$profile.firmware.$vers.tar.gz ../artifacts
     cd ..
 
-    # Calculate a h256 hash of the files
-    vers="$(cat ./version)"
-    h256="$(sha256sum firmware.tar.gz | cut -d' ' -f1)"
-    V="$vers;firmware.tar.gz;30;$h256"
-    echo "Firmware latest: $V"
-    echo $V > latest
+
 
 done
