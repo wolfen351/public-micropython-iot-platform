@@ -10,11 +10,8 @@ variables:
 build-packages:
   stage: build
   script:
-    - apk update
-    - apk add git
-    - ls -altrh
-    - find / -name package.sh
+    - apt update
+    - apt install git
     - chmod +x package.sh
-    - ls ./package.sh
     - ./package.sh
 
