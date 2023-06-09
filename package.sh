@@ -15,9 +15,10 @@ for profile in $profiles
 do
     echo "Processing Profile: $profile"
 
-    activeProfile=$(cat "./profile/$profile" | jq ".activeModules") 
-    echo "Flashing Profile: " $activeProfile.shortName
-    echo "Active Modules: " $activeProfile.activeModules
+    shortName=$(cat "./profile/$profile" | jq ".shortName") 
+    activeModules=$(cat "./profile/$profile" | jq ".activeModules") 
+    echo "Flashing Profile: " $shortName
+    echo "Active Modules: " $activeModules
 
 done
 
