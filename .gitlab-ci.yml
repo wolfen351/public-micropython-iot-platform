@@ -15,5 +15,6 @@ build-packages:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN gitlab.wolfen.za.net
     - apk update
     - apk add git
+    - chmod +x package.sh
     - ./package.sh
 
