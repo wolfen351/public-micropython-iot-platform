@@ -11,14 +11,14 @@ echo $newVersion > ./version
 #make firmware archives for ota
 profiles=$(ls -1 ./profiles)
 
-#record the last time a file was edited
-MAXEDITTIME=$(echo "$MAXEDITTIME" | awk '{print int($1+0.5)}')
-echo $MAXEDITTIME > ./lastedit.dat
-echo "Max Edit Time: $MAXEDITTIME"
-
 for profile in $profiles
 do
     echo "Processing Profile: $profile"
+
+    activeProfile=$(cat "$profile" | jq ".activeModules") 
+    echo "Flashing Profile: " $activeProfile.shortName
+    echo "Active Modules: " $activeProfile.activeModules
+
 done
 
 
