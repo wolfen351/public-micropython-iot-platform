@@ -31,8 +31,12 @@ do
     allFiles+=($rootFiles)
 
     # Write all files to the console
-    echo "All Files: " ${allFiles[@]}
-    
+    echo "All Files: " 
+    # Iterate the loop to read and print each array element
+    for value in "${allFiles[@]}"
+    do
+        echo $value
+    done
 
 done
 
