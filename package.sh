@@ -89,9 +89,9 @@ do
 
     # put all the files in the artifact folder
     mv ../firmware.tar.gz ../artifacts/$shortName/
-    cp version ./artifacts/$shortName/version
-    mv version ./artifacts/$shortName/v$vers
-    mv latest ./artifacts/$shortName/version
+    cp version ../artifacts/$shortName/version
+    mv version ../artifacts/$shortName/v$vers
+    mv latest ../artifacts/$shortName/version
 
     cd ..
 
