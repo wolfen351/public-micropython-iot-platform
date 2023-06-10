@@ -14,6 +14,9 @@ build-packages:
     - apt install git jq -y
     - chmod +x package.sh
     - ./package.sh
+    - git add version
+    - git commit -m "Incremented version during deploy"
+    - git push
   artifacts:
     paths:
       - artifacts/*
