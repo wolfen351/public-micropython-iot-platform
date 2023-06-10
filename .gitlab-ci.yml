@@ -2,32 +2,50 @@ image: ubuntu:latest
 
 stages:
   - build
+  - package
   - deploy 
 
 variables:
   DOCKER_HOST: tcp://docker.ciya:2375
+  # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+  DOCKER_TLS_CERTDIR: "/certs"
+  CI_REG: gitlab.wolfen.za.net:5050  
 
 build-packages:
+  image: docker:19.03.1
   stage: build
   script:
     - apt update
     - apt install git jq -y
     - chmod +x package.sh
     - ./package.sh
-    - git add version
-    - git config --global user.email "gitlab@gitlab.wolfen.za.net"
-    - git config --global user.name "Gitlab Runner"    
-    - git commit -m "Incremented version during deploy"
-    - git push origin HEAD:master
   artifacts:
     paths:
       - artifacts/*
 
-deploy-packages:
-  stage: deploy
+build-docker-image:
+  image: docker:19.03.1
+  variables:
+    # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+    DOCKER_HOST: tcp://docker.ciya:2375
+    DOCKER_TLS_CERTDIR: "/certs"
+    CI_REG: gitlab.wolfen.za.net:5050
+  stage: package
   script:
-    - apt update
-    - apt install git -y
-    - mkdir .deploy
-    - cd .deploy
-    - git clone https://gitlab.wolfen.za.net/wolfen-personal/firmware-archive.git
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REG
+    - cd firmware-web
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+deploy:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  script:
+  - cd firmware-web
+  - kubectl config get-contexts
+  - kubectl config use-context wolfen-personal/k3s-cluster-management:wolfen-personal-k3s
+  - kubectl get pods -A
+  - kubectl delete deployment.apps/firmware-wolfen-nz-host-deployment
+  - kubectl apply $(ls *.yaml | awk ' { print " -f " $1 } ')
