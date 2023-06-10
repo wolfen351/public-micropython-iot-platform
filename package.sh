@@ -80,6 +80,12 @@ do
     tar -zcvf ../firmware.$vers.tar.gz *
     mv ../firmware.$vers.tar.gz ../artifacts/$shortName/
     cd ..
+
+    # Calculate a h256 hash of the files
+    h256 = $(sha256sum ./firmware.$vers.tar.gz | awk '{print $1}')
+    V="$vers;firmware.tar.gz;30;$h256"
+    echo "Firmware latest: $V"
+    echo $V > ./artifacts/$shortName/latest
 done
 
 echo "Packages are ready:"
