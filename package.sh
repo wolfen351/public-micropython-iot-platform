@@ -77,8 +77,8 @@ do
     # Tar up all the files
     cd .package
     vers="$(cat ./version)"
-    tar -zcvf ../firmware.$vers.tar.gz *
-    mv ../firmware.$vers.tar.gz ../artifacts/$shortName/
+    tar -zcvf ../firmware.tar.gz *
+    mv ../firmware.tar.gz ../artifacts/$shortName/
     cd ..
 
     # Calculate a h256 hash of the files
