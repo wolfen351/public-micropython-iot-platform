@@ -1,5 +1,3 @@
-image: ubuntu:latest
-
 stages:
   - build
   - package
@@ -12,7 +10,7 @@ variables:
   CI_REG: gitlab.wolfen.za.net:5050  
 
 build-packages:
-  image: docker:19.03.1
+  image: ubuntu:latest
   stage: build
   script:
     - apt update
