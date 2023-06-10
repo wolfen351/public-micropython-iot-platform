@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+build:
+  image: docker:19.03.1
+  variables:
+    # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+    DOCKER_HOST: tcp://docker.ciya:2375
+    DOCKER_TLS_CERTDIR: "/certs"
+    CI_REG: gitlab.wolfen.za.net:5050
+  stage: build
+  needs:
+    - project: wolfen-personal/micropython-iot-platform
+      job: build-packages
+      ref: master
+      artifacts: true      
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REG
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+deploy:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  script:
+  - kubectl config get-contexts
+  - kubectl config use-context wolfen-personal/k3s-cluster-management:wolfen-personal-k3s
+  - kubectl get pods -A
+  - kubectl delete deployment.apps/firmware-wolfen-nz-host-deployment
+  - kubectl apply $(ls *.yaml | awk ' { print " -f " $1 } ')
