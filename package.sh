@@ -24,6 +24,8 @@ do
     shortName=$(cat "./profiles/$profile" | jq ".shortName" | tr -d '"')
     echo "Short Name: $shortName"
 
+    mkdir -p "./artifacts/$shortName"
+
     # build up a list of all files
     allFiles=()
 
@@ -75,8 +77,8 @@ do
     # Tar up all the files
     cd .package
     vers="$(cat ./version)"
-    tar -zcvf ../$shortName.firmware.$vers.tar.gz *
-    mv ../$shortName.firmware.$vers.tar.gz ../artifacts/
+    tar -zcvf ../firmware.$vers.tar.gz *
+    mv ../firmware.$vers.tar.gz ../artifacts/$shortName/
     cd ..
 done
 
