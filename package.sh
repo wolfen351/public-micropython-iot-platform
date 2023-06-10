@@ -83,11 +83,12 @@ do
 
     # Calculate a h256 hash of the files
     h256 = $(sha256sum ./firmware.$vers.tar.gz | awk '{print $1}')
-    V="$vers;firmware.tar.gz;30;$h256"
+    size=$(du -k ./firmware.$vers.tar.gz | awk '{print $1}') # size in kb
+    V="$vers;firmware.tar.gz;$size;$h256"
     echo "Firmware latest: $V"
     echo $V > ./artifacts/$shortName/latest
 
-    # Calculate a h256 hash of the files
+    # Copy version file
     cp version ./artifacts/$shortName/version
 
 done
