@@ -78,19 +78,23 @@ do
     cd .package
     vers="$(cat ./version)"
     tar -zcvf ../firmware.tar.gz *
-    mv ../firmware.tar.gz ../artifacts/$shortName/
-    cd ..
 
     # Calculate a h256 hash of the files
-    h256 = $(sha256sum ../artifacts/$shortName/firmware.tar.gz | awk '{print $1}')
-    size=$(du -k ../artifacts/$shortName/firmware.tar.gz | awk '{print $1}') # size in kb
+    sha256sum ../firmware.tar.gz
+    h256 = $(sha256sum ../firmware.tar.gz | awk '{print $1}')
+    size=$(du -k ../firmware.tar.gz | awk '{print $1}') # size in kb
     V="$vers;firmware.tar.gz;$size;$h256"
     echo "Firmware latest: $V"
-    echo $V > ./artifacts/$shortName/latest
-    
-    # Copy version file
+    echo $V > ./latest
+
+    # put all the files in the artifact folder
+    mv ../firmware.tar.gz ../artifacts/$shortName/
     cp version ./artifacts/$shortName/version
-    cp version ./artifacts/$shortName/v$vers
+    mv version ./artifacts/$shortName/v$vers
+    mv latest ./artifacts/$shortName/version
+
+    cd ..
+
 
 done
 
