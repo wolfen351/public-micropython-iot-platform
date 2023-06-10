@@ -20,6 +20,7 @@ build-packages:
 
 deploy-packages:
   stage: deploy
-  trigger: 
-    project: wolfen-personal/firmware-archive
-    branch: master
+  script:
+    - mkdir .deploy
+    - cd .deploy
+    - git clone https://gitlab.wolfen.za.net/wolfen-personal/firmware-archive.git
