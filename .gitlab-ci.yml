@@ -24,6 +24,8 @@ build-packages:
 deploy-packages:
   stage: deploy
   script:
+    - apt update
+    - apt install git -y
     - mkdir .deploy
     - cd .deploy
     - git clone https://gitlab.wolfen.za.net/wolfen-personal/firmware-archive.git
