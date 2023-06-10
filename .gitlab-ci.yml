@@ -18,3 +18,8 @@ build-packages:
     paths:
       - artifacts/*
 
+deploy-packages:
+  stage: deploy
+  trigger: 
+    project: wolfen-personal/firmware-archive
+    branch: master
