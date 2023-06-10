@@ -2,6 +2,7 @@ stages:
   - build
   - package
   - deploy 
+  - notify
 
 variables:
   DOCKER_HOST: tcp://docker.ciya:2375
@@ -47,3 +48,12 @@ deploy:
   - kubectl get pods -A
   - kubectl delete deployment.apps/firmware-wolfen-nz-host-deployment
   - kubectl apply $(ls *.yaml | awk ' { print " -f " $1 } ')
+
+notify:
+  stage: notify
+  image: ubuntu:latest
+  script:
+  - apt update -y 
+  - apt install mosquitto mosquitto-clients -y
+  - echo "Version: $(cat version)"
+  - mosquitto_pub -h mqtt.wolfen.za.net -t iot-platform/version -m "$(cat version)"
