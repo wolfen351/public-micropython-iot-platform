@@ -15,6 +15,8 @@ build-packages:
     - chmod +x package.sh
     - ./package.sh
     - git add version
+    - git config --global user.email "gitlab@gitlab.wolfen.za.net"
+    - git config --global user.name "Gitlab Runner"    
     - git commit -m "Incremented version during deploy"
     - git push
   artifacts:
