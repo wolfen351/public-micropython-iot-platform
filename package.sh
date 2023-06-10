@@ -21,8 +21,8 @@ for profile in $profiles
 do
     echo "Processing Profile: $profile"
     
-    shortName=$(cat "./profiles/$profile" | jq ".shortName") 
-    echo "Short Name: " $shortName
+    shortName=$(cat "./profiles/$profile" | jq ".shortName" | tr -d '"')
+    echo "Short Name: $shortName"
 
     # build up a list of all files
     allFiles=()
@@ -78,9 +78,7 @@ do
     tar -zcvf ../$shortName.firmware.$vers.tar.gz *
     mv ../$shortName.firmware.$vers.tar.gz ../artifacts/
     cd ..
-
-    find ./package
-    find ./artifacts
-
-
 done
+
+echo "Packages are ready:"
+find ./artifacts
