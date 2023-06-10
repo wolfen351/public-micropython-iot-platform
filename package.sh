@@ -82,7 +82,7 @@ do
     cd ..
 
     # Calculate a h256 hash of the files
-    h256 = $(sha256sum ./firmware.$vers.tar.gz | awk '{print $1}')
+    h256 = $(sha256sum ./firmware.tar.gz | awk '{print $1}')
     size=$(du -k ./firmware.tar.gz | awk '{print $1}') # size in kb
     V="$vers;firmware.tar.gz;$size;$h256"
     echo "Firmware latest: $V"
