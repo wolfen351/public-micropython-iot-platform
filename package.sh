@@ -90,7 +90,7 @@ do
     
     # Copy version file
     cp version ./artifacts/$shortName/version
-    cp version ./artifacts/$shortName/v-$vers
+    cp version ./artifacts/$shortName/v$vers
 
 done
 
