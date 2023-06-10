@@ -86,6 +86,10 @@ do
     V="$vers;firmware.tar.gz;30;$h256"
     echo "Firmware latest: $V"
     echo $V > ./artifacts/$shortName/latest
+
+    # Calculate a h256 hash of the files
+    cp version ./artifacts/$shortName/version
+
 done
 
 echo "Packages are ready:"
