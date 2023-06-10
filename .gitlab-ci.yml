@@ -18,7 +18,7 @@ build-packages:
     - git config --global user.email "gitlab@gitlab.wolfen.za.net"
     - git config --global user.name "Gitlab Runner"    
     - git commit -m "Incremented version during deploy"
-    - git push
+    - git push origin HEAD:master
   artifacts:
     paths:
       - artifacts/*
