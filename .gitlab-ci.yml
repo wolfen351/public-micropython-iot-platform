@@ -55,4 +55,5 @@ notify:
   script:
   - apt update -y 
   - apt install mosquitto mosquitto-clients -y
-  - echo mosquitto_pub -h mqtt.wolfen.za.net -t iot-platform/version -m "$(cat version)"
+  - sleep 60
+  - mosquitto_pub -h mqtt.wolfen.za.net -t iot-platform/version -m "$(cat version)"
