@@ -15,7 +15,7 @@ date +%s > ./lastedit.dat
 profiles=$(ls -1 ./profiles)
 
 #make a spot for the archives to go
-mkdir artfiacts
+mkdir artifacts
 
 for profile in $profiles
 do
@@ -76,7 +76,7 @@ do
     cd .package
     vers="$(cat ./version)"
     tar -zcvf ../$shortName.firmware.$vers.tar.gz *
-    mv ../$shortName.firmware.$vers.tar.gz ../artifacts
+    mv ../$shortName.firmware.$vers.tar.gz ../artifacts/
     cd ..
 
     find ./package
