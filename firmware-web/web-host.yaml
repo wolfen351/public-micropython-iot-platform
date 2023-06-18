@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
       - name: firmware-wolfen-nz-host
-        image: gitlab.wolfen.za.net:5050/wolfen-personal/firmware-archive:master
+        image: gitlab.wolfen.za.net:5050/wolfen-personal/micropython-temp-sensor:master
         imagePullPolicy: Always
         ports:
         - containerPort: 80
