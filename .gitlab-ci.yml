@@ -51,8 +51,17 @@ deploy:
   - cd firmware-web
   - kubectl config get-contexts
   - kubectl config use-context wolfen-personal/k3s-cluster-management:wolfen-personal-k3s
-  - kubectl get pods -A
-  - kubectl delete deployment.apps/firmware-wolfen-nz-host-deployment
+  - kubectl create namespace iot --dry-run=server && \
+    echo "iot namespace does not exist yet, creating it..." && \
+    kubectl create namespace iot
+  - kubectl config set-context --current --namespace=iot
+  - kubectl get deployment
+  - kubectl get pod
+  - kubectl get pv
+  - kubectl get pvc
+  - kubectl get service
+  - kubectl get ingress
+  - kubectl delete --ignore-not-found=true deployment.apps/firmware-wolfen-nz-host-deployment
   - kubectl apply $(ls *.yaml | awk ' { print " -f " $1 } ')
 
 notify:
