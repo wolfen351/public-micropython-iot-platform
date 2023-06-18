@@ -12,6 +12,8 @@ variables:
 
 build-packages:
   image: ubuntu:latest
+  tags:
+    - k3s
   stage: build
   script:
     - apt update
@@ -24,6 +26,8 @@ build-packages:
 
 build-docker-image:
   image: docker:19.03.1
+  tags:
+    - k3s
   variables:
     # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
     DOCKER_HOST: tcp://docker.ciya:2375
@@ -41,6 +45,8 @@ deploy:
   image:
     name: bitnami/kubectl:latest
     entrypoint: [""]
+  tags:
+    - k3s
   script:
   - cd firmware-web
   - kubectl config get-contexts
@@ -52,6 +58,8 @@ deploy:
 notify:
   stage: notify
   image: ubuntu:latest
+  tags:
+    - k3s
   script:
   - apt update -y 
   - apt install mosquitto mosquitto-clients -y
