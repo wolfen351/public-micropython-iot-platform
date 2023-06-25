@@ -1,4 +1,5 @@
 stages:
+  - test
   - build
   - package
   - deploy 
@@ -9,6 +10,13 @@ variables:
   # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
   DOCKER_TLS_CERTDIR: "/certs"
   CI_REG: gitlab.wolfen.za.net:5050  
+
+test-syntax:
+  image: micropython/unix:v1.18
+  tags:
+    - k3s
+  script:
+    micropython-dev main.py
 
 build-packages:
   image: ubuntu:latest
