@@ -16,8 +16,8 @@ test-syntax:
   tags:
     - k3s
   script:
-    micropython-dev -m upip install urequest
-    micropython-dev main.py
+    - micropython-dev -m upip install urequest
+    - micropython-dev main.py
 
 build-packages:
   image: ubuntu:latest
