@@ -12,6 +12,10 @@ variables:
   CI_REG: gitlab.wolfen.za.net:5050  
 
 test-syntax:
+  stage: test
+  only:
+    refs:
+      - test
   image: micropython/unix:v1.19.1
   tags:
     - k3s
