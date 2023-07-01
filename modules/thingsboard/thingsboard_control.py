@@ -44,7 +44,8 @@ class ThingsboardControl(BasicModule):
                         self.connect()
                     self.client.check_msg()
                 except Exception as e:
-                    self.connect()
+                    SerialLog.log("Error in TB MQTT tick: " + str(e))
+                    self.init = False
                     raise
 
     def getTelemetry(self):
@@ -94,6 +95,7 @@ class ThingsboardControl(BasicModule):
         return thingsThatChanged > 0
 
     def connect(self):
+        SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
         self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
         self.client.connect()
         SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
