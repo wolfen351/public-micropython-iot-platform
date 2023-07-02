@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This file is used by gitlab to package the next version
+# It has the following environment variables:
+# CI_PIPELINE_ID: The unique id of the current pipeline that GitLab CI uses internally
+
 # increment the version
 newVersion=6.0.$CI_PIPELINE_ID
 echo "Version is now: $newVersion"

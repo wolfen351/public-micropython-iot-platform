@@ -55,6 +55,8 @@ build-docker-image:
     CI_REG: gitlab.wolfen.za.net:5050
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REG
+    - ls -altrh
+    - find .
     - cd firmware-web
     - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
