@@ -245,7 +245,7 @@ class WifiHandler(BasicModule):
 
     def ap(self):
         # Enable AP
-        SerialLog.log("Starting AP: " + self.essid)
+        SerialLog.log("Starting AP: %s" % (self.essid))
         self.ap_if.active(True)
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0",
                             "192.168.4.1", "192.168.4.1"))

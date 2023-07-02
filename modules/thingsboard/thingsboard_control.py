@@ -47,7 +47,7 @@ class ThingsboardControl(BasicModule):
                         if (self.client != None):
                             self.client.check_msg()
                 except Exception as e:
-                    SerialLog.log("Error in TB MQTT tick: " + str(e))
+                    SerialLog.log("Error in TB MQTT tick: %s"  % (e))
                     self.init = False
                     raise             
 
@@ -100,7 +100,7 @@ class ThingsboardControl(BasicModule):
         if (self.last_connect + 30000 > ticks_ms()):
             self.last_connect = ticks_ms()
             SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
-            self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
+            self.client = MQTTClient(b"tb-%s" % (self.client_id), self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
             self.client.connect()
             self.init = True
             SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))

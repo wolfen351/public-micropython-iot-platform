@@ -46,7 +46,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
 
         port = 443
     else:
-        raise ValueError("Unsupported protocol: " + proto)
+        raise ValueError("Unsupported protocol: %s" % (proto))
 
     if ":" in host:
         host, port = host.split(":", 1)
@@ -95,7 +95,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
             # print(l)
             if l.startswith(b"Transfer-Encoding:"):
                 if b"chunked" in l:
-                    raise ValueError("Unsupported " + l)
+                    raise ValueError("Unsupported %s" % (l))
             elif l.startswith(b"Location:") and not 200 <= status <= 299:
                 raise NotImplementedError("Redirects not yet supported")
     except OSError:

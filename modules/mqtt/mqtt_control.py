@@ -118,7 +118,7 @@ class MqttControl(BasicModule):
         SerialLog.log("MQTT Command Received: ", topic, msg)
         # remove the part we subscribe to from the topic
         topic = topic.replace(self.topic_sub.replace(b"/#", b""), b"") 
-        self.commands.append(topic + b"/" + msg)
+        self.commands.append(b"%s/%s" % (topic, msg))
 
         # check for firmware update
         # if topic starts with iot-platform/version and the version is different, restart
@@ -136,7 +136,7 @@ class MqttControl(BasicModule):
                 SerialLog.log("Firmware version match, no action (we are on: ", local_version(), ")")
 
     def connect_and_subscribe(self):
-        self.client = MQTTClient(b"mqtt-" + self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password, 300) # 300 second keepalive
+        self.client = MQTTClient(b"mqtt-%s" % (self.client_id), self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password, 300) # 300 second keepalive
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         # Tell the server we are online
