@@ -62,7 +62,7 @@ class ThingsboardControl(BasicModule):
         if (not self.sta_if.isconnected()):
             return
 
-        if (self.client != None and self.hasTelemetryChanged(telemetry)):
+        if (self.client != None and self.init and self.hasTelemetryChanged(telemetry)):
 
             stuffToPost = {}
             for attr, value in telemetry.items():
