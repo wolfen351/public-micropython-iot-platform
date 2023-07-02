@@ -12,6 +12,7 @@ class DS18B20Temp(BasicModule):
     lastTemp = {}
     lastConvert = 0
     roms = []
+    lastScan = 0
 
     def __init__(self):
         pass
@@ -26,16 +27,17 @@ class DS18B20Temp(BasicModule):
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
         time.sleep(0.5)
         self.roms = self.getSensors()
+        self.lastScan = time.ticks_ms()
 
         if (len(self.roms) > 0):
             self.ds_sensor.convert_temp()
             self.lastConvert = time.ticks_ms()
-            for rom in self.roms:
-                self.lastTemp[str(rom)] = -127
 
     def tick(self):
-        if (len(self.roms) == 0):
-            self.roms = self.getSensors()
+        # Try every 5s to get any connected sensors
+        if (len(self.roms) == 0 and self.lastScan + 5000 < time.ticks_ms()):
+            self.roms = self.getSensors(1)
+            self.lastScan = time.ticks_ms()
 
         if (len(self.roms) > 0):
             currentTime = time.ticks_ms()
@@ -53,6 +55,11 @@ class DS18B20Temp(BasicModule):
         telemetry = {"tempReadAt": self.lastConvert}
         for rom in self.roms:
             sensorName = "temperature/%s" % (ubinascii.hexlify(rom).decode('ascii'))
+
+            # make sure we have a last temp for this sensor
+            if self.lastTemp.get(str(rom)) is None:
+                self.lastTemp[str(rom)] = -127
+
             current = self.lastTemp[str(rom)]
             if (current != -127):
                 telemetry.update({sensorName:current})
@@ -86,12 +93,13 @@ class DS18B20Temp(BasicModule):
         data = dumps(telemetry)
         return data, headers            
     
-    def getSensors(self):
+    def getSensors(self, tries=5):
         # try again if no devices found
-        tries = 0
-        while (len(self.roms) == 0 and tries < 5):
+        attempt = 0
+        while (len(self.roms) == 0 and attempt < tries):
             SerialLog.log('No devices found. Trying again...')
             self.roms = self.ds_sensor.scan()
+            time.sleep(0.5)
             SerialLog.log('Found DS devices: ', self.roms)
-            tries += 1
+            attempt += 1
         return self.roms
