@@ -148,11 +148,11 @@ class MQTTClient:
                 pass
             try:
                 self.connect()
-                SerialLog.log("MQTT reconnected")
-                raise
+                SerialLog.log("MQTT reconnected, retrying to send message")
+                self.publishInternal(topic, msg, retain=retain, qos=qos)
             except:
                 SerialLog.log("MQTT failed to reconnect")
-
+                raise
 
     def subscribe(self, topic, qos=0):
         assert self.cb is not None, "Subscribe callback is not set"

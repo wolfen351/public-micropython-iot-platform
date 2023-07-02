@@ -105,8 +105,6 @@ class ThingsboardControl(BasicModule):
             self.client.connect()
             self.init = True
             SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
-        else:
-            SerialLog.log('Waiting 10s before trying to connect to TB again')
 
     def settings(self, settingsVals):
         # Apply the new settings
