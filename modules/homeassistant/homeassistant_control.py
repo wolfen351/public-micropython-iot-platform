@@ -57,7 +57,9 @@ class HomeAssistantControl(BasicModule):
                     if (not self.init):
                         self.init = True
                         self.connect_and_subscribe()
-                    self.client.check_msg()
+                    else:
+                        if (self.client != None):
+                            self.client.check_msg()
                 except Exception as e:
                     self.connect_and_subscribe()
                     raise
