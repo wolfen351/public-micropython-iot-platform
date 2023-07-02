@@ -7,7 +7,7 @@ import machine
 import network
 from modules.web.web_processor import okayHeader, unquote
 import json
-from machine import ticks_ms
+from time import ticks_ms
 
 class ThingsboardControl(BasicModule):
 

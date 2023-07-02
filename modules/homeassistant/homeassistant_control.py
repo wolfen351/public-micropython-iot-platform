@@ -3,11 +3,11 @@ from modules.homeassistant.homeassistant_settings import HomeAssistantSettings
 from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 from ubinascii import hexlify
-from machine import unique_id, ticks_ms
+from machine import unique_id
 import network
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps
-from time import time
+from time import time, ticks_ms
 
 class HomeAssistantControl(BasicModule):
 
