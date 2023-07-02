@@ -61,6 +61,7 @@ class HomeAssistantControl(BasicModule):
                         if (self.client != None):
                             self.client.check_msg()
                 except Exception as e:
+                    SerialLog.log("Error in HA MQTT tick: " + str(e))
                     self.connect_and_subscribe()
                     raise
 

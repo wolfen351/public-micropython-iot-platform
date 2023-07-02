@@ -44,11 +44,13 @@ class ThingsboardControl(BasicModule):
                     if (not self.init):
                         self.init = True
                         self.connect()
-                    self.client.check_msg()
+                    else:
+                        if (self.client != None):
+                            self.client.check_msg()
                 except Exception as e:
                     SerialLog.log("Error in TB MQTT tick: " + str(e))
                     self.init = False
-                    raise
+                    raise             
 
     def getTelemetry(self):
         return {}
