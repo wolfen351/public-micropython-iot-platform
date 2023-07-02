@@ -3,7 +3,7 @@ from modules.homeassistant.homeassistant_settings import HomeAssistantSettings
 from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 from ubinascii import hexlify
-from machine import unique_id
+from machine import unique_id, ticks_ms
 import network
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps
@@ -24,6 +24,7 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_password = None
         self.telemetry = {}
         self.client = None
+        self.last_connect = 0
         self.configuredKeys = []
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
@@ -185,15 +186,19 @@ class HomeAssistantControl(BasicModule):
 
     
     def connect_and_subscribe(self):
-        self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
-        self.client.set_callback(self.sub_cb)
-        self.client.connect()
-        self.client.subscribe(self.topic_sub)
-        # Wipe all existing telemetry so we send a full update on connect
-        self.telemetry = {} 
-        self.configuredKeys = []
-        SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        if (self.last_connect + 30000 > ticks_ms()):
+            self.last_connect = ticks_ms()
 
+            self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+            self.client.set_callback(self.sub_cb)
+            self.client.connect()
+            self.client.subscribe(self.topic_sub)
+            # Wipe all existing telemetry so we send a full update on connect
+            self.telemetry = {} 
+            self.configuredKeys = []
+            SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        else:
+            SerialLog.log("HA MQTT: Waiting 30s to reconnect")
     
     def get_basic_payload(self, name, uniqueid, attr):
 

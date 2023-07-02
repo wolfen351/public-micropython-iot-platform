@@ -7,6 +7,7 @@ import machine
 import network
 from modules.web.web_processor import okayHeader, unquote
 import json
+from machine import ticks_ms
 
 class ThingsboardControl(BasicModule):
 
@@ -96,13 +97,14 @@ class ThingsboardControl(BasicModule):
         return thingsThatChanged > 0
 
     def connect(self):
-        if (self.last_connect + 30000 > machine.ticks_ms()):
-            self.last_connect = machine.ticks_ms()
+        if (self.last_connect + 30000 > ticks_ms()):
+            self.last_connect = ticks_ms()
             SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
             self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
             self.client.connect()
             SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
-        SerialLog.log('Waiting 10s before trying to connect to TB again')
+        else:
+            SerialLog.log('Waiting 10s before trying to connect to TB again')
 
     def settings(self, settingsVals):
         # Apply the new settings
