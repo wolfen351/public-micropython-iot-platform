@@ -42,7 +42,6 @@ class ThingsboardControl(BasicModule):
             if (self.sta_if.isconnected()):
                 try:
                     if (not self.init):
-                        self.init = True
                         self.connect()
                     else:
                         if (self.client != None):
@@ -104,6 +103,7 @@ class ThingsboardControl(BasicModule):
             SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
             self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
             self.client.connect()
+            self.init = True
             SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
         else:
             SerialLog.log('Waiting 10s before trying to connect to TB again')
