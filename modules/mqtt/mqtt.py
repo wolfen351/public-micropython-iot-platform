@@ -35,6 +35,8 @@ class MQTTClient:
         self.lw_msg = None
         self.lw_qos = 0
         self.lw_retain = False
+        self.server = server
+        self.port = port
 
     def _send_str(self, s):
         self.sock.write(struct.pack("!H", len(s)))
@@ -137,7 +139,7 @@ class MQTTClient:
             assert 0
 
     def publish(self, topic, msg, retain=False, qos=0):
-        SerialLog.log("MQTT Sending: ", topic, msg)
+        SerialLog.log("MQTT Sending: ", self.server, self.port, topic, msg)
         try:
             self.publishInternal(topic, msg, retain=retain, qos=qos)
         except Exception as e:

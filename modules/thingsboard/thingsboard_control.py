@@ -70,7 +70,6 @@ class ThingsboardControl(BasicModule):
                     stuffToPost.update({attr: value})
 
             messageStr = json.dumps(stuffToPost)
-            SerialLog.log("Sending TB MQTT: ")
             self.client.publish(self.thingsBoardTelemetryUrl, messageStr)
             self.telemetry = telemetry.copy()
 
