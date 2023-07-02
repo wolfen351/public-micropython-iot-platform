@@ -82,6 +82,11 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             $rootFile = $True
         }
 
+        # Skip .package
+        if ($f.Contains(".package")) {
+            continue;
+        }
+
         if (!$rootFile -and !$activeModule)
         {
             continue;
