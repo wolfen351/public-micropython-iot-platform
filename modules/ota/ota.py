@@ -8,7 +8,12 @@ import gc
 import uos
 import modules.ota.requests as requests
 import uzlib
-import upip_utarfile as tarfile
+
+try:
+    import upip_utarfile as tarfile
+except ImportError:
+    import modules.ota.utarfile as tarfile
+
 from micropython import const
 from serial_log import SerialLog
 import ujson
