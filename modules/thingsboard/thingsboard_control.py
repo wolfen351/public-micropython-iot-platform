@@ -21,6 +21,7 @@ class ThingsboardControl(BasicModule):
         self.telemetry = {}
         self.enabled = b"N"
         self.client = None
+        self.last_connect = 0
 
     def start(self):
         BasicModule.start(self)
@@ -95,11 +96,13 @@ class ThingsboardControl(BasicModule):
         return thingsThatChanged > 0
 
     def connect(self):
-        SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
-        self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
-        self.client.connect()
-        SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
-
+        if (self.last_connect + 30000 > machine.ticks_ms()):
+            self.last_connect = machine.ticks_ms()
+            SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
+            self.client = MQTTClient(b"tb-" + self.client_id, self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
+            self.client.connect()
+            SerialLog.log('Connected to %s:%s TB MQTT broker' % (self.mqtt_server, str(self.mqtt_port)))
+        SerialLog.log('Waiting 10s before trying to connect to TB again')
 
     def settings(self, settingsVals):
         # Apply the new settings
