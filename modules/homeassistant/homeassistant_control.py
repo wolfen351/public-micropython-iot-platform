@@ -61,7 +61,7 @@ class HomeAssistantControl(BasicModule):
                         if (self.client != None):
                             self.client.check_msg()
                 except Exception as e:
-                    SerialLog.log("Error in HA MQTT tick: " + str(e))
+                    SerialLog.log("Error in HA MQTT tick: %s" % (e))
                     self.connect_and_subscribe()
                     raise
 
@@ -184,7 +184,7 @@ class HomeAssistantControl(BasicModule):
     
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
-        self.commands.append(topic + b"/" + msg)
+        self.commands.append(b"%s/%s" % (topic, msg))
 
     
     def connect_and_subscribe(self):
@@ -192,7 +192,7 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.last_connect = ticks_ms()
 
-            self.client = MQTTClient(b"ha-"+self.client_id, self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+            self.client = MQTTClient(b"ha-%s" % (self.client_id), self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
             self.client.set_callback(self.sub_cb)
             self.client.connect()
             self.client.subscribe(self.topic_sub)
@@ -208,15 +208,15 @@ class HomeAssistantControl(BasicModule):
 
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
-            "name": self.getPref("web", "name", self.basicSettings["name"]) + " " + name,
+            "name": "%s %s" % (self.getPref("web", "name", self.basicSettings["name"]), name),
             "unique_id": uniqueid,
             "device": {
                 "connections": [["mac", my_mac_addr]],
                 "manufacturer": "Wolfen",
-                "name": self.getPref("web", "name", self.basicSettings["name"]) + " - " + self.client_id.decode('ascii'),
+                "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), self.client_id.decode('ascii')),
                 "sw_version": self.version,
                 "model": self.basicSettings["shortName"],
-                "configuration_url": "http://" + self.ip
+                "configuration_url": "http://%s" % (self.ip)
             },
             "stat_t": "~/state",
             "val_tpl": "{{ value_json.%s }}" % (attr)
