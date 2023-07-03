@@ -46,6 +46,7 @@ class LilyGoBattery:
             self.voltage = pot_value * 2 / 1000
             self.voltagePercent = round(((pot_value * 2) / 5842) * 100)
             self.lastBatteryCheck = time.ticks_ms()
+            SerialLog.log("Battery voltage: %s (%s%%)" % (self.voltage, self.voltagePercent))
 
     def getTelemetry(self):
 

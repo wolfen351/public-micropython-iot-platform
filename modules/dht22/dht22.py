@@ -29,7 +29,7 @@ class Dht22Monitor(BasicModule):
             self.currentT = self.dht.temperature()
             self.currentH = self.dht.humidity()
             self.lastConvert = currentTime
-
+            SerialLog.log("%s = %s'C %s %RH" % ("DHT22", self.currentT, self.currentH))
      
     def getTelemetry(self):
         # only return telemetry if we got readings
