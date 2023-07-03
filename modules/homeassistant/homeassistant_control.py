@@ -47,6 +47,8 @@ class HomeAssistantControl(BasicModule):
             self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
         self.mqtt_user = settings.Username
         self.mqtt_password = settings.Password
+        if (not self.enabled == b"Y"):
+            SerialLog.log("Home Assistant Integration Disabled")
 
          
     def tick(self):
