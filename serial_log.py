@@ -1,6 +1,6 @@
 import time
 import ujson
-from gc import mem_free
+from gc import mem_free, collect
 
 class SerialLog(object):
 
@@ -25,6 +25,7 @@ class SerialLog(object):
         # Check free memory, if we have less than 10k, then disable logging
         if (mem_free() < 10000):
             SerialLog.logHistoryData = ["Log history purged due to low memory"]
+            collect()
 
         if (len(SerialLog.logHistoryData) > 40):
             SerialLog.logHistoryData.pop(0)
