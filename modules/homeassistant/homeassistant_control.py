@@ -13,8 +13,6 @@ class HomeAssistantControl(BasicModule):
 
     def __init__(self):
         self.client_id = hexlify(unique_id())
-        self.init = False
-        self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
         self.homeAssistantUrl = "homeassistant"
         self.homeAssistantSensorUrl = "%s/sensor/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
@@ -24,12 +22,13 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_password = None
         self.telemetry = {}
         self.client = None
-        self.last_connect = 0
+        self.last_connect = 0 # to stop from spamming the reconnect
         self.configuredKeys = []
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
         self.commands = []
         self.lastHourCheck = 0
+        self.connected = False
     
     def start(self):
         BasicModule.start(self)
@@ -51,20 +50,11 @@ class HomeAssistantControl(BasicModule):
 
          
     def tick(self):
-        if (self.enabled == b"Y"):
-            if (self.sta_if.isconnected()):
-                try:
-                    if (not self.init):
-                        self.init = True
-                        self.connect_and_subscribe()
-                    else:
-                        if (self.client != None):
-                            self.client.check_msg()
-                except Exception as e:
-                    SerialLog.log("Error in HA MQTT tick: %s" % (e))
-                    self.connect_and_subscribe()
-                    raise
-
+        if (self.enabled == b"Y" and self.sta_if.isconnected()):
+            if (not self.connected):
+                self.connect_and_subscribe()
+            if (self.connected):
+                self.client.check_msg()
     
     def getTelemetry(self):
         return {}
@@ -80,7 +70,7 @@ class HomeAssistantControl(BasicModule):
             return
 
         # wait for mqtt connection
-        if (self.client == None):
+        if (not self.connected):
             return
 
         # record telemetry we may need
@@ -200,6 +190,7 @@ class HomeAssistantControl(BasicModule):
             self.telemetry = {} 
             self.configuredKeys = []
             SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+            self.connected = True
     
     def get_basic_payload(self, name, uniqueid, attr):
 
@@ -327,10 +318,10 @@ class HomeAssistantControl(BasicModule):
 
     def safePublish(self, topic, message):
         try:
-            if (self.sta_if.isconnected()):
-                self.client.publish(topic, message)
+            self.client.publish(topic, message)
         except OSError as e:
-            self.connect_and_subscribe()
+            SerialLog.log("Error publishing MQTT message: %s" % (e))
+            self.connected = False
             
 
 
