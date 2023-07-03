@@ -27,7 +27,7 @@ class SerialLog(object):
             SerialLog.logHistoryData = ["Log history purged due to low memory"]
             collect()
 
-        if (len(SerialLog.logHistoryData) > 40):
+        if (len(SerialLog.logHistoryData) > 100):
             SerialLog.logHistoryData.pop(0)
 
         if (message2 == None):
