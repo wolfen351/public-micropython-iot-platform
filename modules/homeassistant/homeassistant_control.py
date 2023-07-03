@@ -49,6 +49,8 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_password = settings.Password
         if (not self.enabled == b"Y"):
             SerialLog.log("Home Assistant Integration Disabled")
+        else:
+            SerialLog.log("Home Assistant Integration Enabled")            
 
          
     def tick(self):
