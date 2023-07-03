@@ -182,7 +182,7 @@ class HomeAssistantControl(BasicModule):
 
     
     def connect_and_subscribe(self):
-        if (self.last_connect + 30000 > ticks_ms()):
+        if (self.last_connect + 30000 < ticks_ms()):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.last_connect = ticks_ms()
 
