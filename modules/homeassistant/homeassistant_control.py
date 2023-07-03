@@ -29,6 +29,7 @@ class HomeAssistantControl(BasicModule):
         self.commands = []
         self.lastHourCheck = 0
         self.connected = False
+        self.lastFullTelemetrySend = 0
     
     def start(self):
         BasicModule.start(self)
@@ -86,6 +87,7 @@ class HomeAssistantControl(BasicModule):
 
         # wipe configured keys every hour, so we reregister with ha 
         if (time() - self.lastHourCheck > 3600):
+            SerialLog.log("Re-registering with Home Assistant, wiping all configured keys")
             self.lastHourCheck = time()
             self.configuredKeys = []         
 
@@ -149,6 +151,13 @@ class HomeAssistantControl(BasicModule):
     # Internal Code 
     def hasTelemetryChanged(self, newTelemetry):
         thingsThatChanged = 0
+
+        # every 60s send a full telemetry packet
+        if (time() - self.lastFullTelemetrySend > 60):
+            self.lastFullTelemetrySend = time()
+            return True
+
+        # otherwise send only the changes
         for attr, value in newTelemetry.items():
             if (value != self.telemetry.get(attr)):
                 if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second

@@ -38,7 +38,6 @@ class NtpSync(BasicModule):
                 # Set up NTP
                 try:
                     SerialLog.log(b"Local time before synchronization: %s" %str(time.localtime()))
-                    #make sure to have internet connection
                     ntptime.settime()
                     SerialLog.log(b"Local time after synchronization: %s" %str(time.localtime(time.time())))
                     localTime = time.localtime(time.time() + self.UTC_OFFSET)
