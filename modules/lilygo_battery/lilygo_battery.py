@@ -1,5 +1,5 @@
 from board_system.cpu_hardware import CpuHardware
-from machine import Pin, ADC
+from machine import Pin, ADC, reset
 import network
 import time
 
@@ -33,6 +33,10 @@ class LilyGoBattery:
         wifiConnected = self.sta_if.isconnected()
         timeSinceLastSleepMs = time.ticks_diff(currentTime, self.lastSleepTime)
         apRunning = self.ap_if.active()
+
+        # If it has been up for more than 1h then reboot
+        if (uptimeMs > 3600000):
+            reset()
 
         # stay awake for 10s every 10min
         if (timeSinceLastSleepMs > 10000 and not wifiConnected and not apRunning and hasBeenRunningForMoreThan2Mins):
