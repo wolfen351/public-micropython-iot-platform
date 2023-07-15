@@ -1,0 +1,19 @@
+{
+    "name": "Esp8266 IR Detector",
+    "shortName": "esp8266-irdetect",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "pir"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 2,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    },
+    "pir": {
+         "pinA": 23,      
+         "pinACommand": "/trigger/0", 
+         "pinB": 19,       
+         "pinBCommand": "/trigger/1"
+    }
+}
