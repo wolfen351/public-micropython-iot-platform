@@ -124,6 +124,9 @@ try:
         elif modname == "touchscreen":
             from modules.touchscreen.touchscreen import TouchScreen
             allModules.append(TouchScreen())
+        elif modname == "wdt":
+            from modules.wdt.wdt import WDTControl
+            allModules.append(WDTControl())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
@@ -195,13 +198,13 @@ try:
 except KeyboardInterrupt:
     raise
 except Exception as e:
-    import sys
-    import time
+    from sys import print_exception
+    from time import sleep
     from serial_log import SerialLog
-    sys.print_exception(e)
+    print_exception(e)
     SerialLog.log("Fatal exception, will reboot in 10s")
     for y in range(0, 100): # lots of little sleeps, hopefully means repl can connect
-        time.sleep(0.1)
+        sleep(0.1)
     from machine import reset
     reset()
 

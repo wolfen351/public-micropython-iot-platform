@@ -1,0 +1,13 @@
+{
+    "name": "LilyGo Battery Powered Motion Sensor",
+    "shortName": "lilygo-irdetect",
+    "activeModules": ["basic", "mqtt", "ota", "thingsboard", "web", "wifi", "homeassistant", "wdt", "pir"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 3,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

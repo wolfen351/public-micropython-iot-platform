@@ -1,6 +1,7 @@
 #!/bin/bash
 
 Write-Output "This will flash the ESP8266 with the latest firmware."
+Write-Output "WARNING - This project probably won't work on ESP8266 without at least 512Kb RAM"
 
 Import-Module ./serial-toys.psm1
 $port = Find-MicrocontrollerPort
