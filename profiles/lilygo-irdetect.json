@@ -9,5 +9,12 @@
         "tmp_filename": "new_firmware.tar.gz",
         "excluded_files": [],
         "delete": []
-    }
+    },
+    "pir": {
+        "pinA": 18,      
+        "pinACommand": "/trigger/0", 
+        "pinB": 19,       
+        "pinBCommand": "/trigger/1"
+   }
+
 }
