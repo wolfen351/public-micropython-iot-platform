@@ -6,7 +6,7 @@
     "statusLedPin" : 3,
     "ds18b20": {
         "pin": 9, 
-        "readEveryMs": 60000
+        "readEveryMs": 10000
     },
     "ota": {
         "url": "https://firmware.wolfen.nz/firmware",

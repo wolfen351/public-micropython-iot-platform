@@ -57,9 +57,9 @@ class CpuHardware():
         # lights out
         led = Pin(3, Pin.OUT)
         led.off()
-        sleep(0.1)
         SerialLog.log("Zzz")
-        if (timeToNapInMs-100 > 0):
-            machine.lightsleep(timeToNapInMs-100) # Sleep to save power 
+        sleep(0.2)
+        if (timeToNapInMs-200 > 0):
+            machine.lightsleep(timeToNapInMs-200) # Sleep to save power 
         SerialLog.log("Woke up..")
 
