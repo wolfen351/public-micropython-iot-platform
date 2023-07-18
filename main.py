@@ -8,7 +8,7 @@ def runSafe(cmd, p1 = None):
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        SerialLog.log("Exception", e)
+        SerialLog.log("Exception", str(e))
         sys.print_exception(e)
         gc.collect()
 
