@@ -1,13 +1,11 @@
 from board_system.cpu_hardware import CpuHardware
 from machine import Pin, ADC, reset
-import network
-import time
+from time import ticks_ms, ticks_diff
 
 from serial_log import SerialLog
 
 class LilyGoBattery:
 
-    loopcount = 0
     voltage = 0
     voltagePercent = 0
     lastBatteryCheck = 0
@@ -19,41 +17,35 @@ class LilyGoBattery:
     def start(self):
         self.pot = ADC(Pin(2))
         self.pot.atten(ADC.ATTN_11DB)       #Full range: 3.3v
-        self.sta_if = network.WLAN(network.STA_IF)
-        self.ap_if = network.WLAN(network.AP_IF)
-        self.bootTime = time.ticks_ms()
+        self.bootTime = ticks_ms()
         self.lastSleepTime = 0
 
     def tick(self):
-        currentTime = time.ticks_ms()
-        self.loopcount += 1
+        currentTime = ticks_ms()
 
-        uptimeMs = time.ticks_diff(currentTime, self.bootTime)
+        uptimeMs = ticks_diff(currentTime, self.bootTime)
         hasBeenRunningForMoreThan2Mins = uptimeMs > 120000
-        wifiConnected = self.sta_if.isconnected()
-        timeSinceLastSleepMs = time.ticks_diff(currentTime, self.lastSleepTime)
-        apRunning = self.ap_if.active()
+        timeSinceLastSleepMs = ticks_diff(currentTime, self.lastSleepTime)
 
         # If it has been up for more than 1h then reboot
         if (uptimeMs > 3600000):
             reset()
 
-        # stay awake for 10s every 10min
-        if (timeSinceLastSleepMs > 10000 and not wifiConnected and not apRunning and hasBeenRunningForMoreThan2Mins):
-            self.lastSleepTime = time.ticks_ms()
-            CpuHardware.lightSleep(600000) # sleep for 10min
-
         # check battery voltage every 5s
-        diff = time.ticks_diff(currentTime, self.lastBatteryCheck)
+        diff = ticks_diff(currentTime, self.lastBatteryCheck)
         if (diff > 5000):
             pot_value = self.pot.read()
             self.voltage = pot_value * 2 / 1000
             self.voltagePercent = round(((pot_value * 2) / 5842) * 100)
-            self.lastBatteryCheck = time.ticks_ms()
+            self.lastBatteryCheck = ticks_ms()
             SerialLog.log("Battery voltage: %s (%s%%)" % (self.voltage, self.voltagePercent))
 
-    def getTelemetry(self):
+        # stay awake for 10s every 10min
+        if (timeSinceLastSleepMs > 10000 and hasBeenRunningForMoreThan2Mins and self.voltagePercent < 90):
+            self.lastSleepTime = ticks_ms()
+            CpuHardware.lightSleep(600000) # sleep for 10min
 
+    def getTelemetry(self):
         return { 
             "voltage": self.voltage,
             "voltagePercent": self.voltagePercent
