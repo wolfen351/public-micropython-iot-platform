@@ -54,7 +54,7 @@ class WebServer():
                 with open(CERT_PATH, 'rb') as f:
                     cert = f.read()
                 scl = ussl.wrap_socket(connection, server_side=True, cert=cert, key=key)
-                SerialLog.log(scl)
+                SerialLog.log("SCL:", scl)
                 scl.setblocking(False)
                 self.poller.register(scl, select.POLLIN)
             except OSError as e:

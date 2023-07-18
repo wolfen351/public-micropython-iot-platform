@@ -27,6 +27,10 @@ class SerialLog(object):
             SerialLog.logHistoryData = ["Log history purged due to low memory"]
             collect()
 
+        # Ignore blank messages
+        if (message == "" or message == None):
+            return
+
         if (len(SerialLog.logHistoryData) > 100):
             SerialLog.logHistoryData.pop(0)
 

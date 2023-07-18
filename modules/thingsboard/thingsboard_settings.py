@@ -36,7 +36,7 @@ class ThingsboardSettings:
             if not self.is_valid():
                 self.remove()
 
-            SerialLog.log(contents)
+            SerialLog.log("Contents:", contents)
 
         except OSError:
             pass
