@@ -27,8 +27,8 @@ class LilyGoBattery:
         hasBeenRunningForMoreThan2Mins = uptimeMs > 120000
         timeSinceLastSleepMs = ticks_diff(currentTime, self.lastSleepTime)
 
-        # If it has been up for more than 1h then reboot
-        if (uptimeMs > 3600000):
+        # If it has been up for more than 10h then reboot
+        if (uptimeMs > 36000000):
             reset()
 
         # check battery voltage every 5s
