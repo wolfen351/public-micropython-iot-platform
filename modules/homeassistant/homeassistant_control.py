@@ -240,9 +240,9 @@ class HomeAssistantControl(BasicModule):
             self.configuredKeys.append(key)
             attr = key.replace("/","_")
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
-            if (key.startswith(b'temperature/')):
+            if (key.startswith(b'temperature/') or key.startswith(b'tempmin') or key.startswith(b'tempmax') or key.startswith(b'ac_setpoint')):
                 payload = self.get_basic_payload("Temperature", safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "\u00b0C"})
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "*C"})
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr, value) 
@@ -261,10 +261,6 @@ class HomeAssistantControl(BasicModule):
             elif (key.startswith(b'ac_mode')):
                 payload = self.get_basic_payload("ac_mode", safeid, attr, value) 
                 self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ac_setpoint')):
-                payload = self.get_basic_payload("ac_setpoint", safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "*C"})
-                self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr, value) 
                 self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
@@ -304,7 +300,7 @@ class HomeAssistantControl(BasicModule):
                 self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
             else:
                 payload = self.get_basic_payload(attr, safeid, attr, value) 
-                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
+                self.safePublish("%s/telemetry%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
     
     def settings(self, settingsVals):
         # Apply the new settings
