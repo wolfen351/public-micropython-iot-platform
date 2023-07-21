@@ -263,7 +263,7 @@ class HomeAssistantControl(BasicModule):
                 self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_setpoint')):
                 payload = self.get_basic_payload("ac_setpoint", safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "\u00b0C"})
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "*C"})
                 self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr, value) 
