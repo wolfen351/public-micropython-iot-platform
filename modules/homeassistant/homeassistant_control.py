@@ -223,7 +223,7 @@ class HomeAssistantControl(BasicModule):
                 "configuration_url": "http://%s" % (self.ip)
             },
             "stat_t": "~/state",
-            "unit_of_meas": '%',
+            "unit_of_meas": 'unit',
             "val_tpl": "{{ value_json.%s }}" % (attr)
         }
         # if the value is a number then update the payload
