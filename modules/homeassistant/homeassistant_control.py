@@ -228,7 +228,7 @@ class HomeAssistantControl(BasicModule):
         # if the value is a number then update the payload
         if (isinstance(value, int) or isinstance(value, float)):
             basicPayload.update({
-                 "unit_of_measurement": "item(s)",
+                 "unit_of_meas": "item(s)",
                   "state_class": "measurement"
                  })
         return basicPayload
