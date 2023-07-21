@@ -213,14 +213,14 @@ class HomeAssistantControl(BasicModule):
         basicPayload = { 
             "~": self.homeAssistantSensorUrl,
             "name": "%s %s" % (self.getPref("web", "name", self.basicSettings["name"]), name),
-            "unique_id": uniqueid,
-            "device": {
-                "connections": [["mac", my_mac_addr]],
-                "manufacturer": "Wolfen",
+            "uniq_id": uniqueid,
+            "dev": {
+                "cns": [["mac", my_mac_addr]],
+                "mf": "Wolfen",
                 "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), self.client_id.decode('ascii')),
-                "sw_version": self.version,
-                "model": self.basicSettings["shortName"],
-                "configuration_url": "http://%s" % (self.ip)
+                "sw": self.version,
+                "mdl": self.basicSettings["shortName"],
+                "cu": "http://%s" % (self.ip)
             },
             "stat_t": "~/state",
             "val_tpl": "{{ value_json.%s }}" % (attr)
@@ -229,7 +229,7 @@ class HomeAssistantControl(BasicModule):
         if (isinstance(value, int) or isinstance(value, float)):
             basicPayload.update({
                  "unit_of_meas": "item(s)",
-                  "state_class": "measurement"
+                  "stat_cla": "measurement"
                  })
         return basicPayload
 
