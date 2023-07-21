@@ -94,7 +94,7 @@ class HomeAssistantControl(BasicModule):
         # tell home assistant about any new keys
         for attr, value in self.telemetry.items():
             if (attr not in self.configuredKeys):
-                self.home_assistant_configure(attr)
+                self.home_assistant_configure(attr, value)
 
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
@@ -205,7 +205,7 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
             self.connected = True
     
-    def get_basic_payload(self, name, uniqueid, attr):
+    def get_basic_payload(self, name, uniqueid, attr, value):
 
         wlan_mac = self.sta_if.config('mac')
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
@@ -223,46 +223,51 @@ class HomeAssistantControl(BasicModule):
                 "configuration_url": "http://%s" % (self.ip)
             },
             "stat_t": "~/state",
+            "unit_of_meas": '%',
             "val_tpl": "{{ value_json.%s }}" % (attr)
         }
+        # if the value is a number then update the payload
+        if (isinstance(value, int) or isinstance(value, float)):
+            basicPayload.update({ "unit_of_measurement": "unit" })
         return basicPayload
 
     
-    def home_assistant_configure(self, key):
+    def home_assistant_configure(self, key, value):
         
         if key not in self.configuredKeys:
             self.configuredKeys.append(key)
             attr = key.replace("/","_")
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/')):
-                payload = self.get_basic_payload("Temperature", safeid, attr) 
-                payload.update({ "dev_cla": "temperature"})
+                payload = self.get_basic_payload("Temperature", safeid, attr, value) 
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
-                payload = self.get_basic_payload("Humidity", safeid, attr) 
-                payload.update({ "dev_cla": "humidity"})
+                payload = self.get_basic_payload("Humidity", safeid, attr, value) 
+                payload.update({ "dev_cla": "humidity", "unit_of_meas": "%"})
                 self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'rssi')):
-                payload = self.get_basic_payload("RSSI", safeid, attr) 
+                payload = self.get_basic_payload("RSSI", safeid, attr, value) 
                 payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
                 self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ip')):
-                payload = self.get_basic_payload("IP", safeid, attr) 
+                payload = self.get_basic_payload("IP", safeid, attr, value) 
                 self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ssid')):
-                payload = self.get_basic_payload("SSID", safeid, attr) 
+                payload = self.get_basic_payload("SSID", safeid, attr, value) 
                 self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_mode')):
-                payload = self.get_basic_payload("ac_mode", safeid, attr) 
+                payload = self.get_basic_payload("ac_mode", safeid, attr, value) 
                 self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_setpoint')):
-                payload = self.get_basic_payload("ac_setpoint", safeid, attr) 
+                payload = self.get_basic_payload("ac_setpoint", safeid, attr, value) 
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
                 self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'button')):
-                payload = self.get_basic_payload("Onboard Button", safeid, attr) 
+                payload = self.get_basic_payload("Onboard Button", safeid, attr, value) 
                 self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ledprimaryb')):
-                payload = self.get_basic_payload("Primary Colour", safeid, attr) 
+                payload = self.get_basic_payload("Primary Colour", safeid, attr, value) 
                 payload.pop("val_tpl")
                 payload.update({ 
 	                    "brightness": True,
@@ -279,7 +284,7 @@ class HomeAssistantControl(BasicModule):
                 })
                 self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
             elif (key.startswith(b'ledsecondaryb')):
-                payload = self.get_basic_payload("Secondary Colour", safeid, attr) 
+                payload = self.get_basic_payload("Secondary Colour", safeid, attr, value) 
                 payload.pop("val_tpl")
                 payload.update({ 
 	                    "brightness": True,
@@ -296,7 +301,7 @@ class HomeAssistantControl(BasicModule):
                 })
                 self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
             else:
-                payload = self.get_basic_payload(attr, safeid, attr) 
+                payload = self.get_basic_payload(attr, safeid, attr, value) 
                 self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
     
     def settings(self, settingsVals):
