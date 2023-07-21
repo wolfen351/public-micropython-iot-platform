@@ -223,12 +223,14 @@ class HomeAssistantControl(BasicModule):
                 "configuration_url": "http://%s" % (self.ip)
             },
             "stat_t": "~/state",
-            "unit_of_meas": 'unit',
             "val_tpl": "{{ value_json.%s }}" % (attr)
         }
         # if the value is a number then update the payload
         if (isinstance(value, int) or isinstance(value, float)):
-            basicPayload.update({ "unit_of_measurement": "item(s)" })
+            basicPayload.update({
+                 "unit_of_measurement": "item(s)",
+                  "state_class": "measurement"
+                 })
         return basicPayload
 
     
