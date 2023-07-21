@@ -240,7 +240,7 @@ class HomeAssistantControl(BasicModule):
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/')):
                 payload = self.get_basic_payload("Temperature", safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "\u00b0C"})
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr, value) 
@@ -261,7 +261,7 @@ class HomeAssistantControl(BasicModule):
                 self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'ac_setpoint')):
                 payload = self.get_basic_payload("ac_setpoint", safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "C"})
+                payload.update({ "dev_cla": "temperature", "unit_of_meas": "\u00b0C"})
                 self.safePublish("%s/ac_setpoint%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'button')):
                 payload = self.get_basic_payload("Onboard Button", safeid, attr, value) 
