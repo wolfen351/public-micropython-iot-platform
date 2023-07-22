@@ -25,7 +25,6 @@ class DS18B20Temp(BasicModule):
         SerialLog.log("Configured to look for ds18b20 on pin: ", self.pinNumber)
         self.ds_pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
-        time.sleep(0.5)
         self.roms = self.getSensors()
         self.lastScan = time.ticks_ms()
 
@@ -97,9 +96,12 @@ class DS18B20Temp(BasicModule):
         # try again if no devices found
         attempt = 0
         while (len(self.roms) == 0 and attempt < tries):
-            SerialLog.log('No devices found. Trying again...')
+            SerialLog.log('Scanning for DS18B20 Devices...')
             self.roms = self.ds_sensor.scan()
-            time.sleep(0.5)
-            SerialLog.log('Found DS devices: ', self.roms)
+            time.sleep(0.75)
+            if (len(self.roms) > 0):
+                SerialLog.log('Found DS devices: ', self.roms)
+            else:
+                SerialLog.log('No DS devices found')
             attempt += 1
         return self.roms
