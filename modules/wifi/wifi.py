@@ -304,6 +304,7 @@ class WifiHandler(BasicModule):
             # Check for update and update if needed
             if ota.check_for_updates():
                 ota.install_new_firmware()
+                SerialLog.log('Update installed, rebooting...')
                 reset()
         except Exception as e:
             SerialLog.log('OTA failed: ' + str(e))
