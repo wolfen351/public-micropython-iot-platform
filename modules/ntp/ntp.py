@@ -5,10 +5,6 @@ import ntptime
 import time
 import network
  
-# Screen is 320x240 px
-# X is left to right on the small side (0-240)
-# Y is up to down on the long side (0-320)
-
 class NtpSync(BasicModule):
 
     gotTime = False
@@ -53,10 +49,15 @@ class NtpSync(BasicModule):
         
 
     def getTelemetry(self):
+        
+        if (not self.gotTime):
+            return { "ntp": "Waiting" }
+        
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
         telemetry = {
             "time" : localTime,
-            "timeZone": self.tzName
+            "timeZone": self.tzName,
+            "ntp": "Synchronized"
         }
         return telemetry
 
