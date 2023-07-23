@@ -16,4 +16,4 @@ Write-Host "Press any key to continue..."
 $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
 esptool.py --chip esp32 --port $port erase_flash
-esptool.py --chip esp32 --port $port write_flash -z 0x1000 ./firmware/esp32-20220117-v1.18.bin
+esptool.py --chip esp32 --port $port write_flash -z 0x1000 ./firmware/esp32spiram-20230426-v1.20.0.bin
