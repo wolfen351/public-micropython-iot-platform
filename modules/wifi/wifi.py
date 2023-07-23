@@ -254,6 +254,12 @@ class WifiHandler(BasicModule):
 
     def station(self):
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
+
+        if (ssid == self.defaultSSID):
+            SerialLog.log("Wifi not configured, skipping connection")
+            self.sta_if.active(False)
+            return
+
         SerialLog.log('\nConnecting to wifi...', ssid)
         try:
             # Make sure the interface is active
