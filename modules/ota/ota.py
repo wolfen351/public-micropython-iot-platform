@@ -76,6 +76,8 @@ def check_free_space(min_free_space: int) -> bool:
     block_sz = fs_stat[0]
     free_blocks = fs_stat[3]
     free_kb = block_sz * free_blocks / 1024
+    SerialLog.log('Update size: %s kB' % min_free_space)
+    SerialLog.log('Free disk space: %s kB' % free_kb)
     return free_kb >= min_free_space
 
 def local_version():
@@ -127,7 +129,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     if not version_check or remote_version > local_version:
         SerialLog.log('new version %s is available' % remote_version)
         if not check_free_space(min_free_space):
-            SerialLog.log('not enough free space for the new firmware')
+            SerialLog.log('Error! Not enough free space for the new firmware, staying on this version')
             return False
 
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
