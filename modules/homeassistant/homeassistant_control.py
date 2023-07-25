@@ -247,7 +247,7 @@ class HomeAssistantControl(BasicModule):
             elif (key.startswith(b'freeram')):
                 payload = self.get_basic_payload("Free RAM", safeid, attr, value) 
                 payload.update({ "unit_of_meas": "bytes"})
-                self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
+                self.safePublish("%s/freeram%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
                 payload = self.get_basic_payload("Humidity", safeid, attr, value) 
                 payload.update({ "dev_cla": "humidity", "unit_of_meas": "%"})
