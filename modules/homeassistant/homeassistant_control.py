@@ -3,7 +3,7 @@ from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 from ubinascii import hexlify
 from machine import unique_id
-import network
+from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps
 from time import time, ticks_ms
@@ -11,22 +11,16 @@ from time import time, ticks_ms
 class HomeAssistantControl(BasicModule):
 
     def __init__(self):
-        self.client_id = hexlify(unique_id())
-        self.sta_if = network.WLAN(network.STA_IF)
-        self.homeAssistantUrl = "homeassistant"
-        self.homeAssistantSensorUrl = "%s/sensor/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
-        self.homeAssistantLightUrl = "%s/light/%s" % (self.homeAssistantUrl, self.client_id.decode('ascii'))
-        self.mqtt_port = 1883
-        self.mqtt_user = None
-        self.mqtt_password = None
+        self.homeAssistantSensorUrl = "homeassistant/sensor/%s" % (hexlify(unique_id()).decode('ascii'))
+        self.homeAssistantLightUrl = "homeassistant/light/%s" % (hexlify(unique_id()).decode('ascii'))
         self.telemetry = {}
         self.client = None
-        self.last_connect = 0 # to stop from spamming the reconnect
+        self.lastConnectTime = 0 # to stop from spamming the reconnect
         self.configuredKeys = []
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
         self.commands = []
-        self.lastHourCheck = 0
+        self.lastConfigureTime = 0
         self.connected = False
         self.lastFullTelemetrySend = 0
     
@@ -34,17 +28,15 @@ class HomeAssistantControl(BasicModule):
         BasicModule.start(self)
         self.enabled = self.getPref("homeassistant", "enabled", "Y")
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.wolfen.za.net")
-        self.topic_sub = self.getPref("homeassistant", "topic_sub", "homeassistant/sensor/%s/command/#" % (self.client_id))
-        self.topic_pub = self.getPref("homeassistant", "topic_pub", "homeassistant/sensor/%s/state" % (self.client_id))
-        self.mqtt_user = self.getPref("homeassistant", "mqtt_user", "")
-        self.mqtt_password = self.getPref("homeassistant", "mqtt_password", "")
+        self.topic_sub = self.getPref("homeassistant", "topic_sub", "homeassistant/sensor/%s/command/#" % (hexlify(unique_id())))
+        self.topic_pub = self.getPref("homeassistant", "topic_pub", "homeassistant/sensor/%s/state" % (hexlify(unique_id())))
         if (not self.enabled == b"Y"):
             SerialLog.log("Home Assistant Integration Disabled")
         else:
             SerialLog.log("Home Assistant Integration Enabled")            
          
     def tick(self):
-        if (self.enabled == "Y" and self.sta_if.isconnected()):
+        if (self.enabled == "Y" and WLAN(STA_IF).isconnected()):
             if (not self.connected):
                 self.connect_and_subscribe()
             if (self.connected):
@@ -60,7 +52,7 @@ class HomeAssistantControl(BasicModule):
             return
 
         # wait for wifi connection
-        if (not self.sta_if.isconnected()):
+        if (not WLAN(STA_IF).isconnected()):
             return
 
         # wait for mqtt connection
@@ -75,9 +67,9 @@ class HomeAssistantControl(BasicModule):
                 self.version = value
 
         # wipe configured keys every hour, so we reregister with ha 
-        if (time() - self.lastHourCheck > 3600):
+        if (time() - self.lastConfigureTime > 3600):
             SerialLog.log("Re-registering with Home Assistant, wiping all configured keys")
-            self.lastHourCheck = time()
+            self.lastConfigureTime = time()
             self.configuredKeys = []         
 
         # tell home assistant about any new keys
@@ -155,7 +147,7 @@ class HomeAssistantControl(BasicModule):
     
     def loadhasettings(self, params):
         headers = okayHeader
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.mqtt_user, self.mqtt_password)
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
         return data, headers
     
     def savehasettings(self, params):
@@ -176,11 +168,11 @@ class HomeAssistantControl(BasicModule):
         self.commands.append(b"%s/%s" % (topic, msg))
     
     def connect_and_subscribe(self):
-        if (self.last_connect + 30000 < ticks_ms()):
+        if (self.lastConnectTime + 30000 < ticks_ms()):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
-            self.last_connect = ticks_ms()
+            self.lastConnectTime = ticks_ms()
 
-            self.client = MQTTClient(b"ha-%s" % (self.client_id), self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password)
+            self.client = MQTTClient(b"ha-%s" % (hexlify(unique_id())), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
             self.client.set_callback(self.sub_cb)
             self.client.connect()
             self.client.subscribe(self.topic_sub)
@@ -192,7 +184,7 @@ class HomeAssistantControl(BasicModule):
     
     def get_basic_payload(self, name, uniqueid, attr, value):
 
-        wlan_mac = self.sta_if.config('mac')
+        wlan_mac = WLAN(STA_IF).config('mac')
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
@@ -202,7 +194,7 @@ class HomeAssistantControl(BasicModule):
             "dev": {
                 "cns": [["mac", my_mac_addr]],
                 "mf": "Wolfen",
-                "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), self.client_id.decode('ascii')),
+                "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), hexlify(unique_id()).decode('ascii')),
                 "sw": self.version,
                 "mdl": self.basicSettings["shortName"],
                 "cu": "http://%s" % (self.ip)
@@ -224,33 +216,64 @@ class HomeAssistantControl(BasicModule):
         if key not in self.configuredKeys:
             self.configuredKeys.append(key)
             attr = key.replace("/","_")
-            safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
-            if (key.startswith(b'temperature/') or key.startswith(b'tempmin') or key.startswith(b'tempmax') or key.startswith(b'ac_setpoint')):
-                payload = self.get_basic_payload("Temperature (%s)" % (key), safeid, attr, value) 
-                payload.update({ "dev_cla": "temperature", "unit_of_meas": "*C"})
-                self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'humidity/')):
-                payload = self.get_basic_payload("Humidity", safeid, attr, value) 
-                payload.update({ "dev_cla": "humidity", "unit_of_meas": "%"})
-                self.safePublish("%s/humidity%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'rssi')):
-                payload = self.get_basic_payload("RSSI", safeid, attr, value) 
-                payload.update({ "dev_cla": "signal_strength", "unit_of_meas": "dBm"})
-                self.safePublish("%s/rssi%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ip')):
-                payload = self.get_basic_payload("IP", safeid, attr, value) 
-                self.safePublish("%s/ip%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ssid')):
-                payload = self.get_basic_payload("SSID", safeid, attr, value) 
-                self.safePublish("%s/ssid%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ac_mode')):
-                payload = self.get_basic_payload("ac_mode", safeid, attr, value) 
-                self.safePublish("%s/ac_mode%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'button')):
-                payload = self.get_basic_payload("Onboard Button", safeid, attr, value) 
-                self.safePublish("%s/onboard_button%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ledprimaryb')):
-                payload = self.get_basic_payload("Primary Colour", safeid, attr, value) 
+            safeid = "%s_%s" % (hexlify(unique_id()).decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
+            topic = "%s/%s/config" % (self.homeAssistantSensorUrl, safeid)
+
+            nameLookup = {
+                "temperature": "Temperature",
+                "tempmin": "Temperature Minimum",
+                "dayavg": "Day Average Temperature",
+                "tempmax": "Temperature Maximum",
+                "ac_setpoint": "AC Setpoint Temperature",
+                "humidity": "Humidity",
+                "rssi": "RSSI",
+                "ip": "IP",
+                "ssid": "SSID",
+                "ac_mode": "AC Mode",
+                "button": "Onboard Button",
+                "ledprimaryb": "Primary Colour",
+                "ledsecondaryb": "Secondary Colour"
+            }
+            uomLookup = {
+                "temperature": "*C",
+                "dayavg": "*C",
+                "daymin": "*C",
+                "daymax": "*C",
+                "tempmin": "*C",
+                "tempmax": "*C",
+                "ac_setpoint": "*C",
+                "humidity": "%",
+                "rssi": "dBm",
+                "freeram": "bytes",
+                "freedisk": "bytes"
+            }
+            devClassLookup = {
+                "temperature": "temperature",
+                "tempmin": "temperature",
+                "tempmax": "temperature",
+                "ac_setpoint": "temperature",
+                "dayavg": "temperature",
+                "daymin": "temperature",
+                "daymax": "temperature",
+                "humidity": "humidity",
+                "rssi": "signal_strength"
+            }
+
+            lookupkey = key.split("/")[0]
+            name = nameLookup.get(lookupkey, key)
+            uom = uomLookup.get(lookupkey, "")
+            devclass = devClassLookup.get(lookupkey, "")
+                        
+            # if the key contains a / add the text after the / to the name
+            if (key.find("/") > -1):
+                name = name + " (%s)" % (key.split("/")[1])
+            payload = self.get_basic_payload(name, safeid, attr, value) 
+            if (uom != ""):
+                payload.update({ "unit_of_meas": uom })
+            if (devclass != ""):
+                payload.update({ "dev_cla": devclass })
+
+            if (key.startswith('ledprimaryb')):
                 payload.pop("val_tpl")
                 payload.update({ 
 	                    "brightness": True,
@@ -265,9 +288,8 @@ class HomeAssistantControl(BasicModule):
 	                    "unique_id": safeid,
                         "stat_t": "~/ledprimaryrgbstate",
                 })
-                self.safePublish("%s/ledprimaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
-            elif (key.startswith(b'ledsecondaryb')):
-                payload = self.get_basic_payload("Secondary Colour", safeid, attr, value) 
+                topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
+            elif (key.startswith('ledsecondaryb')):
                 payload.pop("val_tpl")
                 payload.update({ 
 	                    "brightness": True,
@@ -282,18 +304,13 @@ class HomeAssistantControl(BasicModule):
 	                    "unique_id": safeid,
                         "stat_t": "~/ledsecondaryrgbstate",
                 })
-                self.safePublish("%s/ledsecondaryrgb%s/config" % (self.homeAssistantLightUrl, safeid), dumps(payload))
-            else:
-                payload = self.get_basic_payload(attr, safeid, attr, value) 
-                self.safePublish("%s/telemetry%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
-    
+                topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
+
+            self.safePublish(topic, dumps(payload))
+
     def safePublish(self, topic, message):
         try:
             self.client.publish(topic, message)
         except OSError as e:
             SerialLog.log("Error publishing MQTT message: %s" % (e))
             self.connected = False
-            
-
-
-    
