@@ -90,7 +90,7 @@ class WifiHandler(BasicModule):
                     self.rssi = self.sta_if.status('rssi')
                     self.lastrssitime = now
                     self.freerambytes = gc.mem_free()
-                    self.freediskbytes = get_free_disk_space()
+                    self.freediskbytes = self.get_free_disk_space()
 
                 if (self.freerambytes == -1):
                     self.freerambytes = gc.mem_free()

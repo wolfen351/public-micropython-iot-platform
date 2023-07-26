@@ -45,7 +45,7 @@ try:
 
     SerialLog.log("Ram Total:", gc.mem_alloc() + gc.mem_free())
     SerialLog.log("Ram Free:", gc.mem_free())
-    SerialLog.log("Ram Allocated:", gc.mem_alloc(), "(", gc.mem_alloc()/(gc.mem_alloc() + gc.mem_free()), "%)")
+    SerialLog.log("Ram Allocated:", gc.mem_alloc(), "(", int(gc.mem_alloc()*100/(gc.mem_alloc() + gc.mem_free())), "%)")
 
     # start Web processing
     from modules.web.web_processor import WebProcessor
