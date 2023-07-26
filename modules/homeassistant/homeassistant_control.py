@@ -1,5 +1,4 @@
 from modules.basic.basic_module import BasicModule
-from modules.homeassistant.homeassistant_settings import HomeAssistantSettings
 from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 from ubinascii import hexlify
@@ -33,29 +32,19 @@ class HomeAssistantControl(BasicModule):
     
     def start(self):
         BasicModule.start(self)
-        settings = HomeAssistantSettings()
-        settings.load()
-        self.enabled = settings.Enable
-        self.mqtt_server = settings.Server
-        if (settings.Subscribe != b""):
-            self.topic_sub = settings.Subscribe
-        else:
-            self.topic_sub = b'homeassistant/sensor/%s/command/#' % (self.client_id)
-
-        if (settings.Publish != b""):
-            self.topic_pub = settings.Publish
-        else:
-            self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
-        self.mqtt_user = settings.Username
-        self.mqtt_password = settings.Password
+        self.enabled = self.getPref("homeassistant", "enabled", "Y")
+        self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.wolfen.za.net")
+        self.topic_sub = self.getPref("homeassistant", "topic_sub", "homeassistant/sensor/%s/command/#" % (self.client_id))
+        self.topic_pub = self.getPref("homeassistant", "topic_pub", "homeassistant/sensor/%s/state" % (self.client_id))
+        self.mqtt_user = self.getPref("homeassistant", "mqtt_user", "")
+        self.mqtt_password = self.getPref("homeassistant", "mqtt_password", "")
         if (not self.enabled == b"Y"):
             SerialLog.log("Home Assistant Integration Disabled")
         else:
             SerialLog.log("Home Assistant Integration Enabled")            
-
          
     def tick(self):
-        if (self.enabled == b"Y" and self.sta_if.isconnected()):
+        if (self.enabled == "Y" and self.sta_if.isconnected()):
             if (not self.connected):
                 self.connect_and_subscribe()
             if (self.connected):
@@ -67,7 +56,7 @@ class HomeAssistantControl(BasicModule):
     
     def processTelemetry(self, telemetry):
 
-        if (self.enabled != b"Y"):
+        if (self.enabled != "Y"):
             return
 
         # wait for wifi connection
@@ -165,22 +154,19 @@ class HomeAssistantControl(BasicModule):
         return thingsThatChanged > 0
     
     def loadhasettings(self, params):
-        settings =  self.getsettings()
         headers = okayHeader
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (settings[0], settings[1], settings[2], settings[3], settings[4], settings[5])
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.mqtt_user, self.mqtt_password)
         return data, headers
-
     
     def savehasettings(self, params):
         # Read form params
-        enable = unquote(params.get(b"enable", None))
-        server = unquote(params.get(b"server", None))
-        subscribe = unquote(params.get(b"subscribe", None))
-        publish = unquote(params.get(b"publish", None))
-        username = unquote(params.get(b"username", None))
-        password = unquote(params.get(b"password", None))
-        settings = (enable, server, subscribe, publish, username, password)
-        self.settings(settings)
+        self.setPref("homeassistant", "enabled", unquote(params.get(b"enable", None)))
+        self.setPref("homeassistant", "mqtt_server", unquote(params.get(b"server", None)))
+        self.setPref("homeassistant", "topic_sub", unquote(params.get(b"subscribe", None)))
+        self.setPref("homeassistant", "topic_pub", unquote(params.get(b"publish", None)))
+        self.setPref("homeassistant", "mqtt_user", unquote(params.get(b"username", None)))
+        self.setPref("homeassistant", "mqtt_password", unquote(params.get(b"password", None)))
+
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 
@@ -188,7 +174,6 @@ class HomeAssistantControl(BasicModule):
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
         self.commands.append(b"%s/%s" % (topic, msg))
-
     
     def connect_and_subscribe(self):
         if (self.last_connect + 30000 < ticks_ms()):
@@ -241,7 +226,7 @@ class HomeAssistantControl(BasicModule):
             attr = key.replace("/","_")
             safeid = "%s_%s" % (self.client_id.decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             if (key.startswith(b'temperature/') or key.startswith(b'tempmin') or key.startswith(b'tempmax') or key.startswith(b'ac_setpoint')):
-                payload = self.get_basic_payload("Temperature", safeid, attr, value) 
+                payload = self.get_basic_payload("Temperature (%s)" % (key), safeid, attr, value) 
                 payload.update({ "dev_cla": "temperature", "unit_of_meas": "*C"})
                 self.safePublish("%s/temp%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))
             elif (key.startswith(b'humidity/')):
@@ -302,36 +287,6 @@ class HomeAssistantControl(BasicModule):
                 payload = self.get_basic_payload(attr, safeid, attr, value) 
                 self.safePublish("%s/telemetry%s/config" % (self.homeAssistantSensorUrl, safeid), dumps(payload))                
     
-    def settings(self, settingsVals):
-        # Apply the new settings
-        self.enabled = settingsVals[0]
-        self.mqtt_server = settingsVals[1]
-
-        if (settingsVals[2] != b""):
-            self.topic_sub = settingsVals[2]
-        else:
-            self.topic_sub = b'homeassistant/sensor/%s/command/#' % (self.client_id)
-
-        if (settingsVals[3] != b""):
-            self.topic_pub = settingsVals[3]
-        else: 
-            self.topic_pub = b'homeassistant/sensor/%s/state' % (self.client_id)
-
-        # Save the settings to disk
-        settings = HomeAssistantSettings()
-        settings.Enable = self.enabled
-        settings.Server = self.mqtt_server
-        settings.Subscribe = self.topic_sub
-        settings.Publish = self.topic_pub
-        settings.Username = self.mqtt_user
-        settings.Password = self.mqtt_password
-        settings.write()
-    
-     
-    def getsettings(self):
-        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.mqtt_user, self.mqtt_password)
-        return s
-
     def safePublish(self, topic, message):
         try:
             self.client.publish(topic, message)
