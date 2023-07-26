@@ -5,7 +5,7 @@ from ubinascii import hexlify
 from machine import unique_id
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
-from ujson import dumps
+from ujson import dumps, load
 from time import time, ticks_ms
 
 class HomeAssistantControl(BasicModule):
@@ -219,45 +219,9 @@ class HomeAssistantControl(BasicModule):
             safeid = "%s_%s" % (hexlify(unique_id()).decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
             topic = "%s/%s/config" % (self.homeAssistantSensorUrl, safeid)
 
-            nameLookup = {
-                "temperature": "Temperature",
-                "tempmin": "Temperature Minimum",
-                "dayavg": "Day Average Temperature",
-                "tempmax": "Temperature Maximum",
-                "ac_setpoint": "AC Setpoint Temperature",
-                "humidity": "Humidity",
-                "rssi": "RSSI",
-                "ip": "IP",
-                "ssid": "SSID",
-                "ac_mode": "AC Mode",
-                "button": "Onboard Button",
-                "ledprimaryb": "Primary Colour",
-                "ledsecondaryb": "Secondary Colour"
-            }
-            uomLookup = {
-                "temperature": "*C",
-                "dayavg": "*C",
-                "daymin": "*C",
-                "daymax": "*C",
-                "tempmin": "*C",
-                "tempmax": "*C",
-                "ac_setpoint": "*C",
-                "humidity": "%",
-                "rssi": "dBm",
-                "freeram": "bytes",
-                "freedisk": "bytes"
-            }
-            devClassLookup = {
-                "temperature": "temperature",
-                "tempmin": "temperature",
-                "tempmax": "temperature",
-                "ac_setpoint": "temperature",
-                "dayavg": "temperature",
-                "daymin": "temperature",
-                "daymax": "temperature",
-                "humidity": "humidity",
-                "rssi": "signal_strength"
-            }
+            nameLookup = load(open("modules/homeassistant/name.json",'r'))
+            uomLookup = load(open("modules/homeassistant/uom.json",'r'))
+            devClassLookup = load(open("modules/homeassistant/devclass.json",'r'))
 
             lookupkey = key.split("/")[0]
             name = nameLookup.get(lookupkey, key)
@@ -273,37 +237,14 @@ class HomeAssistantControl(BasicModule):
             if (devclass != ""):
                 payload.update({ "dev_cla": devclass })
 
-            if (key.startswith('ledprimaryb')):
+            if (key.startswith('ledprimaryb') or key.startswith('ledsecondaryb')):
                 payload.pop("val_tpl")
-                payload.update({ 
-	                    "brightness": True,
-	                    "brightness_scale": 255,
-	                    "color_mode": True,
-	                    "command_topic": "~/command/ledprimary",
-	                    "effect": True,
-	                    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
-	                    "json_attributes_topic": "~/ledprimaryrgbstate",
-	                    "schema": "json",
-	                    "supported_color_modes": ["rgb"],
-	                    "unique_id": safeid,
-                        "stat_t": "~/ledprimaryrgbstate",
-                })
-                topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
-            elif (key.startswith('ledsecondaryb')):
-                payload.pop("val_tpl")
-                payload.update({ 
-	                    "brightness": True,
-	                    "brightness_scale": 255,
-	                    "color_mode": True,
-	                    "command_topic": "~/command/ledsecondary",
-	                    "effect": True,
-	                    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
-	                    "json_attributes_topic": "~/ledsecondaryrgbstate",
-	                    "schema": "json",
-	                    "supported_color_modes": ["rgb"],
-	                    "unique_id": safeid,
-                        "stat_t": "~/ledsecondaryrgbstate",
-                })
+                if (key.startswith('ledprimaryb')):
+                    ledconfig = load(open("modules/homeassistant/ledprimary.json",'r'))
+                else:
+                    ledconfig = load(open("modules/homeassistant/ledsecondary.json",'r'))
+                payload.update(ledconfig)
+                payload.update( { "unique_id": safeid })
                 topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
 
             self.safePublish(topic, dumps(payload))

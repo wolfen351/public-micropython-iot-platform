@@ -1,0 +1,12 @@
+{ 
+    "brightness": true,
+    "brightness_scale": 255,
+    "color_mode": true,
+    "command_topic": "~/command/ledsecondary",
+    "effect": true,
+    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
+    "json_attributes_topic": "~/ledsecondaryrgbstate",
+    "schema": "json",
+    "supported_color_modes": ["rgb"],
+    "stat_t": "~/ledsecondaryrgbstate"
+}
