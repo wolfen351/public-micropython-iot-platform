@@ -298,7 +298,7 @@ class HomeAssistantControl(BasicModule):
 	                    "command_topic": "~/command/ledsecondary",
 	                    "effect": True,
 	                    "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
-	                    "json_attributes_topic": "~/ledprimaryrgbstate",
+	                    "json_attributes_topic": "~/ledsecondaryrgbstate",
 	                    "schema": "json",
 	                    "supported_color_modes": ["rgb"],
 	                    "unique_id": safeid,
