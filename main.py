@@ -43,6 +43,10 @@ try:
     import sys
     import gc
 
+    SerialLog.log("Ram Total:", gc.mem_alloc() + gc.mem_free())
+    SerialLog.log("Ram Free:", gc.mem_free())
+    SerialLog.log("Ram Allocated:", gc.mem_alloc(), "(", gc.mem_alloc()/(gc.mem_alloc() + gc.mem_free()), "%)")
+
     # start Web processing
     from modules.web.web_processor import WebProcessor
     web = WebProcessor()
@@ -130,6 +134,7 @@ try:
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
+        SerialLog.log("Ram Allocated:", gc.mem_alloc(), "(", int(gc.mem_alloc()*100/(gc.mem_alloc() + gc.mem_free())), "%)")
 
     gc.collect()
     SerialLog.log("All code compiled. Ram Free:", gc.mem_free())

@@ -2,7 +2,7 @@
     "name": "Esp32R4 4 Relays Board",
     "shortName": "esp32r4v3-4relay",
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "four_relay", "four_button", "dion_hallway_lights", "pir"],
-    "cpuSpeed": 240000000,
+    "cpuSpeed": 160000000,
     "statusLedPin" : 2,
     "ota": {
         "url": "https://firmware.wolfen.nz/firmware",
