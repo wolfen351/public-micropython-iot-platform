@@ -1,0 +1,15 @@
+{
+    "temperature": "Temperature",
+    "tempmin": "Temperature Minimum",
+    "dayavg": "Day Average Temperature",
+    "tempmax": "Temperature Maximum",
+    "ac_setpoint": "AC Setpoint Temperature",
+    "humidity": "Humidity",
+    "rssi": "RSSI",
+    "ip": "IP",
+    "ssid": "SSID",
+    "ac_mode": "AC Mode",
+    "button": "Onboard Button",
+    "ledprimaryb": "Primary Colour",
+    "ledsecondaryb": "Secondary Colour"
+}

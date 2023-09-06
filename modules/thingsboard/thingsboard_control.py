@@ -47,7 +47,8 @@ class ThingsboardControl(BasicModule):
                         if (self.client != None):
                             self.client.check_msg()
                 except Exception as e:
-                    SerialLog.log("Error in TB MQTT tick: %s"  % (e))
+                    SerialLog.log("Error in Thingsboard tick: %s"  % (e))
+                    SerialLog.log("Exception details: %s" % (str(e.args)))
                     self.init = False
                     raise             
 

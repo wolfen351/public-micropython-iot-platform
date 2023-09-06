@@ -7,6 +7,7 @@ import time
 import modules.ota.ota as ota
 from modules.web.web_processor import okayHeader, unquote
 import gc
+from uos import statvfs
 
 class WifiHandler(BasicModule):
 
@@ -25,7 +26,8 @@ class WifiHandler(BasicModule):
         self.lastrssitime = 0
         self.lastReconnectTime = 0
         self.version = "unknown"
-        self.freeram = -1
+        self.freerambytes = -1
+        self.freediskbytes = -1
         self.apModeGaveUp = False
         self.everConnected = False
 
@@ -70,6 +72,13 @@ class WifiHandler(BasicModule):
         BasicModule.start(self)
         self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
 
+    def get_free_disk_space(self):
+        fs_stat = statvfs('/')
+        block_sz = fs_stat[0]
+        free_blocks = fs_stat[3]
+        freebytes = block_sz * free_blocks / 1024
+        return freebytes
+
     def tick(self):
         if (not self.apMode):
 
@@ -80,10 +89,11 @@ class WifiHandler(BasicModule):
                 if (diff > 50000):
                     self.rssi = self.sta_if.status('rssi')
                     self.lastrssitime = now
-                    self.freeram = gc.mem_free()
+                    self.freerambytes = gc.mem_free()
+                    self.freediskbytes = self.get_free_disk_space()
 
-                if (self.freeram == -1):
-                    self.freeram = gc.mem_free()
+                if (self.freerambytes == -1):
+                    self.freerambytes = gc.mem_free()
                 return
 
             if (self.sta_if.isconnected() and not self.connected):
@@ -169,7 +179,8 @@ class WifiHandler(BasicModule):
                     "ip": b"192.168.4.1",
                     "rssi": "0",
                     "version": self.version,
-                    "freeram": self.freeram,
+                    "freeram": self.freerambytes,
+                    "freedisk": self.freediskbytes,
                     "wifiMode": b"Access Point",
                     "stations": len(self.ap_if.status('stations'))
                 }
@@ -182,7 +193,8 @@ class WifiHandler(BasicModule):
             "ip": self.sta_if.ifconfig()[0],
             "rssi": self.rssi,
             "version": self.version,
-            "freeram": self.freeram,
+            "freeram": self.freerambytes,
+            "freedisk": self.freediskbytes,
             "wifiMode": b"Station"
         }
     
