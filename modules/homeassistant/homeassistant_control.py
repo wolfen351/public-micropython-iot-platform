@@ -80,7 +80,7 @@ class HomeAssistantControl(BasicModule):
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
             messageToSend = dumps(telemetry).replace("/","_")
-            self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend)
+            self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend, True)
 
             if ("ledprimary" in telemetry):
                 state = {
@@ -94,7 +94,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", dumps(state))
+                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", dumps(state), True)
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -108,7 +108,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", dumps(state))
+                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", dumps(state), True)
             self.telemetry = telemetry.copy()
 
     
@@ -247,11 +247,11 @@ class HomeAssistantControl(BasicModule):
                 payload.update( { "unique_id": safeid })
                 topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
 
-            self.safePublish(topic, dumps(payload))
+            self.safePublish(topic, dumps(payload), True)
 
-    def safePublish(self, topic, message):
+    def safePublish(self, topic, message, retain=False):
         try:
-            self.client.publish(topic, message)
+            self.client.publish(topic, message, retain)
         except OSError as e:
             SerialLog.log("Error publishing MQTT message: %s" % (e))
             self.connected = False
