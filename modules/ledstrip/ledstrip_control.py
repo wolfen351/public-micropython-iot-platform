@@ -53,6 +53,7 @@ class LedStripControl(BasicModule):
         
         self.primaryColorHexString = self.getPref("ledStrip", "primary", b"000000")
         self.primaryColorTuple = self.hexStringToRgbTuple(self.primaryColorHexString)
+        SerialLog.log("Primary color: " + self.primaryColorHexString)
 
         self.secondaryColorHexString = self.getPref("ledStrip", "secondary", b"000000")
         self.secondaryColorTuple = self.hexStringToRgbTuple(self.secondaryColorHexString)
@@ -65,6 +66,7 @@ class LedStripControl(BasicModule):
         self.ledPin = self.basicSettings['led']['pin']
 
         self.neoPixel = neopixel.NeoPixel(machine.Pin(self.ledPin), self.ledCount)
+        self.fullstrip(self.primaryColorHexString)
         self.calculateRainbow()
 
     def tick(self):
