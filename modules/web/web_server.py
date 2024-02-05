@@ -74,8 +74,6 @@ class WebServer():
     def get_response(self, req):
         """generate a response body and headers, given a route"""
 
-        SerialLog.log("Got a request:", req.path, req.params, req.host)
-
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
 
@@ -120,6 +118,7 @@ class WebServer():
             data = s.read()
             if not data:
                 # no data in the TCP stream, so close the socket
+                SerialLog.log("Closed socket, no more data")
                 self.close(s)
                 return
 
@@ -127,6 +126,7 @@ class WebServer():
             sid = id(s)
             self.request[sid] = self.request.get(sid, b"") + data
             if (len(self.request[sid]) > 1000):
+                SerialLog.log("Stream closed")
                 self.close(s)
                 return
 
@@ -142,12 +142,19 @@ class WebServer():
             body, headers, shouldReboot = self.get_response(req)
             self.shouldReboot = shouldReboot
             self.prepare_write(s, body, headers)
-        except:
+        except Exception as e:
+            SerialLog.log("Error reading from socket", e)
             self.close(s)
+        
 
     def prepare_write(self, s, body, headers):
         # add newline to headers to signify transition to body
         headers += "\r\n"
+
+        # force strings to have utf-8 encoding so they have a defined length
+        if type(headers) is str:
+            headers = headers.encode("utf-8")
+
         # TCP/IP MSS is 536 bytes, so create buffer of this size and
         # initially populate with header data
         buff = bytearray(headers + "\x00" * (536 - len(headers)))
