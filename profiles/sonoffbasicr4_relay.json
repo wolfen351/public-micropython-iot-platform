@@ -1,0 +1,16 @@
+{
+    "name": "Sonoff Basic R4 Board",
+    "shortName": "sonoffbasicr4_relay",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "relay", "builtin_button"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 6,
+    "builtinButton": {
+        "pin": 9
+    },
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

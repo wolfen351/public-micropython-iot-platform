@@ -7,7 +7,13 @@ MIT license; Copyright (c) 2021 Martin Komon
 import gc
 import uos
 import modules.ota.requests as requests
-import uzlib
+
+missingImports = False
+
+try:
+    import uzlib
+except ImportError:
+    missingImports = True
 
 try:
     import upip_utarfile as tarfile
@@ -17,6 +23,9 @@ except ImportError:
 from micropython import const
 from serial_log import SerialLog
 import ujson
+
+if missingImports:
+    SerialLog.log('Error! Missing required imports. OTA is disabled.')
 
 GZDICT_SZ = const(31)
 ota_config = {}
@@ -148,9 +157,11 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     return False
 
 def install_new_firmware(quiet=False):
-    """
-    Unpack new firmware that is already downloaded and perform a post-installation cleanup.
-    """
+
+    if missingImports:
+        SerialLog.log('Error! Missing required imports. OTA is disabled.')
+        return
+
     gc.collect()
 
     if not load_ota_cfg():

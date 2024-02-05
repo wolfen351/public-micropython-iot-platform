@@ -131,6 +131,9 @@ try:
         elif modname == "wdt":
             from modules.wdt.wdt import WDTControl
             allModules.append(WDTControl())
+        elif modname == "relay":
+            from modules.relay.relay import Relay
+            allModules.append(Relay())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
