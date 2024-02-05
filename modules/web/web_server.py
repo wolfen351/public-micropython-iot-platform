@@ -27,10 +27,6 @@ class WebServer():
         self.httpServer.sock.listen(5)
         self.httpServer.sock.setblocking(False)
 
-        self.httpsServer = Server(self.poller, 443, socket.SOCK_STREAM, "WebHTTPS Server")
-        self.httpsServer.sock.listen(5)
-        self.httpsServer.sock.setblocking(False)
-
         self.shouldReboot = False
 
     
@@ -39,28 +35,6 @@ class WebServer():
             # client connecting on port 80, so spawn off a new
             # socket to handle this connection
             self.accept(sock)
-        elif sock is self.httpsServer.sock:
-            # client connecting on port 443, so spawn off a new
-            # socket to handle this connection
-            try:
-                gc.collect()
-                connection, addr = sock.accept()
-
-                KEY_PATH = 'ssl.key'
-                CERT_PATH = 'ssl.crt'
-                with open(KEY_PATH, 'rb') as f:
-                    key = f.read()
-
-                with open(CERT_PATH, 'rb') as f:
-                    cert = f.read()
-                scl = ussl.wrap_socket(connection, server_side=True, cert=cert, key=key)
-                SerialLog.log("SCL:", scl)
-                scl.setblocking(False)
-                self.poller.register(scl, select.POLLIN)
-            except OSError as e:
-                self.close(connection)
-                return
-
         elif event & select.POLLIN:
             # socket has data to read in
             self.read(sock)
@@ -99,6 +73,8 @@ class WebServer():
 
     def get_response(self, req):
         """generate a response body and headers, given a route"""
+
+        SerialLog.log("Got a request:", req.path, req.params, req.host)
 
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
