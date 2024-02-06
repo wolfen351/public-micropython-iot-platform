@@ -7,9 +7,10 @@ class BuiltinButtonControl(BasicModule):
     commands = []
 
     def __init__(self):
-        self.buttonPin = Pin(0, Pin.IN)
+        BasicModule.start(self)
+        self.pinNumber = self.getPref("builtinButton", "pin", 0)
+        self.buttonPin = Pin(self.pinNumber, Pin.IN)
         self.value = 0
-
      
     def start(self):
         self.value = 0
