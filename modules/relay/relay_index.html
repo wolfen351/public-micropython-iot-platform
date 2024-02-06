@@ -1,0 +1,23 @@
+<div class="panel" id="relay" class="relaypanel">
+  <div class="title">RELAY</div>
+
+  <div class="line">
+    <div class="lineitem">Switch</div>
+    <div dataitem="relay/S1" class="mdata" datadisplay="onoff"></div>
+    <input type="button" value="Switch" onclick="post('/relay/flip')" class="mosswitch"></input>
+  </div>
+
+</div>
+
+<style>
+  .mdata {
+    width:30px;
+    padding-right: 20px;
+  }
+
+  .mosswitch {
+    width: 100px;
+    height: 25px;
+    margin-bottom: 15px;
+  }
+</style>

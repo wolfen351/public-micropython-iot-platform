@@ -81,6 +81,9 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         if ($f.Contains("board_system")) {
             $rootFile = $True
         }
+        if ($f.Contains("ulib")) {
+            $rootFile = $True
+        }        
 
         # Skip .package
         if ($f.Contains(".package")) {

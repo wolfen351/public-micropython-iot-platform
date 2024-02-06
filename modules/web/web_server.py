@@ -27,10 +27,6 @@ class WebServer():
         self.httpServer.sock.listen(5)
         self.httpServer.sock.setblocking(False)
 
-        self.httpsServer = Server(self.poller, 443, socket.SOCK_STREAM, "WebHTTPS Server")
-        self.httpsServer.sock.listen(5)
-        self.httpsServer.sock.setblocking(False)
-
         self.shouldReboot = False
 
     
@@ -39,28 +35,6 @@ class WebServer():
             # client connecting on port 80, so spawn off a new
             # socket to handle this connection
             self.accept(sock)
-        elif sock is self.httpsServer.sock:
-            # client connecting on port 443, so spawn off a new
-            # socket to handle this connection
-            try:
-                gc.collect()
-                connection, addr = sock.accept()
-
-                KEY_PATH = 'ssl.key'
-                CERT_PATH = 'ssl.crt'
-                with open(KEY_PATH, 'rb') as f:
-                    key = f.read()
-
-                with open(CERT_PATH, 'rb') as f:
-                    cert = f.read()
-                scl = ussl.wrap_socket(connection, server_side=True, cert=cert, key=key)
-                SerialLog.log("SCL:", scl)
-                scl.setblocking(False)
-                self.poller.register(scl, select.POLLIN)
-            except OSError as e:
-                self.close(connection)
-                return
-
         elif event & select.POLLIN:
             # socket has data to read in
             self.read(sock)
@@ -115,7 +89,7 @@ class WebServer():
 
         if type(route) is bytes:
             # expect a filename, so return contents of file
-            SerialLog("Returning file:", route)
+            SerialLog.log("Returning file:", route)
             return open(route, "rb"), headers, False
 
         if callable(route):
@@ -144,6 +118,7 @@ class WebServer():
             data = s.read()
             if not data:
                 # no data in the TCP stream, so close the socket
+                SerialLog.log("Closed socket, no more data")
                 self.close(s)
                 return
 
@@ -151,6 +126,7 @@ class WebServer():
             sid = id(s)
             self.request[sid] = self.request.get(sid, b"") + data
             if (len(self.request[sid]) > 1000):
+                SerialLog.log("Stream closed")
                 self.close(s)
                 return
 
@@ -166,12 +142,19 @@ class WebServer():
             body, headers, shouldReboot = self.get_response(req)
             self.shouldReboot = shouldReboot
             self.prepare_write(s, body, headers)
-        except:
+        except Exception as e:
+            SerialLog.log("Error reading from socket", e)
             self.close(s)
+        
 
     def prepare_write(self, s, body, headers):
         # add newline to headers to signify transition to body
         headers += "\r\n"
+
+        # force strings to have utf-8 encoding so they have a defined length
+        if type(headers) is str:
+            headers = headers.encode("utf-8")
+
         # TCP/IP MSS is 536 bytes, so create buffer of this size and
         # initially populate with header data
         buff = bytearray(headers + "\x00" * (536 - len(headers)))
