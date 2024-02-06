@@ -11,8 +11,8 @@ from time import time, ticks_ms
 class HomeAssistantControl(BasicModule):
 
     def __init__(self):
-        self.homeAssistantSensorUrl = "homeassistant/sensor/%s" % (hexlify(unique_id()).decode('ascii'))
-        self.homeAssistantLightUrl = "homeassistant/light/%s" % (hexlify(unique_id()).decode('ascii'))
+        self.homeAssistantPrefixUrl = "homeassistant/"
+        self.homeAssistantSuffix = "/%s" % (hexlify(unique_id()).decode('ascii'))
         self.telemetry = {}
         self.client = None
         self.lastConnectTime = 0 # to stop from spamming the reconnect
@@ -80,7 +80,7 @@ class HomeAssistantControl(BasicModule):
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
             messageToSend = dumps(telemetry).replace("/","_")
-            self.safePublish("%s/state" % self.homeAssistantSensorUrl, messageToSend, True)
+            self.safePublish("%s/%s/%s/state" % self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix, messageToSend, True)
 
             if ("ledprimary" in telemetry):
                 state = {
@@ -94,7 +94,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledprimaryrgbstate", dumps(state), True)
+                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix, dumps(state), True)
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -108,7 +108,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish(self.homeAssistantSensorUrl + "/ledsecondaryrgbstate", dumps(state), True)
+                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix, dumps(state), True)
             self.telemetry = telemetry.copy()
 
     
@@ -188,7 +188,7 @@ class HomeAssistantControl(BasicModule):
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
-            "~": self.homeAssistantSensorUrl,
+            "~": "%s/%s/%s" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix),
             "name": name,
             "uniq_id": uniqueid,
             "dev": {
@@ -246,6 +246,11 @@ class HomeAssistantControl(BasicModule):
                 payload.update(ledconfig)
                 payload.update( { "unique_id": safeid })
                 topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
+
+            if (key.startswith('relay')):
+                payload.update({ "payload_on": "1", "payload_off": "0", "cmd_t": "~/command/on"})
+                topic = "%s/%s/config" % (self.homeAssistantSwitchUrl, safeid)
+                SerialLog.log("RELAY CONFIG", dumps(payload))
 
             self.safePublish(topic, dumps(payload), True)
 

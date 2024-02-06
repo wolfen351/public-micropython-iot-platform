@@ -7,5 +7,6 @@
     "daymin": "temperature",
     "daymax": "temperature",
     "humidity": "humidity",
-    "rssi": "signal_strength"
+    "rssi": "signal_strength",
+    "relay": "switch"
 }

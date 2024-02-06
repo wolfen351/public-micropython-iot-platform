@@ -11,5 +11,6 @@
     "ac_mode": "AC Mode",
     "button": "Onboard Button",
     "ledprimaryb": "Primary Colour",
-    "ledsecondaryb": "Secondary Colour"
+    "ledsecondaryb": "Secondary Colour",
+    "relay": "Relay"
 }
