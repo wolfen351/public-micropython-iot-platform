@@ -105,6 +105,10 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     """
     gc.collect()
 
+    if missingImports:
+        SerialLog.log('Error! Missing required imports. OTA is disabled.')
+        return False
+
     if not load_ota_cfg():
         return False
 
@@ -157,10 +161,6 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     return False
 
 def install_new_firmware(quiet=False):
-
-    if missingImports:
-        SerialLog.log('Error! Missing required imports. OTA is disabled.')
-        return
 
     gc.collect()
 

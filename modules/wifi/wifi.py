@@ -317,6 +317,7 @@ class WifiHandler(BasicModule):
         self.sta_if.active(True)
 
     def ota(self):
+
         # Squash OTA exceptions
         try:
             # Check for update and update if needed

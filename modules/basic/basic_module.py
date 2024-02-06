@@ -7,7 +7,7 @@ class BasicModule:
 
     # static vars
     prefs = {}
-    basicSettingss = {}
+    basicSettings = {}
     loadedPrefs = False
 
     def __init__(self):
@@ -20,6 +20,12 @@ class BasicModule:
         self.basicSettings = ujson.loads(settings_string)
         self.ensurePrefsExists()
         self.loadPrefs()
+
+    def free(self):
+        self.prefs = None
+        self.basicSettings = None
+        self.loadedPrefs = False
+
 
     def tick(self):
         pass

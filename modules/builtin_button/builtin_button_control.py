@@ -1,5 +1,6 @@
 from modules.basic.basic_module import BasicModule
 from machine import Pin
+from serial_log import SerialLog
 
 class BuiltinButtonControl(BasicModule):
 
@@ -8,9 +9,10 @@ class BuiltinButtonControl(BasicModule):
 
     def __init__(self):
         BasicModule.start(self)
-        self.pinNumber = self.getPref("builtinButton", "pin", 0)
-        self.buttonPin = Pin(self.pinNumber, Pin.IN)
+        self.pinNumber = self.basicSettings["builtinButton"]["pin"]
+        self.buttonPin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.value = 0
+        BasicModule.free(self) # release the ram
      
     def start(self):
         self.value = 0
