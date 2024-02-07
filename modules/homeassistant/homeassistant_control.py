@@ -11,8 +11,8 @@ from time import time, ticks_ms
 class HomeAssistantControl(BasicModule):
 
     def __init__(self):
-        self.homeAssistantPrefixUrl = "homeassistant/"
-        self.homeAssistantSuffix = "/%s" % (hexlify(unique_id()).decode('ascii'))
+        self.haPrefixUrl = "homeassistant"
+        self.deviceId = hexlify(unique_id()).decode('ascii')
         self.telemetry = {}
         self.client = None
         self.lastConnectTime = 0 # to stop from spamming the reconnect
@@ -28,8 +28,7 @@ class HomeAssistantControl(BasicModule):
         BasicModule.start(self)
         self.enabled = self.getPref("homeassistant", "enabled", "Y")
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.wolfen.za.net")
-        self.topic_sub = self.getPref("homeassistant", "topic_sub", "%s/sensor/%s/command/#" % (self.homeAssistantPrefixUrl, hexlify(unique_id())))
-        self.topic_pub = self.getPref("homeassistant", "topic_pub", "%s/sensor/%s/state" % (self.homeAssistantPrefixUrl, hexlify(unique_id())))
+
         if (not self.enabled == b"Y"):
             SerialLog.log("Home Assistant Integration Disabled")
         else:
@@ -79,8 +78,10 @@ class HomeAssistantControl(BasicModule):
 
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
+
+            # publish all the telemetry to homeassistant/sensor/deviceid/state
             messageToSend = dumps(telemetry).replace("/","_")
-            self.safePublish("%s/%s/%s/state" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix), messageToSend, True)
+            self.safePublish("%s/%s/%s/state" % (self.haPrefixUrl, "sensor", self.deviceId), messageToSend, True)
 
             if ("ledprimary" in telemetry):
                 state = {
@@ -94,7 +95,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % (self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix), dumps(state), True)
+                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % (self.haPrefixUrl, "light", self.deviceId), dumps(state), True)
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -108,7 +109,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % (self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix), dumps(state), True)
+                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % (self.haPrefixUrl, "light", self.deviceId), dumps(state), True)
             self.telemetry = telemetry.copy()
 
     
@@ -147,15 +148,13 @@ class HomeAssistantControl(BasicModule):
     
     def loadhasettings(self, params):
         headers = okayHeader
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"username\": \"%s\", \"password\":\"%s\" }" % (self.enabled, self.mqtt_server, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
         return data, headers
     
     def savehasettings(self, params):
         # Read form params
         self.setPref("homeassistant", "enabled", unquote(params.get(b"enable", None)))
         self.setPref("homeassistant", "mqtt_server", unquote(params.get(b"server", None)))
-        self.setPref("homeassistant", "topic_sub", unquote(params.get(b"subscribe", None)))
-        self.setPref("homeassistant", "topic_pub", unquote(params.get(b"publish", None)))
         self.setPref("homeassistant", "mqtt_user", unquote(params.get(b"username", None)))
         self.setPref("homeassistant", "mqtt_password", unquote(params.get(b"password", None)))
 
@@ -172,14 +171,13 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
-            self.client = MQTTClient(b"ha-%s" % (hexlify(unique_id())), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
+            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
             self.client.set_callback(self.sub_cb)
             self.client.connect()
-            self.client.subscribe(self.topic_sub)
             # Wipe all existing telemetry so we send a full update on connect
             self.telemetry = {} 
             self.configuredKeys = []
-            SerialLog.log('Connected to %s HA MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+            SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
     
     def get_basic_payload(self, name, uniqueid, attr, value):
@@ -188,13 +186,13 @@ class HomeAssistantControl(BasicModule):
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
-            "~": "%s/%s/%s" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix),
+            "~": "%s/%s/%s" % (self.haPrefixUrl, "sensor", self.deviceId),
             "name": name,
             "uniq_id": uniqueid,
             "dev": {
                 "cns": [["mac", my_mac_addr]],
                 "mf": "Wolfen",
-                "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), hexlify(unique_id()).decode('ascii')),
+                "name": "%s - %s" % (self.getPref("web", "name", self.basicSettings["name"]), self.deviceId),
                 "sw": self.version,
                 "mdl": self.basicSettings["shortName"],
                 "cu": "http://%s" % (self.ip)
@@ -216,8 +214,7 @@ class HomeAssistantControl(BasicModule):
         if key not in self.configuredKeys:
             self.configuredKeys.append(key)
             attr = key.replace("/","_")
-            safeid = "%s_%s" % (hexlify(unique_id()).decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
-            topic = "%s/%s/%s/%s/config" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix, safeid)
+            telemetryId = "%s_%s" % (self.deviceId, attr) #43jh34hg4_temp_jhgfddfdsfd
 
             nameLookup = load(open("modules/homeassistant/name.json",'r'))
             uomLookup = load(open("modules/homeassistant/uom.json",'r'))
@@ -227,11 +224,12 @@ class HomeAssistantControl(BasicModule):
             name = nameLookup.get(lookupkey, key)
             uom = uomLookup.get(lookupkey, "")
             devclass = devClassLookup.get(lookupkey, "")
+            telemetryType = "sensor"
                         
             # if the key contains a / add the text after the / to the name
             if (key.find("/") > -1):
                 name = name + " (%s)" % (key.split("/")[1])
-            payload = self.get_basic_payload(name, safeid, attr, value) 
+            payload = self.get_basic_payload(name, telemetryId, attr, value) 
             if (uom != ""):
                 payload.update({ "unit_of_meas": uom })
             if (devclass != ""):
@@ -244,14 +242,14 @@ class HomeAssistantControl(BasicModule):
                 else:
                     ledconfig = load(open("modules/homeassistant/ledsecondary.json",'r'))
                 payload.update(ledconfig)
-                payload.update( { "unique_id": safeid })
-                topic = "%s/%s/config" % (self.homeAssistantLightUrl, safeid)
+                payload.update( { "unique_id": telemetryId })
+                telemetryType = "light"
 
             if (key.startswith('relay')):
-                payload.update({ "payload_on": "1", "payload_off": "0", "cmd_t": "~/command/on"})
-                topic = "%s/%s/config" % (self.homeAssistantSwitchUrl, safeid)
-                SerialLog.log("RELAY CONFIG", dumps(payload))
+                payload.update({ "payload_on": "1", "payload_off": "0", "cmd_t": "~/command"})
+                telemetryType = "switch"
 
+            topic = "%s/%s/%s/%s/config" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
             self.safePublish(topic, dumps(payload), True)
 
     def safePublish(self, topic, message, retain=False):
