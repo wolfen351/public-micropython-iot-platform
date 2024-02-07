@@ -28,8 +28,8 @@ class HomeAssistantControl(BasicModule):
         BasicModule.start(self)
         self.enabled = self.getPref("homeassistant", "enabled", "Y")
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.wolfen.za.net")
-        self.topic_sub = self.getPref("homeassistant", "topic_sub", "homeassistant/sensor/%s/command/#" % (hexlify(unique_id())))
-        self.topic_pub = self.getPref("homeassistant", "topic_pub", "homeassistant/sensor/%s/state" % (hexlify(unique_id())))
+        self.topic_sub = self.getPref("homeassistant", "topic_sub", "%s/sensor/%s/command/#" % (self.homeAssistantPrefixUrl, hexlify(unique_id())))
+        self.topic_pub = self.getPref("homeassistant", "topic_pub", "%s/sensor/%s/state" % (self.homeAssistantPrefixUrl, hexlify(unique_id())))
         if (not self.enabled == b"Y"):
             SerialLog.log("Home Assistant Integration Disabled")
         else:
@@ -80,7 +80,7 @@ class HomeAssistantControl(BasicModule):
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
             messageToSend = dumps(telemetry).replace("/","_")
-            self.safePublish("%s/%s/%s/state" % self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix, messageToSend, True)
+            self.safePublish("%s/%s/%s/state" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix), messageToSend, True)
 
             if ("ledprimary" in telemetry):
                 state = {
@@ -94,7 +94,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix, dumps(state), True)
+                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % (self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix), dumps(state), True)
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -108,7 +108,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix, dumps(state), True)
+                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % (self.homeAssistantPrefixUrl, "light", self.homeAssistantSuffix), dumps(state), True)
             self.telemetry = telemetry.copy()
 
     
@@ -217,7 +217,7 @@ class HomeAssistantControl(BasicModule):
             self.configuredKeys.append(key)
             attr = key.replace("/","_")
             safeid = "%s_%s" % (hexlify(unique_id()).decode('ascii'), key.replace("/","_")) #43jh34hg4_temp_jhgfddfdsfd
-            topic = "%s/%s/config" % (self.homeAssistantSensorUrl, safeid)
+            topic = "%s/%s/%s/%s/config" % (self.homeAssistantPrefixUrl, "sensor", self.homeAssistantSuffix, safeid)
 
             nameLookup = load(open("modules/homeassistant/name.json",'r'))
             uomLookup = load(open("modules/homeassistant/uom.json",'r'))
