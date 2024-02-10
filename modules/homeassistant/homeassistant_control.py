@@ -255,7 +255,7 @@ class HomeAssistantControl(BasicModule):
                 telemetryType = "switch"
 
             if (key.startswith('mosfet')):
-                payload.update({ "payload_on": "/mosfet/on/S"+key[-1], "payload_off": "/mosfet/off/S"+key[-1], "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
+                payload.update({ "payload_on": "/mosfet/on/"+key[-1], "payload_off": "/mosfet/off/"+key[-1], "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
