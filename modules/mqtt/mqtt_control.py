@@ -6,7 +6,7 @@ from ubinascii import hexlify
 from machine import unique_id, reset
 import network
 from modules.web.web_processor import okayHeader, unquote
-from time import sleep
+from time import sleep, ticks_ms
 from modules.ota.ota import local_version
 
 class MqttControl(BasicModule):
@@ -22,6 +22,7 @@ class MqttControl(BasicModule):
         self.telemetry = {}
         self.client = None
         self.commands = []
+        self.lastConnectAttempt = 0
 
     def start(self):
         BasicModule.start(self)
@@ -40,27 +41,30 @@ class MqttControl(BasicModule):
             self.topic_pub = b'%s/%s/status' % (self.basicSettings['shortName'], self.client_id)
 
     def tick(self):
-        if (self.enabled == b"Y"):
-            if (self.sta_if.isconnected()):
-                try:
-                    if (not self.init):
-                        self.init = True
-                        self.connect_and_subscribe()
-                    self.client.check_msg()
-                except Exception as e:
-                    self.connect_and_subscribe()
-                    raise
-            
-            # detect loss of wifi after initial connection
-            if (not self.sta_if.isconnected() and self.init == True):
-                self.init = False # re-subscribe if wifi comes back later
+        if (self.enabled != b"Y"):
+            return
 
+        if (not self.sta_if.isconnected()):
+            return
+        
+        if (not self.init and self.lastConnectAttempt + 120000 > ticks_ms()):
+            return
+        
+        if (not self.init):
+            self.init = True
+            self.lastConnectAttempt = ticks_ms()
+            self.connect_and_subscribe()
+
+        try:
+            self.client.check_msg()
+        except Exception as e:
+            self.init = False
+            raise
 
     def getTelemetry(self):
         return {}
 
     def processTelemetry(self, telemetry):
-
         if (self.enabled != b"Y"):
             return
 
