@@ -168,7 +168,9 @@ class HomeAssistantControl(BasicModule):
     
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
-        self.commands.append(msg)
+        # if the topic ends with command then add it to the commands list
+        if (topic.endswith("command")):
+            self.commands.append(msg)
     
     def connect_and_subscribe(self):
         if (self.lastConnectTime + 30000 < ticks_ms()):
