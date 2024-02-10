@@ -98,7 +98,7 @@ class ThingsboardControl(BasicModule):
         return thingsThatChanged > 0
 
     def connect(self):
-        if (self.last_connect + 30000 < ticks_ms()):
+        if (self.last_connect + 60000 < ticks_ms()):
             self.last_connect = ticks_ms()
             SerialLog.log('Connecting to TB MQTT broker', self.mqtt_server, str(self.mqtt_port))
             self.client = MQTTClient(b"tb-%s" % (self.client_id), self.mqtt_server, port=int(self.mqtt_port), user=self.access_token, password=self.access_token)
