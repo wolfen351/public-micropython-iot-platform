@@ -16,7 +16,7 @@ class HomeAssistantControl(BasicModule):
         self.telemetry = {}
         self.client = None
         self.lastConnectTime = 0 # to stop from spamming the reconnect
-        self.configuredKeys = []
+        self.topics = {}
         self.version = b"1.0.0"
         self.ip = b"0.0.0.0"
         self.commands = []
@@ -50,7 +50,6 @@ class HomeAssistantControl(BasicModule):
         if (self.enabled != "Y"):
             return
 
-        # wait for wifi connection
         if (not WLAN(STA_IF).isconnected()):
             return
 
@@ -59,29 +58,31 @@ class HomeAssistantControl(BasicModule):
             return
 
         # record telemetry we may need
-        for attr, value in self.telemetry.items():
-            if (attr == "ip"):
-                self.ip = value
-            if (attr == "version"):
-                self.version = value
+        if "ip" in self.telemetry:
+            self.ip = self.telemetry["ip"]
+        if "version" in self.telemetry:
+            self.version = self.telemetry["version"]
 
         # wipe configured keys every hour, so we reregister with ha 
         if (time() - self.lastConfigureTime > 3600):
             SerialLog.log("Re-registering with Home Assistant, wiping all configured keys")
             self.lastConfigureTime = time()
-            self.configuredKeys = []         
+            self.topics = {}
 
         # tell home assistant about any new keys
         for attr, value in self.telemetry.items():
-            if (attr not in self.configuredKeys):
+            if attr not in self.topics:
                 self.home_assistant_configure(attr, value)
 
         # tell home assistant about any new values
         if (self.hasTelemetryChanged(telemetry)):
 
-            # publish all the telemetry to homeassistant/sensor/deviceid/state
-            messageToSend = dumps(telemetry).replace("/","_")
-            self.safePublish("%s/%s/%s/state" % (self.haPrefixUrl, "sensor", self.deviceId), messageToSend, True)
+            # publish all the separate telemetry values to homeassistant/sensor/deviceid/telemetryid/state
+            for attr, value in telemetry.items():
+                if (attr in self.topics):
+                    self.safePublish("%s/state" % (self.topics[attr]), dumps(value), True)
+                else:
+                    SerialLog.log("No topic for %s" % (attr))
 
             if ("ledprimary" in telemetry):
                 state = {
@@ -176,7 +177,7 @@ class HomeAssistantControl(BasicModule):
             self.client.connect()
             # Wipe all existing telemetry so we send a full update on connect
             self.telemetry = {} 
-            self.configuredKeys = []
+            self.topics = {}
             SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
     
@@ -197,8 +198,7 @@ class HomeAssistantControl(BasicModule):
                 "mdl": self.basicSettings["shortName"],
                 "cu": "http://%s" % (self.ip)
             },
-            "stat_t": "~/state",
-            "val_tpl": "{{ value_json.%s }}" % (attr)
+            "stat_t": "~/state"
         }
         # if the value is a number then update the payload
         if (isinstance(value, int) or isinstance(value, float)):
@@ -211,8 +211,7 @@ class HomeAssistantControl(BasicModule):
     
     def home_assistant_configure(self, key, value):
         
-        if key not in self.configuredKeys:
-            self.configuredKeys.append(key)
+        if key not in self.topics:
             attr = key.replace("/","_")
             telemetryId = "%s_%s" % (self.deviceId, attr) #43jh34hg4_temp_jhgfddfdsfd
 
@@ -249,7 +248,9 @@ class HomeAssistantControl(BasicModule):
                 payload.update({ "payload_on": "1", "payload_off": "0", "cmd_t": "~/command"})
                 telemetryType = "switch"
 
-            topic = "%s/%s/%s/%s/config" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
+            telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
+            topic = "%s/config" % (telemetryUrl)
+            self.topics[key] = telemetryUrl
             self.safePublish(topic, dumps(payload), True)
 
     def safePublish(self, topic, message, retain=False):
