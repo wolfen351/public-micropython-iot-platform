@@ -18,7 +18,11 @@ class Relay(BasicModule):
 
     def start(self):
         # Default the relay off, so the program matches the hw behaviour
-        self.off()
+        startState = self.getPref("relay", "S1", 0)
+        if (startState == 1):
+            self.on()
+        else:
+            self.off()
 
     def tick(self):
         pass
@@ -63,10 +67,12 @@ class Relay(BasicModule):
     def on(self):
         self.States[0] = 1
         self.Switches[0].on()
+        self.setPref("relay", "S1", 1)
 
     def off(self):
         self.States[0] = 0
         self.Switches[0].off()
+        self.setPref("relay", "S1", 0)
 
     def flip(self): # num is 1-4, but arrays are 0-3
         if (self.States[0] == 0):

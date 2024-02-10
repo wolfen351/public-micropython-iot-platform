@@ -183,8 +183,8 @@ class HomeAssistantControl(BasicModule):
             # Wipe all existing telemetry so we send a full update on connect
             self.telemetry = {} 
             self.topics = {}
-            self.client.subscribe("homeassistant/switch/%s/#" % (self.deviceId))
-            self.client.subscribe("homeassistant/light/%s/#" % (self.deviceId))
+            self.client.subscribe("homeassistant/switch/%s/+/command" % (self.deviceId))
+            self.client.subscribe("homeassistant/light/%s/+/command" % (self.deviceId))
             SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
     
