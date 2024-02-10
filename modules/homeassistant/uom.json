@@ -11,5 +11,6 @@
     "freeram": "bytes",
     "freedisk": "bytes",
     "voltage": "V",
-    "voltagepercent": "%"
+    "voltagepercent": "%",
+    "distancecm": "cm"
 }
