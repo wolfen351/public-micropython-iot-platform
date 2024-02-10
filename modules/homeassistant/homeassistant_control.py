@@ -250,7 +250,7 @@ class HomeAssistantControl(BasicModule):
                 payload.update( { "unique_id": telemetryId })
                 telemetryType = "light"
 
-            if (key.startswith('relay')):
+            if (key.startswith('relay') or key.startswith('mosfet')):
                 payload.update({ "payload_on": "/relay/on", "payload_off": "/relay/off", "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
 
