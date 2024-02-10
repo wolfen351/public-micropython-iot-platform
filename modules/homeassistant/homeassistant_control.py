@@ -250,8 +250,12 @@ class HomeAssistantControl(BasicModule):
                 payload.update( { "unique_id": telemetryId })
                 telemetryType = "light"
 
-            if (key.startswith('relay') or key.startswith('mosfet')):
+            if (key.startswith('relay')):
                 payload.update({ "payload_on": "/relay/on", "payload_off": "/relay/off", "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
+                telemetryType = "switch"
+
+            if (key.startswith('mosfet')):
+                payload.update({ "payload_on": "/mosfet/on/S"+key[-1], "payload_off": "/mosfet/off/S"+key[-1], "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
