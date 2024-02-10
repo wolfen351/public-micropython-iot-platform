@@ -70,7 +70,7 @@ class HomeAssistantControl(BasicModule):
             self.topics = {}
 
         # tell home assistant about any new keys
-        for attr, value in self.telemetry.items():
+        for attr, value in telemetry.items():
             if attr not in self.topics:
                 self.home_assistant_configure(attr, value)
 
@@ -80,7 +80,10 @@ class HomeAssistantControl(BasicModule):
             # publish all the separate telemetry values to homeassistant/sensor/deviceid/telemetryid/state
             for attr, value in telemetry.items():
                 if (attr in self.topics):
-                    self.safePublish("%s/state" % (self.topics[attr]), dumps(value), True)
+                    # if value is bytes then convert to string first
+                    if (isinstance(value, bytes)):
+                        value = value.decode('ascii')
+                    self.safePublish("%s/state" % (self.topics[attr]), str(value), True)
                 else:
                     SerialLog.log("No topic for %s" % (attr))
 
@@ -187,7 +190,7 @@ class HomeAssistantControl(BasicModule):
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
-            "~": "%s/%s/%s" % (self.haPrefixUrl, "sensor", self.deviceId),
+            "~": "%s/%s/%s/%s" % (self.haPrefixUrl, "sensor", self.deviceId, uniqueid),
             "name": name,
             "uniq_id": uniqueid,
             "dev": {
