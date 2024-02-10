@@ -168,7 +168,7 @@ class HomeAssistantControl(BasicModule):
     
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
-        self.commands.append(b"%s/%s" % (topic, msg))
+        self.commands.append(msg)
     
     def connect_and_subscribe(self):
         if (self.lastConnectTime + 30000 < ticks_ms()):
@@ -181,6 +181,8 @@ class HomeAssistantControl(BasicModule):
             # Wipe all existing telemetry so we send a full update on connect
             self.telemetry = {} 
             self.topics = {}
+            self.client.subscribe("homeassistant/switch/%s/#" % (self.deviceId))
+            self.client.subscribe("homeassistant/light/%s/#" % (self.deviceId))
             SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
     
@@ -190,7 +192,6 @@ class HomeAssistantControl(BasicModule):
         my_mac_addr = hexlify(wlan_mac, ':').decode().upper()
 
         basicPayload = { 
-            "~": "%s/%s/%s/%s" % (self.haPrefixUrl, "sensor", self.deviceId, uniqueid),
             "name": name,
             "uniq_id": uniqueid,
             "dev": {
@@ -248,10 +249,11 @@ class HomeAssistantControl(BasicModule):
                 telemetryType = "light"
 
             if (key.startswith('relay')):
-                payload.update({ "payload_on": "1", "payload_off": "0", "cmd_t": "~/command"})
+                payload.update({ "payload_on": "/relay/on", "payload_off": "/relay/off", "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
+            payload.update({"~": telemetryUrl}),
             topic = "%s/config" % (telemetryUrl)
             self.topics[key] = telemetryUrl
             self.safePublish(topic, dumps(payload), True)
