@@ -6,6 +6,7 @@ class USRangeSensor(BasicModule):
 
     distance_cm = -1
     average_cm = -1
+    average_over = 20
 
     def __init__(self):
         pass
@@ -19,10 +20,10 @@ class USRangeSensor(BasicModule):
 
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastDetectTime)
-        if (diff > 1900):
+        if (diff > 200):
             self.distance_cm = self.sensor.distance_cm()
             self.lastDetectTime = currentTime
-            self.average_cm = (self.distance_cm / 5) + (self.average_cm * 4 / 5)
+            self.average_cm = (self.distance_cm / self.average_over) + (self.average_cm * (self.average_over - 1) / self.average_over)
 
     def getTelemetry(self): 
         telemetry = { 
