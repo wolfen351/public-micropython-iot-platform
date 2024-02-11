@@ -12,5 +12,6 @@
     "freedisk": "bytes",
     "voltage": "V",
     "voltagepercent": "%",
-    "distancecm": "cm"
+    "distancecm": "cm",
+    "averagecm": "cm"
 }
