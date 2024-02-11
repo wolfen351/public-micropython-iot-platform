@@ -22,8 +22,9 @@ class USRangeSensor(BasicModule):
         diff = time.ticks_diff(currentTime, self.lastDetectTime)
         if (diff > 200):
             self.distance_cm = self.sensor.distance_cm()
-            self.lastDetectTime = currentTime
-            self.average_cm = (self.distance_cm / self.average_over) + (self.average_cm * (self.average_over - 1) / self.average_over)
+            if (self.distance_cm != 250):
+                self.lastDetectTime = currentTime
+                self.average_cm = (self.distance_cm / self.average_over) + (self.average_cm * (self.average_over - 1) / self.average_over)
 
     def getTelemetry(self): 
         telemetry = { 
