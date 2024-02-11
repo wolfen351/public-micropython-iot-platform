@@ -47,9 +47,9 @@ class GarageDoorControl(BasicModule):
         oldSensorState = self.sensorState
 
         # See if the sensor is open or closed
-        if (telemetry["distancecm"] == -1):
+        if (telemetry["averagecm"] == -1):
           self.sensorState = "Unknown"
-        elif (telemetry["distancecm"] > 90):
+        elif (telemetry["averagecm"] > 90):
           self.sensorState = "Closed"
         else:
           self.sensorState = "Open"
