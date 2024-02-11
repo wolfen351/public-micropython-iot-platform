@@ -80,10 +80,12 @@ class HomeAssistantControl(BasicModule):
             # publish all the separate telemetry values to homeassistant/sensor/deviceid/telemetryid/state
             for attr, value in telemetry.items():
                 if (attr in self.topics):
-                    # if value is bytes then convert to string first
-                    if (isinstance(value, bytes)):
-                        value = value.decode('ascii')
-                    self.safePublish("%s/state" % (self.topics[attr]), str(value), True)
+                    # only send changes
+                    if (attr not in self.telemetry or self.telemetry.get(attr) != value):
+                        # if value is bytes then convert to string first
+                        if (isinstance(value, bytes)):
+                            value = value.decode('ascii')
+                        self.safePublish("%s/state" % (self.topics[attr]), str(value), True)
                 else:
                     SerialLog.log("No topic for %s" % (attr))
 
