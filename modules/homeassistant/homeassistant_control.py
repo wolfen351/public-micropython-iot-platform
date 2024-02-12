@@ -5,7 +5,7 @@ from ubinascii import hexlify
 from machine import unique_id
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
-from ujson import dumps, load
+from ujson import dumps, load, loads
 from time import time, ticks_ms
 
 class HomeAssistantControl(BasicModule):
@@ -167,11 +167,15 @@ class HomeAssistantControl(BasicModule):
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 
-    
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
-        # if the topic ends with command then add it to the commands list
-        if (topic.endswith("command")):
+        if (topic.find(b"ledprimary")):
+            base = "/ledprimary"
+            self.commands.append("%s/%s" % (base, msg))
+        elif (topic.find(b"ledsecondary")):
+            base = "/ledsecondary"
+            self.commands.append("%s/%s" % (base, msg))
+        else:
             self.commands.append(msg)
     
     def connect_and_subscribe(self):
@@ -243,7 +247,6 @@ class HomeAssistantControl(BasicModule):
                 payload.update({ "dev_cla": devclass })
 
             if (key.startswith('ledprimaryb') or key.startswith('ledsecondaryb')):
-                payload.pop("val_tpl")
                 if (key.startswith('ledprimaryb')):
                     ledconfig = load(open("modules/homeassistant/ledprimary.json",'r'))
                 else:

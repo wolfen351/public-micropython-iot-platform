@@ -2,7 +2,7 @@
     "brightness": true,
     "brightness_scale": 255,
     "color_mode": true,
-    "command_topic": "~/command/ledprimary",
+    "command_topic": "~/command",
     "effect": true,
     "effect_list": ["none", "switch", "fade", "cycle", "bounce", "rainbow"],
     "json_attributes_topic": "~/ledprimaryrgbstate",
