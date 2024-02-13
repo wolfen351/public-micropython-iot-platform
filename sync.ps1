@@ -137,8 +137,8 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 }
 
 if ($sent -gt 0) {
-    # increment the version
-    Step-Version
+    # Write "7.0.0" to the version file
+    Write-Output "7.0.0" | Out-File -Encoding ascii .\version
 
     Write-Host "Uploading new version file to board.."
     ampy --port $port put version

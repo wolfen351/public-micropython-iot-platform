@@ -170,7 +170,7 @@ class LedStripControl(BasicModule):
     def processCommands(self, commands):
         for c in commands:
             # this decodes and executes home assistant comands
-            if (b"/ledprimary/" in c):
+            if ("/ledprimary/" in c):
                 command = c.rsplit(b'/', 1)[-1]
                 bits = ujson.loads(command)
                 for cc in bits:
@@ -185,7 +185,7 @@ class LedStripControl(BasicModule):
                         self.setcolor(newSecondary, self.secondaryColorHexString)
                     elif (cc == "effect"):
                         self.setaction(bytes(val, 'ascii'))
-            if (b"/ledsecondary/" in c):
+            if ("/ledsecondary/" in c):
                 command = c.rsplit(b'/', 1)[-1]
                 bits = ujson.loads(command)
                 for cc in bits:
@@ -200,7 +200,7 @@ class LedStripControl(BasicModule):
                         self.setcolor(self.primaryColorHexString, newSecondary)
                     elif (cc == "effect"):
                         self.setaction(bytes(val, 'ascii'))                    
-            if (b"/button/onboard/1" in c):
+            if ("/button/onboard/1" in c):
                 SerialLog.log("WHITE COMMAND")
                 self.whiteOverride = not self.whiteOverride
                 self.prevaction = self.ACTION_CLEAR

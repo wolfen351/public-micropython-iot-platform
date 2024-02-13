@@ -5,7 +5,7 @@ from ubinascii import hexlify
 from machine import unique_id
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
-from ujson import dumps, load
+from ujson import dumps, load, loads
 from time import time, ticks_ms
 
 class HomeAssistantControl(BasicModule):
@@ -71,6 +71,10 @@ class HomeAssistantControl(BasicModule):
 
         # tell home assistant about any new keys
         for attr, value in telemetry.items():
+            if attr.startswith('ledprimary'):
+                attr = 'ledprimary'
+            if attr.startswith('ledsecondary'):
+                attr = 'ledsecondary'
             if attr not in self.topics:
                 self.home_assistant_configure(attr, value)
 
@@ -80,6 +84,9 @@ class HomeAssistantControl(BasicModule):
             # publish all the separate telemetry values to homeassistant/sensor/deviceid/telemetryid/state
             for attr, value in telemetry.items():
                 if (attr in self.topics):
+                    # skip special topics
+                    if (attr.startswith('ledprimary') or attr.startswith('ledsecondary')):
+                        continue
                     # only send changes
                     if (attr not in self.telemetry or self.telemetry.get(attr) != value):
                         # if value is bytes then convert to string first
@@ -101,7 +108,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledprimaryrgbstate" % (self.haPrefixUrl, "light", self.deviceId), dumps(state), True)
+                self.safePublish("%s/state" % (self.topics['ledprimary']), dumps(state), True)
 
             if ("ledsecondary" in telemetry):
                 state = {
@@ -115,7 +122,7 @@ class HomeAssistantControl(BasicModule):
                     },
                     "effect": telemetry["ledaction"]
                 }
-                self.safePublish("%s/%s/%s/ledsecondaryrgbstate" % (self.haPrefixUrl, "light", self.deviceId), dumps(state), True)
+                self.safePublish("%s/state" % (self.topics['ledsecondary']), dumps(state), True)
             self.telemetry = telemetry.copy()
 
     
@@ -167,11 +174,18 @@ class HomeAssistantControl(BasicModule):
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
 
-    
     def sub_cb(self, topic, msg):
         SerialLog.log("HA MQTT Command Received: ", topic, msg)
-        # if the topic ends with command then add it to the commands list
-        if (topic.endswith("command")):
+        
+        msg = msg.decode('ascii')
+
+        if (topic.find(b"ledprimary") != -1):
+            base = "/ledprimary"
+            self.commands.append("%s/%s" % (base, msg))
+        elif (topic.find(b"ledsecondary") != -1):
+            base = "/ledsecondary"
+            self.commands.append("%s/%s" % (base, msg))
+        else:
             self.commands.append(msg)
     
     def connect_and_subscribe(self):
@@ -218,8 +232,9 @@ class HomeAssistantControl(BasicModule):
 
     
     def home_assistant_configure(self, key, value):
-        
+
         if key not in self.topics:
+
             attr = key.replace("/","_")
             telemetryId = "%s_%s" % (self.deviceId, attr) #43jh34hg4_temp_jhgfddfdsfd
 
@@ -242,9 +257,8 @@ class HomeAssistantControl(BasicModule):
             if (devclass != ""):
                 payload.update({ "dev_cla": devclass })
 
-            if (key.startswith('ledprimaryb') or key.startswith('ledsecondaryb')):
-                payload.pop("val_tpl")
-                if (key.startswith('ledprimaryb')):
+            if (key.startswith('ledprimary') or key.startswith('ledsecondary')):
+                if (key.startswith('ledprimary')):
                     ledconfig = load(open("modules/homeassistant/ledprimary.json",'r'))
                 else:
                     ledconfig = load(open("modules/homeassistant/ledsecondary.json",'r'))
