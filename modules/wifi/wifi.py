@@ -77,7 +77,7 @@ class WifiHandler(BasicModule):
         fs_stat = statvfs('/')
         block_sz = fs_stat[0]
         free_blocks = fs_stat[3]
-        freebytes = block_sz * free_blocks / 1024
+        freebytes = block_sz * free_blocks
         return freebytes
 
     def tick(self):
