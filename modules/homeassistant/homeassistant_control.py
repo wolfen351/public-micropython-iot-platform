@@ -79,53 +79,62 @@ class HomeAssistantControl(BasicModule):
                 self.home_assistant_configure(attr, value)
 
         # tell home assistant about any new values
+        processed = []
         if (self.hasTelemetryChanged(telemetry)):
-
-            # publish all the separate telemetry values to homeassistant/sensor/deviceid/telemetryid/state
             for attr, value in telemetry.items():
+                if attr.startswith('ledprimary'):
+                    attr = 'ledprimary'
+                if attr.startswith('ledsecondary'):
+                    attr = 'ledsecondary'
+                if (attr in processed):
+                    continue
                 if (attr in self.topics):
-                    # skip special topics
-                    if (attr.startswith('ledprimary') or attr.startswith('ledsecondary')):
-                        continue
                     # only send changes
                     if (attr not in self.telemetry or self.telemetry.get(attr) != value):
-                        # if value is bytes then convert to string first
-                        if (isinstance(value, bytes)):
-                            value = value.decode('ascii')
-                        self.safePublish("%s/state" % (self.topics[attr]), str(value), True)
+                        self.sendSingleTelemetry(attr, value, telemetry)
                 else:
                     SerialLog.log("No topic for %s" % (attr))
+                processed.append(attr)
 
-            if ("ledprimary" in telemetry):
-                state = {
-                    "state": telemetry["ledstate"],
-                    "brightness": telemetry["ledbrightness"],
-                    "color_mode": "rgb",
-                    "color": {
-                        "r": telemetry["ledprimaryr"],
-                        "g": telemetry["ledprimaryg"],
-                        "b": telemetry["ledprimaryb"]
-                    },
-                    "effect": telemetry["ledaction"]
-                }
-                self.safePublish("%s/state" % (self.topics['ledprimary']), dumps(state), True)
-
-            if ("ledsecondary" in telemetry):
-                state = {
-                    "state": telemetry["ledstate"],
-                    "brightness": telemetry["ledbrightness"],
-                    "color_mode": "rgb",
-                    "color": {
-                        "r": telemetry["ledsecondaryr"],
-                        "g": telemetry["ledsecondaryg"],
-                        "b": telemetry["ledsecondaryb"]
-                    },
-                    "effect": telemetry["ledaction"]
-                }
-                self.safePublish("%s/state" % (self.topics['ledsecondary']), dumps(state), True)
             self.telemetry = telemetry.copy()
 
-    
+    def sendSingleTelemetry(self, attr, value, telemetry):
+        # if value is bytes then convert to string first
+        if (isinstance(value, bytes)):
+            value = value.decode('ascii')
+
+        # handle special topics
+        if attr.startswith('ledprimary'):
+            state = {
+                "state": telemetry["ledstate"],
+                "brightness": telemetry["ledbrightness"],
+                "color_mode": "rgb",
+                "color": {
+                    "r": telemetry["ledprimaryr"],
+                    "g": telemetry["ledprimaryg"],
+                    "b": telemetry["ledprimaryb"]
+                },
+                "effect": telemetry["ledaction"]
+            }
+            self.safePublish("%s/state" % (self.topics['ledprimary']), dumps(state), True)
+
+        elif attr.startswith('ledsecondary'):
+            state = {
+                "state": telemetry["ledstate"],
+                "brightness": telemetry["ledbrightness"],
+                "color_mode": "rgb",
+                "color": {
+                    "r": telemetry["ledsecondaryr"],
+                    "g": telemetry["ledsecondaryg"],
+                    "b": telemetry["ledsecondaryb"]
+                },
+                "effect": telemetry["ledaction"]
+            }
+            self.safePublish("%s/state" % (self.topics['ledsecondary']), dumps(state), True)
+        else: # normal topics
+            self.safePublish("%s/state" % (self.topics[attr]), str(value), True)
+
+
     def getCommands(self):
         c = self.commands
         self.commands = []
