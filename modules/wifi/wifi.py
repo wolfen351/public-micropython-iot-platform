@@ -8,6 +8,7 @@ import modules.ota.ota as ota
 from modules.web.web_processor import okayHeader, unquote
 import gc
 from uos import statvfs
+from sys import print_exception
 
 class WifiHandler(BasicModule):
 
@@ -280,7 +281,11 @@ class WifiHandler(BasicModule):
                 time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
 
             # Set The DCHP Hostname
-            self.sta_if.config(dhcp_hostname=self.essid)
+            try:
+                self.sta_if.config(dhcp_hostname=self.defaultSSID)
+            except Exception as e:
+                SerialLog.log("Failed to set DHCP hostname")
+                print_exception(e)
 
             # set static ip
             type = self.getPref("wifi", "type", "DHCP")
