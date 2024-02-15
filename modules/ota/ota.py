@@ -124,7 +124,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
             return False
         SerialLog.log('local version information missing, ignoring it')
 
-    SerialLog.log("Local version: ", local_version)
+    SerialLog.log("Local version:  ", local_version)
     SerialLog.log("Remote version: ", remote_version)
     if not version_check or remote_version > local_version:
         SerialLog.log('new version %s is available' % remote_version)
