@@ -33,6 +33,9 @@ if ($port -eq "COM1")
 
 Start-Sleep 4
 
+$MAX = 0
+$MAXEDITTIME = 0
+
 # if the user added -prod to the command line, send a new file to the board containing 1.0.0 with the file name version
 if ($args -contains "-prod") {
     Write-Host "Prod option specified. Will upload all files to board."

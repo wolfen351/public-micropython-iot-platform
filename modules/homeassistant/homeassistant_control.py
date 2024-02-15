@@ -29,7 +29,7 @@ class HomeAssistantControl(BasicModule):
         self.enabled = self.getPref("homeassistant", "enabled", "Y")
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.wolfen.za.net")
 
-        if (not self.enabled == b"Y"):
+        if (not self.enabled == "Y"):
             SerialLog.log("Home Assistant Integration Disabled")
         else:
             SerialLog.log("Home Assistant Integration Enabled")            
