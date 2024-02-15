@@ -152,6 +152,14 @@ if ($sent -gt 0) {
     Write-Output "No changes since last sync."
 }
 
+# if the user added -prod to the command line, send a new file to the board containing 1.0.0 with the file name version
+if ($args -contains "-prod") {
+    Write-Output "1.0.0" | Out-File -Encoding ascii .\version
+    Write-Host "Uploading 1.0.0 version file to board, so it will auto update.."
+    ampy --port $port put version
+    Write-Output "7.0.0" | Out-File -Encoding ascii .\version
+}
+
 # Clean up
 Remove-Item profile.json
 

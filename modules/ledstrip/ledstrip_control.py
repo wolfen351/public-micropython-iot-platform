@@ -44,7 +44,7 @@ class LedStripControl(BasicModule):
     rainbow = [primaryColorTuple] * 0
 
     def __init__(self):
-        pass
+        self.whiteOverride = False
 
     def start(self):
         BasicModule.start(self)
@@ -53,15 +53,14 @@ class LedStripControl(BasicModule):
         
         self.primaryColorHexString = self.getPref("ledStrip", "primary", b"000000")
         self.primaryColorTuple = self.hexStringToRgbTuple(self.primaryColorHexString)
-        SerialLog.log("Primary color: " + self.primaryColorHexString)
+        SerialLog.log("Primary color: %s" % (self.primaryColorHexString))
 
         self.secondaryColorHexString = self.getPref("ledStrip", "secondary", b"000000")
         self.secondaryColorTuple = self.hexStringToRgbTuple(self.secondaryColorHexString)
 
         self.brightness = self.getPref("ledStrip", "brightness", 255)
         self.duration = self.getPref("ledStrip", "duration", 1000) 
-        self.whiteOverride = False
-
+        
         self.ledCount = self.basicSettings['led']['length']
         self.ledPin = self.basicSettings['led']['pin']
 

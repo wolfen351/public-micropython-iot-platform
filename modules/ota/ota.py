@@ -6,26 +6,9 @@ MIT license; Copyright (c) 2021 Martin Komon
 
 import gc
 import uos
-import modules.ota.requests as requests
-
-missingImports = False
-
-try:
-    import uzlib
-except ImportError:
-    missingImports = True
-
-try:
-    import upip_utarfile as tarfile
-except ImportError:
-    import modules.ota.utarfile as tarfile
-
 from micropython import const
 from serial_log import SerialLog
 import ujson
-
-if missingImports:
-    SerialLog.log('Error! Missing required imports. OTA is disabled.')
 
 GZDICT_SZ = const(31)
 ota_config = {}
@@ -105,9 +88,13 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
     """
     gc.collect()
 
-    if missingImports:
-        SerialLog.log('Error! Missing required imports. OTA is disabled.')
-        return False
+    try:
+        import requests
+    except ImportError:
+        SerialLog.log('requests module not found, attempting to install from online sources')
+        import mip
+        mip.install('requests')
+        import requests
 
     if not load_ota_cfg():
         return False
@@ -148,6 +135,7 @@ def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update updates on: ", downloadUrl)
         response = requests.get(downloadUrl)
+        SerialLog.log("Download Response:", response.status_code)
         with open(ota_config['tmp_filename'], 'wb') as f:
             while True:
                 chunk = response.raw.read(512)
@@ -173,36 +161,53 @@ def install_new_firmware(quiet=False):
         SerialLog.log('No new firmware file found in flash.')
         return
 
-    with open(ota_config['tmp_filename'], 'rb') as f1:
-        f2 = uzlib.DecompIO(f1, GZDICT_SZ)
-        f3 = tarfile.TarFile(fileobj=f2)
-        for _file in f3:
-            file_name = _file.name
-            if file_name in ota_config['excluded_files']:
-                item_type = 'directory' if file_name.endswith('/') else 'file'
-                SerialLog.log('Skipping excluded %s %s' % (item_type, file_name))
-                continue
+        
+    try:
+        import deflate
+    except ImportError:
+        SerialLog.log('deflate module not found, attempting to install from online sources')
+        import mip
+        mip.install('deflate')
+        import deflate
 
-            if file_name.endswith('/'):  # is a directory
-                try:
-                    SerialLog.log('creating directory %s ... ' % file_name)
-                    uos.mkdir(file_name[:-1])  # without trailing slash or fail with errno 2
-                    SerialLog.log('ok')
-                except OSError as e:
-                    if e.errno == 17:
-                        SerialLog.log('already exists')
-                    else:
-                        raise e
-                continue
-            file_obj = f3.extractfile(_file)
-            with open(file_name, 'wb') as f_out:
-                written_bytes = 0
-                while True:
-                    buf = file_obj.read(512)
-                    if not buf:
-                        break
-                    written_bytes += f_out.write(buf)
-                SerialLog.log('file %s (%s B) written to flash' % (file_name, written_bytes))
+    try:
+        import tarfile
+    except ImportError:
+        SerialLog.log('tarfile module not found, attempting to install from online sources')
+        import mip
+        mip.install('tarfile')
+        import tarfile
+
+    with open(ota_config['tmp_filename'], 'rb') as f1:
+        with (deflate.DeflateIO(f1, deflate.GZIP)) as f2:
+            f3 = tarfile.TarFile(fileobj=f2)
+            for _file in f3:
+                file_name = _file.name
+                if file_name in ota_config['excluded_files']:
+                    item_type = 'directory' if file_name.endswith('/') else 'file'
+                    SerialLog.log('Skipping excluded %s %s' % (item_type, file_name))
+                    continue
+
+                if file_name.endswith('/'):  # is a directory
+                    try:
+                        SerialLog.log('creating directory %s ... ' % file_name)
+                        uos.mkdir(file_name[:-1])  # without trailing slash or fail with errno 2
+                        SerialLog.log('ok')
+                    except OSError as e:
+                        if e.errno == 17:
+                            SerialLog.log('already exists')
+                        else:
+                            raise e
+                    continue
+                file_obj = f3.extractfile(_file)
+                with open(file_name, 'wb') as f_out:
+                    written_bytes = 0
+                    while True:
+                        buf = file_obj.read(512)
+                        if not buf:
+                            break
+                        written_bytes += f_out.write(buf)
+                    SerialLog.log('file %s (%s B) written to flash' % (file_name, written_bytes))
 
     uos.remove(ota_config['tmp_filename'])
     if load_ota_cfg():

@@ -332,4 +332,5 @@ class WifiHandler(BasicModule):
                 reset()
         except Exception as e:
             SerialLog.log('OTA failed: ' + str(e))
+            print_exception(e)
 
