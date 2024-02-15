@@ -33,16 +33,27 @@ if ($port -eq "COM1")
 
 Start-Sleep 4
 
-Write-Host "Checking when board was last updated.."
-Remove-Item ./lastedit.dat
-ampy --port $port get lastedit.dat > lastedit.dat # 2> $null
-
-if ((Get-Item "lastedit.dat").length -eq 0) {
-    Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
-    Write-Host "Press any key to continue..."
-    $junk = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-
+# if the user added -prod to the command line, send a new file to the board containing 1.0.0 with the file name version
+if ($args -contains "-prod") {
+    Write-Host "Prod option specified. Will upload all files to board."
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+}
+else {
+    Write-Host "Checking when board was last updated.."
+    Remove-Item ./lastedit.dat
+    ampy --port $port get lastedit.dat > lastedit.dat # 2> $null
+
+    $MAX = Get-Content -Path .\lastedit.dat
+    $MAXEDITTIME = $MAX
+    Write-Output "Last sync for this board was at $MAX"
+
+    if ((Get-Item "lastedit.dat").length -eq 0) {
+        Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
+        Write-Host "Press any key to continue..."
+        $junk = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
+        Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+    }
 }
 
 if ($args[0] -eq "--force") {
@@ -50,9 +61,7 @@ if ($args[0] -eq "--force") {
     Write-Output "Force option specified. All files will be copied!"
 }
 
-$MAX = Get-Content -Path .\lastedit.dat
-$MAXEDITTIME = $MAX
-Write-Output "Last sync for this board was at $MAX"
+
 
 # send all files to the device
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw, profile.json, *.json
