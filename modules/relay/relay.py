@@ -6,7 +6,7 @@ from modules.web.web_processor import okayHeader, unquote
 class Relay(BasicModule):
 
     # Switch Pins
-    S1 = Pin(4, Pin.OUT)
+    S1 = None
     Switches = [S1]
 
     # Actual of the switches (0=Off, 1=On)
@@ -15,6 +15,8 @@ class Relay(BasicModule):
     def __init__(self):
         BasicModule.start(self)
         self.flipcommand = self.basicSettings["relay"]["flipcommand"]
+        self.pinnumber = self.basicSettings["relay"]["pin"]
+        self.S1 = Pin(self.pinnumber, Pin.OUT)
         BasicModule.free(self) # release the ram
 
     def start(self):

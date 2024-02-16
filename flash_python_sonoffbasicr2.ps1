@@ -14,4 +14,5 @@ Write-Output "Found port: $port"
 
 
 esptool --chip esp8266 --port $port erase_flash
-esptool --chip esp8266 --port $port --baud 115200 write_flash -z 0x0 ./firmware/ESP8266_GENERIC-20240105-v1.22.1.bin
+esptool --chip esp8266 --port $port --baud 115200 write_flash -fm dout -z 0x0 ./firmware/ESP8266_GENERIC-FLASH_1M-20240105-v1.22.1.bin
+

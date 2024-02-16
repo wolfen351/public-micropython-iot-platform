@@ -27,6 +27,7 @@ try:
 
     # some storage
     ledOn = True
+    
     telemetry = dict()
     allModules = [ wifi ]
 
