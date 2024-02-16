@@ -13,7 +13,7 @@ class BuiltinButtonControl(BasicModule):
         self.buttonPin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.value = 0
         BasicModule.free(self) # release the ram
-     
+
     def start(self):
         self.value = 0
 

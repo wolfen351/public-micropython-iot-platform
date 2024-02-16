@@ -12,5 +12,8 @@
         "tmp_filename": "new_firmware.tar.gz",
         "excluded_files": [],
         "delete": []
+    },
+    "relay": {
+        "flipcommand": "/button/onboard/1"
     }
 }

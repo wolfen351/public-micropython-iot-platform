@@ -12,9 +12,10 @@ class Relay(BasicModule):
     # Actual of the switches (0=Off, 1=On)
     States = [0]
 
-
     def __init__(self):
-        pass
+        BasicModule.start(self)
+        self.flipcommand = self.basicSettings["relay"]["flipcommand"]
+        BasicModule.free(self) # release the ram
 
     def start(self):
         # Default the relay off, so the program matches the hw behaviour
@@ -45,6 +46,8 @@ class Relay(BasicModule):
             if (c.startswith(b"/relay/off")):
                 self.off()
             if (c.startswith(b"/relay/flip")):
+                self.flip()
+            if (c.startswith(self.flipcommand)):
                 self.flip()
 
     def getRoutes(self):
