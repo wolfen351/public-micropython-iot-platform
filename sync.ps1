@@ -40,8 +40,10 @@ $MAXEDITTIME = 0
 if ($args -contains "-prod") {
     Write-Host "Prod option specified. Will upload all files to board."
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
-}
-else {
+} elseif ($args -contains "-force") {
+    Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+    Write-Output "Force option specified. All files will be copied!"
+} else {
     Write-Host "Checking when board was last updated.."
     Remove-Item ./lastedit.dat
     ampy --port $port get lastedit.dat > lastedit.dat # 2> $null
@@ -53,18 +55,11 @@ else {
     if ((Get-Item "lastedit.dat").length -eq 0) {
         Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
         Write-Host "Press any key to continue..."
-        $junk = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | Out-Null
 
         Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
     }
 }
-
-if ($args[0] -eq "--force") {
-    Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
-    Write-Output "Force option specified. All files will be copied!"
-}
-
-
 
 # send all files to the device
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw, profile.json, *.json
