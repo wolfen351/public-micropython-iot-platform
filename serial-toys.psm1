@@ -109,7 +109,7 @@ function Restart-Microcontroller {
     $portObj.WriteLine("machine.reset()\r\n")
     $portObj.Close()
 
-    esptool.py --port $port chip_id
+    esptool --port $port chip_id
 }
 
 function Step-Version {
