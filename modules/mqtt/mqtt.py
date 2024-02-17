@@ -65,7 +65,6 @@ class MQTTClient:
 
     def connect(self, clean_session=True):
         self.sock = socket.socket()
-        self.sock.settimeout(5)
         self.sock.connect(self.addr)
         if self.ssl:
             import ussl
@@ -168,6 +167,7 @@ class MQTTClient:
         self.sock.write(qos.to_bytes(1, "little"))
         while 1:
             op = self.wait_msg()
+            SerialLog.log("Resp Op: ", str(op))
             if op == 0x90:
                 resp = self.sock.read(4)
                 SerialLog.log("Resp:", resp)
