@@ -39,7 +39,11 @@ class HomeAssistantControl(BasicModule):
             if (not self.connected):
                 self.connect_and_subscribe()
             if (self.connected):
-                self.client.check_msg()
+                try:
+                    self.client.check_msg()
+                except:
+                    self.connected = False
+                    SerialLog.log("Error checking MQTT messages (HA)")
     
     def getTelemetry(self):
         return {}
