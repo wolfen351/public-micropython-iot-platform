@@ -147,7 +147,7 @@ try:
     routes = {}
     panels = {}
     for mod in allModules:
-        SerialLog.log("Starting: ", mod)
+        SerialLog.log("Starting: ", type(mod))
         runSafe(mod.start)
         routes.update(runSafe(mod.getRoutes))
         panels.update(runSafe(mod.getIndexFileName))
