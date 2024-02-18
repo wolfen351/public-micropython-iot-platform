@@ -255,7 +255,7 @@ class HomeAssistantControl(BasicModule):
             devClassLookup = load(open("modules/homeassistant/devclass.json",'r'))
 
             lookupkey = key.split("/")[0]
-            name = nameLookup.get(lookupkey, key)
+            name = nameLookup.get(lookupkey, nameLookup.get(key, key))
             uom = uomLookup.get(lookupkey, "")
             devclass = devClassLookup.get(lookupkey, "")
             telemetryType = "sensor"
