@@ -7,7 +7,7 @@ import time
 import modules.ota.ota as ota
 from modules.web.web_processor import okayHeader, unquote
 import gc
-from uos import statvfs
+from os import statvfs, uname
 from sys import print_exception
 
 class WifiHandler(BasicModule):
@@ -26,7 +26,6 @@ class WifiHandler(BasicModule):
         self.rssi = 0
         self.lastrssitime = 0
         self.lastReconnectTime = 0
-        self.version = "unknown"
         self.freerambytes = -1
         self.freediskbytes = -1
         self.apModeGaveUp = False
@@ -46,7 +45,6 @@ class WifiHandler(BasicModule):
 
             self.station()
 
-            self.version = ota.local_version()
             startTime = time.ticks_ms()
 
             # wait up to 20s for a connection
@@ -179,9 +177,10 @@ class WifiHandler(BasicModule):
                     "ssid": self.essid,
                     "ip": b"192.168.4.1",
                     "rssi": "0",
-                    "version": self.version,
+                    "version": ota.local_version(),
                     "freeram": self.freerambytes,
                     "freedisk": self.freediskbytes,
+                    "osname": uname().sysname,
                     "wifiMode": b"Access Point",
                     "stations": len(self.ap_if.status('stations'))
                 }
@@ -193,9 +192,10 @@ class WifiHandler(BasicModule):
             "ssid": self.sta_if.config('essid'),
             "ip": self.sta_if.ifconfig()[0],
             "rssi": self.rssi,
-            "version": self.version,
+            "version": ota.local_version(),
             "freeram": self.freerambytes,
             "freedisk": self.freediskbytes,
+            "osname": uname().release,
             "wifiMode": b"Station"
         }
     

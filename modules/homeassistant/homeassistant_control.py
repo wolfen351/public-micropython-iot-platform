@@ -5,7 +5,7 @@ from ubinascii import hexlify
 from machine import unique_id
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
-from ujson import dumps, load, loads
+from ujson import dumps, load
 from time import time, ticks_ms
 
 class HomeAssistantControl(BasicModule):
