@@ -12,5 +12,6 @@
     "button": "Onboard Button",
     "ledprimaryb": "Primary Colour",
     "ledsecondaryb": "Secondary Colour",
-    "relay": "Relay"
+    "relay": "Relay",
+    "trigger": "Trigger"
 }
