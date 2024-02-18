@@ -122,7 +122,7 @@ class MqttControl(BasicModule):
         SerialLog.log("MQTT Command Received: ", topic, msg)
         # remove the part we subscribe to from the topic
         topic = topic.replace(self.topic_sub.replace(b"/#", b""), b"") 
-        self.commands.append(b"%s/%s" % (topic, msg))
+        self.commands.append("%s/%s" % (topic, msg))
 
         # check for firmware update
         # if topic starts with iot-platform/version and the version is different, restart

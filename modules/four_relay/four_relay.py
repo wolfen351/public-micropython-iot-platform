@@ -42,14 +42,14 @@ class FourRelay(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/relay/on/")):
-                s = int(c.replace(b"/relay/on/", b""))
+            if (c.startswith("/relay/on/")):
+                s = int(c.replace("/relay/on/", ""))
                 self.on(s)
-            if (c.startswith(b"/relay/off/")):
-                s = int(c.replace(b"/relay/off/", b""))
+            if (c.startswith("/relay/off/")):
+                s = int(c.replace("/relay/off/", ""))
                 self.off(s)
-            if (c.startswith(b"/relay/flip/")):
-                s = int(c.replace(b"/relay/flip/", b""))
+            if (c.startswith("/relay/flip/")):
+                s = int(c.replace("/relay/flip/", ""))
                 self.flip(s)
 
     def getRoutes(self):

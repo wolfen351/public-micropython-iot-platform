@@ -12,5 +12,10 @@
     "button": "Onboard Button",
     "ledprimaryb": "Primary Colour",
     "ledsecondaryb": "Secondary Colour",
-    "relay": "Relay"
+    "relay": "Relay",
+    "trigger": "Trigger",
+    "freedisk": "Free Disk Space",
+    "freeram": "Free RAM",
+    "name": "Device Name",
+    "onboard/led": "Onboard LED"
 }

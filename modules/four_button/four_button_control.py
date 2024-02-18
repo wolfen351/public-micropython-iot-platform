@@ -31,35 +31,35 @@ class FourButton(BasicModule):
         newValue = 1 - self.B1.value()
         if (self.States[0] != newValue):
             self.States[0] = newValue
-            self.commands.append(b"/button/B1/" + str(newValue))
+            self.commands.append("/button/B1/" + str(newValue))
             if (newValue == 1):
-                self.commands.append(self.extraCommandsOn[0].encode("ascii"))
+                self.commands.append(self.extraCommandsOn[0])
             else: 
-                self.commands.append(self.extraCommandsOff[0].encode("ascii"))
+                self.commands.append(self.extraCommandsOff[0])
         newValue = 1 - self.B2.value()
         if (self.States[1] != newValue):
             self.States[1] = newValue
-            self.commands.append(b"/button/B2/" + str(newValue))
+            self.commands.append("/button/B2/" + str(newValue))
             if (newValue == 1):
-                self.commands.append(self.extraCommandsOn[1].encode("ascii"))
+                self.commands.append(self.extraCommandsOn[1])
             else: 
-                self.commands.append(self.extraCommandsOff[1].encode("ascii"))
+                self.commands.append(self.extraCommandsOff[1])
         newValue = 1 - self.B3.value()
         if (self.States[2] != newValue):
             self.States[2] = newValue
-            self.commands.append(b"/button/B3/" + str(newValue))
+            self.commands.append("/button/B3/" + str(newValue))
             if (newValue == 1):
-                self.commands.append(self.extraCommandsOn[2].encode("ascii"))
+                self.commands.append(self.extraCommandsOn[2])
             else: 
-                self.commands.append(self.extraCommandsOff[2].encode("ascii"))
+                self.commands.append(self.extraCommandsOff[2])
         newValue = 1 - self.B4.value()
         if (self.States[3] != newValue):
             self.States[3] = newValue
-            self.commands.append(b"/button/B4/" + str(newValue))
+            self.commands.append("/button/B4/" + str(newValue))
             if (newValue == 1):
-                self.commands.append(self.extraCommandsOn[3].encode("ascii"))
+                self.commands.append(self.extraCommandsOn[3])
             else: 
-                self.commands.append(self.extraCommandsOff[3].encode("ascii"))
+                self.commands.append(self.extraCommandsOff[3])
      
     def getTelemetry(self):
         return {

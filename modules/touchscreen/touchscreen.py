@@ -56,7 +56,7 @@ class TouchScreen(BasicModule):
 
     def getCommands(self):
         if (self.lastTouch != None):
-            return [b"/touch/0/0"]
+            return ["/touch/0/0"]
         return []
 
     def processCommands(self, commands):

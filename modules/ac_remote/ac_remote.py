@@ -82,15 +82,15 @@ class AcRemote(BasicModule):
     def processCommands(self, commands):
          for c in commands:
             # this decodes and executes home assistant/mqtt comands
-            if (b"/current_temp/" in c):
+            if ("/current_temp/" in c):
                 temp = float(c.rsplit(b'/', 1)[-1])
                 self.detectedTemp = temp
                 self.draw_detectedTemp()
-            if (b"/ac_mode/" in c):
+            if ("/ac_mode/" in c):
                 mode = c.rsplit(b'/', 1)[-1]
                 self.mode = mode
                 self.draw_mode()
-            if (b"/ac_setpoint/" in c):
+            if ("/ac_setpoint/" in c):
                 ac_setpoint = c.rsplit(b'/', 1)[-1]
                 self.setpoint = ac_setpoint
                 self.draw_setpoint()

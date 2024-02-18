@@ -43,12 +43,12 @@ class DionHallwayLightsControl(BasicModule):
     def tick(self):
         # Main Loop
         if (self.triggerState[0] == 1):
-            SerialLog.log(b"Light: Trigger 1")
+            SerialLog.log("Light: Trigger 1")
             self.action = 1
             self.triggeredAt = time.ticks_ms()
 
         if (self.triggerState[1] == 1):
-            SerialLog.log(b"Light: Trigger 2")
+            SerialLog.log("Light: Trigger 2")
             self.action = 2
             self.triggeredAt = time.ticks_ms()
 
@@ -103,11 +103,11 @@ class DionHallwayLightsControl(BasicModule):
             # send changes as commands
             for num, val in enumerate(newLightState):
                 if (val != self.lightState[num] and val == 0):
-                    self.commands.append(b"/relay/off/" + str(num+1).encode('ascii'))
+                    self.commands.append("/relay/off/%s" % (num+1))
                     self.lightState[num] = 0
 
                 if (val != self.lightState[num] and val == 1):
-                    self.commands.append(b"/relay/on/" + str(num+1).encode('ascii'))
+                    self.commands.append("/relay/on/%s" % (num+1))
                     self.lightState[num] = 1
      
     def getTelemetry(self):
@@ -115,7 +115,9 @@ class DionHallwayLightsControl(BasicModule):
             "light1": self.lightState[0],
             "light2": self.lightState[1],
             "light3": self.lightState[2],
-            "light4": self.lightState[3]
+            "light4": self.lightState[3],
+            "trigger/1": self.triggerState[0],
+            "trigger/2": self.triggerState[1]
         }
      
     def processTelemetry(self, telemetry):
@@ -128,9 +130,9 @@ class DionHallwayLightsControl(BasicModule):
      
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/trigger/")):
-                s = int(c.replace(b"/trigger/", b""))
-                self.triggerState[s] = 1
+            if (c.startswith("/trigger/")):
+                s = int(c[-1])
+                self.triggerState[s-1] = 1
      
     def getRoutes(self):
         return {

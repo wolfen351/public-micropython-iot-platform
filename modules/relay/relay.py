@@ -44,11 +44,11 @@ class Relay(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/relay/on/1")):
+            if (c.startswith("/relay/on/1")):
                 self.on()
-            if (c.startswith(b"/relay/off/1")):
+            if (c.startswith("/relay/off/1")):
                 self.off()
-            if (c.startswith(b"/relay/flip/1")):
+            if (c.startswith("/relay/flip/1")):
                 self.flip()
             if (c.startswith(self.flipcommand)):
                 self.flip()

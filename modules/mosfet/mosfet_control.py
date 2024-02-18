@@ -41,15 +41,15 @@ class MosfetControl(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/mosfet/on/")):
-                s = int(c.replace(b"/mosfet/on/", b""))
+            if (c.startswith("/mosfet/on/")):
+                s = int(c.replace("/mosfet/on/", ""))
                 self.on(s)
-            if (c.startswith(b"/mosfet/off/")):
-                s = int(c.replace(b"/mosfet/off/", b""))
+            if (c.startswith("/mosfet/off/")):
+                s = int(c.replace("/mosfet/off/", ""))
                 self.off(s)
-            if (c.startswith(b"/mosfet/allon")):
+            if (c.startswith("/mosfet/allon")):
                 self.allOn()
-            if (c.startswith(b"/mosfet/alloff")):
+            if (c.startswith("/mosfet/alloff")):
                 self.allOff()
 
     def getRoutes(self):
