@@ -212,8 +212,7 @@ class HomeAssistantControl(BasicModule):
             # Wipe all existing telemetry so we send a full update on connect
             self.telemetry = {} 
             self.topics = {}
-            self.client.subscribe("homeassistant/switch/%s/+/command" % (self.deviceId))
-            self.client.subscribe("homeassistant/light/%s/+/command" % (self.deviceId))
+            self.client.subscribe("homeassistant/+/%s/+/command" % (self.deviceId))
             SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
     
@@ -286,6 +285,10 @@ class HomeAssistantControl(BasicModule):
             if (key.startswith('mosfet')):
                 payload.update({ "payload_on": "/mosfet/on/"+key[-1], "payload_off": "/mosfet/off/"+key[-1], "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
+
+            if (key.startswith('trigger')):
+                payload.update({ "payload_on": "/mosfet/on/"+key[-1], "payload_press": "/trigger/"+key[-1], "cmd_t": "~/command" })
+                telemetryType = "button"                
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
             payload.update({"~": telemetryUrl}),
