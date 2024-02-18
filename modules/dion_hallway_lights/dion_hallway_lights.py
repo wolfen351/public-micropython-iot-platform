@@ -103,11 +103,11 @@ class DionHallwayLightsControl(BasicModule):
             # send changes as commands
             for num, val in enumerate(newLightState):
                 if (val != self.lightState[num] and val == 0):
-                    self.commands.append(b"/relay/off/" + str(num+1).encode('ascii'))
+                    self.commands.append("/relay/off/%s" % (num+1))
                     self.lightState[num] = 0
 
                 if (val != self.lightState[num] and val == 1):
-                    self.commands.append(b"/relay/on/" + str(num+1).encode('ascii'))
+                    self.commands.append("/relay/on/%s" % (num+1))
                     self.lightState[num] = 1
      
     def getTelemetry(self):
@@ -128,8 +128,8 @@ class DionHallwayLightsControl(BasicModule):
      
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith(b"/trigger/")):
-                s = int(c.replace(b"/trigger/", b""))
+            if (c.startswith("/trigger/")):
+                s = int(c.replace("/trigger/", ""))
                 self.triggerState[s] = 1
      
     def getRoutes(self):

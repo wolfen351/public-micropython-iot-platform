@@ -22,7 +22,7 @@ class BuiltinButtonControl(BasicModule):
         newValue = 1 - self.buttonPin.value()
         if (self.value != newValue):
             self.value = newValue
-            self.commands.append(b"/button/onboard/%s" % (str(self.value)))
+            self.commands.append("/button/onboard/%s" % (str(self.value)))
 
      
     def getTelemetry(self):
