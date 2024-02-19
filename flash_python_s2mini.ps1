@@ -6,7 +6,7 @@ Write-Output "    Press Button Reset"
 Write-Output "    Release Button 0 When you hear the prompt tone on usb reconnection"
 
 Write-Host "Press any key to continue..."
-$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | Out-Null
 
 Import-Module ./serial-toys.psm1
 $port = Find-MicrocontrollerPort
