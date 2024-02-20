@@ -38,8 +38,9 @@ $MAXEDITTIME = 0
 
 # if the user added -prod to the command line, send a new file to the board containing 1.0.0 with the file name version
 if ($args -contains "-prod") {
-    Write-Host "Prod option specified. Will upload all files to board."
+    Write-Host "Prod option specified. Will upload minimum files for flashing, with version 1.0.0."
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+    $activeModules = @("basic", "ota", "wifi", "web")
 } elseif ($args -contains "-force") {
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
     Write-Output "Force option specified. All files will be copied!"
