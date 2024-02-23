@@ -254,7 +254,7 @@ class HomeAssistantControl(BasicModule):
             uomLookup = load(open("modules/homeassistant/uom.json",'r'))
             devClassLookup = load(open("modules/homeassistant/devclass.json",'r'))
 
-            lookupkey = key.split("/")[0]
+            lookupkey = key.split("/")[0].lower()
             name = nameLookup.get(lookupkey, nameLookup.get(key, key))
             uom = uomLookup.get(lookupkey, "")
             devclass = devClassLookup.get(lookupkey, "")
