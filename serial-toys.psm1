@@ -66,22 +66,25 @@ function Show-SerialLog {
     $portObj.DtrEnable = $true;
     $portObj.RtsEnable = $true;
     $portObj.Open()
+
     while (! [console]::KeyAvailable) {
         try {
+            if (! $portObj.IsOpen) {
+                $portObj.Open()
+            }            
+
             $data = $portObj.ReadLine()
             if ($data -ne "") {
             Write-Output $data
+            Write-Progress -Completed -Activity "Connecting"
             }
         }
         catch [TimeoutException] {
             continue;
         }
         catch {
-            Write-Host "Error. $_"
-
-            if (! $portObj.IsOpen) {
-                $portObj.Open()
-            }
+            $err = "Error. $_"
+            Write-Progress -Activity "Connecting" -Status $err
         }
         #python -m serial.tools.miniterm $port 115200 2> $null
     }
