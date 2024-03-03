@@ -12,7 +12,7 @@ from sys import print_exception
 
 class WifiHandler(BasicModule):
 
-    essid = "Wolfen-Sensor-AP"
+    hostname = None
     defaultSSID = "NOT-CONFIGURED"
     defaultPassword = "no-password-set"
 
@@ -31,6 +31,7 @@ class WifiHandler(BasicModule):
         self.apModeGaveUp = False
         self.everConnected = False
 
+    # Called by the startup code as booting the board
     def preStart(self):
 
         self.ap_if.active(False)
@@ -38,17 +39,15 @@ class WifiHandler(BasicModule):
         ssid = self.getPref("wifi", "ssid", self.defaultSSID)
         password = self.getPref("wifi", "password", self.defaultPassword)
 
+        BasicModule.start(self)
+        self.hostname = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+
+        # If wifi is configured, then attempt to connect
         if (self.defaultSSID != ssid or self.defaultPassword != password):
-            # Set the essid, so the dhcp hostname is set
-            BasicModule.start(self)
-            self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
-
             self.station()
-
-            startTime = time.ticks_ms()
-
             # wait up to 20s for a connection
             SerialLog.log('Waiting for wifi...')
+            startTime = time.ticks_ms()
             while (time.ticks_diff(time.ticks_ms(), startTime) < 20000 and not self.sta_if.isconnected()):
                 time.sleep(0.1)
 
@@ -69,7 +68,7 @@ class WifiHandler(BasicModule):
 
     def start(self):
         BasicModule.start(self)
-        self.essid = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+        self.defaultSSID = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
 
     def get_free_disk_space(self):
         fs_stat = statvfs('/')
@@ -174,7 +173,7 @@ class WifiHandler(BasicModule):
         if (self.apMode):
             if (self.ap_if.active()):
                 return {
-                    "ssid": self.essid,
+                    "ssid": self.ap_if.config('essid'),
                     "ip": b"192.168.4.1",
                     "rssi": "0",
                     "version": ota.local_version(),
@@ -258,11 +257,11 @@ class WifiHandler(BasicModule):
 
     def ap(self):
         # Enable AP
-        SerialLog.log("Starting AP: %s" % (self.essid))
+        SerialLog.log("Starting AP: %s" % (self.defaultSSID))
         self.ap_if.active(True)
         self.ap_if.ifconfig(("192.168.4.1", "255.255.255.0",
                             "192.168.4.1", "192.168.4.1"))
-        self.ap_if.config(essid=self.essid, authmode=network.AUTH_OPEN)
+        self.ap_if.config(essid=self.defaultSSID, authmode=network.AUTH_OPEN)
         self.apMode = True
 
     def station(self):
@@ -282,7 +281,7 @@ class WifiHandler(BasicModule):
 
             # Set The DCHP Hostname
             try:
-                self.sta_if.config(dhcp_hostname=self.defaultSSID)
+                self.sta_if.config(dhcp_hostname=self.hostname)
             except Exception as e:
                 SerialLog.log("Failed to set DHCP hostname")
                 print_exception(e)
