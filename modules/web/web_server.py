@@ -24,7 +24,7 @@ class WebServer():
         self.conns = dict()
 
         # queue up to 5 connection requests before refusing
-        self.httpServer.sock.listen(5)
+        self.httpServer.sock.listen(2)
         self.httpServer.sock.setblocking(False)
 
         self.shouldReboot = False
