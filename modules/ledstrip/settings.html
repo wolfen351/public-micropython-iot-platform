@@ -744,11 +744,22 @@
     <script src="/modules/ledstrip/nanoajax.min.js"></script>
     <script type="text/javascript">
 
+        function debounce(func, timeout = 300){
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
+        function saveInput(){
+            console.log('Saving data');
+        }
+
         function tellTheServer() {
             url = '/led/color?primary=' + primary.value.replace("#", "") + "&secondary=" + secondary.value.replace("#", "");
             nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
         }
-
 
         function clickColor(col, x, y) {
             $(primary).val(col);
@@ -769,21 +780,27 @@
             nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
         }
 
+        // Brightness
         var slider = document.getElementById("brightness");
-        // Update the current slider value (each time you drag the slider handle)
-        slider.oninput = function () {
-            brightness = this.value;
-            url = '/led/brightness?brightness=' + this.value;
+        function brightnessChangeSend() {
+            brightness = slider.value;
+            url = '/led/brightness?brightness=' + brightness;
             nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
         }
+        const brightnessChangeOnInput = debounce(() => brightnessChangeSend());
+        slider.oninput = brightnessChangeOnInput;
 
+        // Duration
         var slider2 = document.getElementById("duration");
-        // Update the current slider value (each time you drag the slider handle)
-        slider2.oninput = function () {
-            duration = this.value;
-            url = '/led/duration?duration=' + (20000 - this.value);
+        function durationChangeSend() {
+            duration = slider2.value;
+            url = '/led/duration?duration=' + (20000-duration);
             nanoajax.ajax({ url: url }, function (code, responseText) { console.log("Response: ", responseText) })
         }
+        const durationChangeOnInput = debounce(() => durationChangeSend());
+        slider2.oninput = durationChangeOnInput;
+
+
 
         primary.addEventListener("input", colorChanged, false);
         secondary.addEventListener("input", colorChanged, false);
@@ -796,7 +813,7 @@
                         $("#primary").val("#" + data.ledprimary);
                         $("#secondary").val("#" + data.ledsecondary);
                         $("#brightness").val(data.ledbrightness);
-                        $("#duration").val(20000 - data.ledduration);
+                        $("#duration").val(20000-data.ledduration);
 
                         $(".actionbtn").removeClass("selected");
                         $(".actionbtn.action"+data.ledaction).addClass("selected");
