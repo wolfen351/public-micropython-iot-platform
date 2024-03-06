@@ -1,0 +1,13 @@
+{
+    "name": "S2 Mini AC Remote",
+    "shortName": "s2mini-acremote",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "ac_remote"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

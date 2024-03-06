@@ -1,0 +1,25 @@
+<div class="panel" id="temps">
+    <div class="title">Temperature/Humidity</div>
+</div>
+
+<script>
+    function newTempDht11(attr) {
+        if (attr.startsWith('temperature')) {
+            h = '<div class="line"><div class="lineitem">Reading #$#</div><div dataitem="##"></div><div>°C</div></div>';
+            h = h.replaceAll("##", attr)
+            title = attr.replace("temperature/", "")
+            h = h.replaceAll("#$#", title)
+            $("#temps").append(h);
+        }
+
+        if (attr.startsWith('humidity')) {
+            h = '<div class="line"><div class="lineitem">Reading #$#</div><div dataitem="##"></div><div> %RH</div></div>';
+            h = h.replaceAll("##", attr)
+            title = attr.replace("humidity/", "")
+            h = h.replaceAll("#$#", title)
+            $("#temps").append(h);
+        }
+    }
+
+    window.telHandlers.push(newTempDht11);
+</script>

@@ -1,0 +1,17 @@
+{
+    "name": "S2 Mini LED Strip",
+    "shortName": "s2mini-ledstrip",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "wdt", "ledstrip"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "led": {
+        "length": 120,
+        "pin": 16
+    },
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}
