@@ -26,7 +26,7 @@
 Many other boards will probably work too!
 
 ## Supported Modules
-* ac_remote - This presents a simple UI on a touchscreen () to be the remote control unit for a air conditioner.
+* ac_remote - This presents a simple UI on a touchscreen (ILI9341 XPT2046) to be the remote control unit for a air conditioner.
 * binary_clock - This presents a nice little binary clock UI on a touchscreen ().
 * builtin_button - This exposes the built in button on many of these development boards to mqtt etc
 * dht11 - This reads the temperature and humidity from a DHT11 sensor
