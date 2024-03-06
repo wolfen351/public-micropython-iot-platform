@@ -277,6 +277,7 @@ class WifiHandler(BasicModule):
             # Make sure the interface is active
             if (not self.sta_if.active()):
                 self.sta_if.active(True)
+                self.sta_if.config(pm=self.sta_if.PM_NONE)                
                 time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
 
             # Set The DCHP Hostname
@@ -319,6 +320,8 @@ class WifiHandler(BasicModule):
         self.ap_if.active(False)
         time.sleep(2)
         self.sta_if.active(True)
+        self.sta_if.config(pm=self.sta_if.PM_NONE)                
+
 
     def ota(self):
 

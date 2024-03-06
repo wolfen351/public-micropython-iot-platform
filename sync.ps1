@@ -3,6 +3,10 @@ param($profileName)
 # Globals
 Import-Module .\serial-toys.psm1
 
+
+# Set env var for baud
+$env:AMPY_BAUD = 921600
+
 # Load the profile
 try {
 
@@ -133,7 +137,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Deleting file on microcontroller:"
             ampy --port $port rm $fnn
             Write-Output "Trying another copy:"
-            ampy --baud 460800 --port $port put $fnn $fnn
+            ampy --port $port put $fnn $fnn
             if (!($?)) {
                 Write-Output "Failed again. Giving up."
                 exit 3
