@@ -13,7 +13,7 @@
 
 ### 🏠 [Homepage](https://github.com/wolfen351/public-micropython-iot-platform)
 
-### ✨ [Demo]((demo url here))
+### ✨ [Demo](https://github.com/wolfen351/public-micropython-iot-platform/wiki/Web-UI)
 
 ## Supported Hardware
 
