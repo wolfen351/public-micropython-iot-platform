@@ -1,0 +1,17 @@
+{
+    "name": "S2 Mini DHT22",
+    "shortName": "s2mini-dht22",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "dht22", "temphistory"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "dht22": {
+        "pin": 16,
+        "readEveryMs": 20000
+    },    
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

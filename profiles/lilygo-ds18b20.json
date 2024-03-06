@@ -1,0 +1,17 @@
+{
+    "name": "LilyGo Battery Powered Temp Sensor",
+    "shortName": "lilygo-ds18b20",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ds18b20temp", "ntp", "temphistory", "lilygo_battery", "wdt"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 3,
+    "ds18b20": {
+        "pin": 9, 
+        "readEveryMs": 10000
+    },
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

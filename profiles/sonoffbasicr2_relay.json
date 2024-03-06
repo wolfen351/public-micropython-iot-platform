@@ -1,0 +1,20 @@
+{
+    "name": "Sonoff Basic R2 Board",
+    "shortName": "sonoffbasicr2_relay",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "relay", "builtin_button"],
+    "cpuSpeed": 80000000,
+    "statusLedPin" : 13,
+    "builtinButton": {
+        "pin": 0
+    },
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    },
+    "relay": {
+        "flipcommand": "/button/onboard/1",
+        "pin": 12
+    }
+}

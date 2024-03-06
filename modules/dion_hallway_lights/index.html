@@ -1,0 +1,101 @@
+<style>
+  .status .light {
+    width: 25px;
+    height: 15px;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: grey;
+  }
+
+  .status .trigger {
+    width: 25px;
+    height: 15px;
+    border: 1px dashed black;
+    padding: 5px;
+    margin: 5px;
+    background-color: grey;
+  }
+
+  .light.on {
+    background-color: #8e1f1f;
+    color: white;
+  }
+
+  .trigger.on {
+    background-color: #304280;
+    color: white;
+  }
+
+  .status {
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  #mosfet {
+    display: none;
+  }
+
+  .auto1.data_2 {
+    background-color: #304280;
+  }
+  .auto2.data_2 {
+    background-color: #304280;
+  }
+  .auto3.data_2 {
+    background-color: #304280;
+  }
+  .auto4.data_2 {
+    background-color: #304280;
+  }
+
+  .off1.data_0 {
+    background-color: #304280;
+  }
+  .off2.data_0 {
+    background-color: #304280;
+  }
+  .off3.data_0 {
+    background-color: #304280;
+  }
+  .off4.data_0 {
+    background-color: #304280;
+  }
+
+  .on1.data_1 {
+    background-color: #304280;
+  }
+  .on2.data_1 {
+    background-color: #304280;
+  }
+  .on3.data_1 {
+    background-color: #304280;
+  }
+  .on4.data_1 {
+    background-color: #304280;
+  }
+</style>
+
+<div class="panel" id="lights4">
+  <div class="title">4 Lights</div>
+
+  <div class="status">
+    <div class="trigger" dataitem="trigger1" datadisplay="onoff">T1</div>
+
+    <div class="light" dataitem="light1" datadisplay="onoff">1</div>
+    <div class="light" dataitem="light2" datadisplay="onoff">2</div>
+    <div class="light" dataitem="light3" datadisplay="onoff">3</div>
+    <div class="light" dataitem="light4" datadisplay="onoff">4</div>
+
+    <div class="trigger" dataitem="trigger2" datadisplay="onoff">T2</div>
+  </div>
+
+  <div class="nav">
+    <input type="button" class="navbtn" value="Light Settings" onclick="window.location='/light'"></input>
+  </div>
+
+</div>

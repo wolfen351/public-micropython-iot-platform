@@ -1,0 +1,17 @@
+{
+    "name": "LilyGo Battery Powered Temp Sensor",
+    "shortName": "lilygo-gps",
+    "activeModules": ["basic", "mqtt", "ota", "thingsboard", "web", "wifi", "gps", "homeassistant"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 3,
+    "gps": {
+        "rxPin": 19,
+        "txPin": 18
+    },
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

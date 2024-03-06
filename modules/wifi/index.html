@@ -1,0 +1,81 @@
+<div class="panel" id="wifi">
+    <div class="title">WiFi</div>
+
+    <div class="line">
+        <div class="lineitem">SSID</div>
+        <div dataitem="ssid"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">IP Address</div>
+        <div dataitem="ip"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">RSSI</div>
+        <div dataitem="rssi"></div>
+        <div>dBm</div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Mode</div>
+        <div dataitem="wifiMode"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Stations</div>
+        <div dataitem="stations"></div>
+    </div>
+
+    <input type="button" class="navbtn" value="Settings" onclick="window.location='/network'"></input>
+
+</div>
+
+<div class="panel" id="system">
+    <div class="title">System</div>
+
+    <div class="line">
+        <div class="lineitem">Version</div>
+        <div dataitem="version"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">OS Version</div>
+        <div dataitem="osname"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Free RAM</div>
+        <div dataitem="freeram"></div>
+        <div>&nbsp;bytes</div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Free Disk</div>
+        <div dataitem="freedisk"></div>
+        <div>&nbsp;bytes</div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Battery Voltage</div>
+        <div dataitem="voltage"></div>
+        <div>&nbsp;V&nbsp;(</div>
+        <div dataitem="voltagePercent"></div>
+        <div>%)</div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Status LED</div>
+        <div dataitem="onboard/led" datadisplay="switch" onclick="switchLed()"></div>
+    </div>
+
+    <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
+    <input type="button" class="navbtn" value="Log" onclick="window.location='/log'"></input>
+
+</div>
+
+<script>
+    function switchLed() {
+        post("/switchLed");
+    }
+</script>

@@ -1,0 +1,28 @@
+<div class="panel" id="ntp">
+    <div class="title">NTP Time</div>
+
+    <div class="line">
+        <div class="lineitem">Time</div>
+        <div dataitem="time" datadisplay="timearray"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">Time Zone</div>
+        <div dataitem="timeZone"></div>
+    </div>
+
+    <div class="line">
+        <div class="lineitem">NTP Status</div>
+        <div dataitem="ntp"></div>
+    </div>
+
+    <input type="button" class="navbtn" value="Settings" onclick="window.location='/ntp'"></input>
+
+</div>
+
+
+<script>
+    function switchLed() {
+        post("/switchLed");
+    }
+</script>

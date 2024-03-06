@@ -1,0 +1,13 @@
+{
+    "name": "S2 Mini Mosfet Shield",
+    "shortName": "s2mini-mosfet",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "mosfet"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "ota": {
+        "url": "https://firmware.example.com/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    }
+}

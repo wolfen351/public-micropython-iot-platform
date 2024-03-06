@@ -1,0 +1,12 @@
+{
+    "temperature": "temperature",
+    "tempmin": "temperature",
+    "tempmax": "temperature",
+    "ac_setpoint": "temperature",
+    "dayavg": "temperature",
+    "daymin": "temperature",
+    "daymax": "temperature",
+    "humidity": "humidity",
+    "rssi": "signal_strength",
+    "relay": "switch"
+}

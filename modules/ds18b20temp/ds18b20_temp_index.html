@@ -1,0 +1,22 @@
+<div class="panel" id="temps">
+    <div class="title">Temperature</div>
+
+    
+
+
+  </div>
+
+<script>
+    function newTemp(attr) {
+        if (attr.startsWith('temperature'))
+        {
+            h = '<div class="line"><div class="lineitem">Reading #$#</div><div dataitem="##"></div><div>°C</div></div>';
+            h = h.replaceAll("##", attr)
+            title = attr.replace("temperature/", "")
+            h = h.replaceAll("#$#", title)
+            $("#temps").append(h);
+        }
+    }
+
+    window.telHandlers.push(newTemp);
+</script>

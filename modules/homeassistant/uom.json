@@ -1,0 +1,21 @@
+{
+    "temperature": "*C",
+    "dayavg": "*C",
+    "daymin": "*C",
+    "daymax": "*C",
+    "tempmin": "*C",
+    "tempmax": "*C",
+    "ac_setpoint": "*C",
+    "humidity": "%",
+    "rssi": "dBm",
+    "freeram": "bytes",
+    "freedisk": "bytes",
+    "voltage": "V",
+    "voltagepercent": "%",
+    "distancecm": "cm",
+    "averagecm": "cm",
+    "light1": "",
+    "light2": "",
+    "light3": "",
+    "light4": ""
+}

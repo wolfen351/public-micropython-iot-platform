@@ -1,0 +1,186 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Temperature History</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #3498db;
+      width: 100%;
+      text-align: center;
+      margin: 20px 0px 20px 0px;
+    }
+
+    span {
+      width: 40px;
+      display: inline-block;
+    }
+
+    input[type='text'],
+    input[type='password'] {
+      border: #ccc 1px solid;
+      padding: 8px;
+      margin-top: 10px;
+      font-size: 1em;
+      border-radius: 4px;
+    }
+
+    .btn {
+      width: 50px;
+      height: 50px;
+    }
+
+    .sett {
+      text-align: left;
+      margin-left: auto;
+      margin-right: auto;
+      width: 500px;
+    }
+
+    .sett input {
+      /* width: 100px; */
+      margin-left: 20px;
+    }
+
+    .sett input[type="radio"] {
+      width: 20px;
+      margin-left: 2px;
+      margin-top: 15px;
+    }
+
+    .sett button {
+      margin-top: 25px;
+      width: 80%;
+      margin-left: 10%;
+      margin-right: 10%;
+    }
+
+    .lbl {
+      width: 180px;
+    }
+
+    .status {
+      display: flex;
+      width: 100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <h1>Temperature History</h1>
+
+  <div class="allsett">
+    <br />
+    <h3>History data:</h3>
+    <h4>History data displayed below for the past 24h:</h4>
+
+
+    <div style="display:flex;">
+    <div id="today">Loading data...</div>
+    <div id="yesterday">Loading data...</div>
+    <div id="month">Loading data...</div>
+  </div>
+
+  </div>
+
+
+  <script type="text/javascript">
+    setInterval(function () {
+      fetch('/temphistorydetailtoday')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+
+          hour = 0;
+          table = "<div class='thh'>Today</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s)) {
+            if (!s[hour])
+              s[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s[hour].min.toFixed(1)} °C</td><td>${s[hour].max.toFixed(1)} °C</td><td>${(s[hour].sum / s[hour].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            hour++;;
+          }
+          table += "</table>";
+          $("#today").html(table);
+        });
+    }, 2000);
+
+    setInterval(function () {
+      fetch('/temphistorydetailyesterday')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+
+          hour = 0;
+          table = "<div class='thh'>Yesterday</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Hour</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s)) {
+            if (!s[hour])
+              s[hour] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${hour}:00 - ${hour}:59</td><td>${s[hour].min.toFixed(1)} °C</td><td>${s[hour].max.toFixed(1)} °C</td><td>${(s[hour].sum / s[hour].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            hour++;;
+          }
+          table += "</table>";
+          $("#yesterday").html(table);
+        });
+    }, 2132);
+
+    setInterval(function () {
+      fetch('/temphistorydetailmonth')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+
+          day = 0;
+          table = "<div class='thh'>This Month</div><table class='dataList' cellspacing=0 cellpadding=0><tr><th>Day</th><th>Min</th><th>Max</th><th>Avg</th></tr>";
+          for (let key of Object.keys(s)) {
+            if (!s[day])
+              s[day] = { min: 0, max: 0, count: 1, sum: 0 }
+            row = `<tr><td>${day}</td><td>${s[day].min.toFixed(1)} °C</td><td>${s[day].max.toFixed(1)} °C</td><td>${(s[day].sum / s[day].count).toFixed(1)} °C</td></tr>`;
+            table += row;
+            day++;;
+          }
+          table += "</table>";
+          $("#month").html(table);
+
+
+        });
+    }, 2482);
+
+  </script>
+
+  <style>
+
+.dataList {
+  background: red;
+  border: 1px solid black;
+  background-color: transparent;
+}
+
+.dataList th {
+  font-weight: bold;
+  background: #00006060;
+  border: 1px black solid;
+}
+
+.dataList td {
+  background-color: unset;
+  border: 1px black solid;
+  padding: 7px;
+}
+
+div + div {
+  margin-left: 50px;
+}
+
+
+  </style>
+
+</body>
+
+</html>
