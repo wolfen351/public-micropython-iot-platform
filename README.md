@@ -9,7 +9,7 @@
   </a>
 </p>
 
-> Micropython code to control relays, temp sensors, buttons, touchscreen, gps etc. Has web ui, mqtt, home assistant and thingsboard support
+> Micropython code to control relays, temp sensors, buttons, touchscreen, gps etc. Has a responsive Web UI, MQTT, Home Assistant and Thingsboard support
 
 ### 🏠 [Homepage](https://github.com/wolfen351/public-micropython-iot-platform)
 
