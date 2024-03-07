@@ -92,10 +92,12 @@ Show-SerialLog
 ## Make fun projects
 
 Binary clock
+![310741660-ea58f663-d5e4-4192-b4ff-709d11fb4258](https://github.com/wolfen351/public-micropython-iot-platform/assets/5477547/25af3bcd-a2fa-4ea6-b7a3-598236d56e92)
 
 
 
 AC Remote
+![310735767-95666078-f79c-453f-893a-ec02ecf7017d](https://github.com/wolfen351/public-micropython-iot-platform/assets/5477547/6211e7f7-2c8c-45ed-93d2-300993059243)
 
 
 
