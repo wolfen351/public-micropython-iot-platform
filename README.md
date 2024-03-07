@@ -74,13 +74,13 @@ If you can't find the profile you need simply create a new one for your board. Y
 ### Send all the required micropython files to the board
 
 You can use the sync.ps1 script to send all the required files to the board. You will need to pass the profile name
-```sh
+```powershell
 sync.ps1 s2mini-dht22
 ```
 
 ## Monitoring the Board Via Serial
 
-```sh
+```powershell
 Install-Module serial-toys.psm1
 Show-SerialLog
 ```
@@ -94,6 +94,14 @@ Show-SerialLog
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/wolfen351/public-micropython-iot-platform/issues). You can also take a look at the [contributing guide](https://github.com/jessesquires/.github/blob/main/CONTRIBUTING.md).
+
+## Many thanks for open source libraries and code snippets used
+
+There are very many open source developers that have inspired this project, as well as some direct code contributions:
+
+* Tool for converting images to raw format for use on the screens: https://github.com/rdagger/micropython-ili9341
+* 
+
 
 ## Show your support
 
