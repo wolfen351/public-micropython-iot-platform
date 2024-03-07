@@ -100,7 +100,7 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 There are very many open source developers that have inspired this project, as well as some direct code contributions:
 
 * Tool for converting images to raw format for use on the screens: https://github.com/rdagger/micropython-ili9341
-* 
+* MicroPython ILI9341 Display and XPT2046 Touch Screen Drivers: https://github.com/rdagger/micropython-ili9341
 
 
 ## Show your support
