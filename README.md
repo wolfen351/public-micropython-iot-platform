@@ -85,6 +85,20 @@ Install-Module serial-toys.psm1
 Show-SerialLog
 ```
 
+## Access the web ui
+
+![310423462-c837013b-c4c9-4348-aa95-79dad1cc0620](https://github.com/wolfen351/public-micropython-iot-platform/assets/5477547/b276135b-ae79-4965-a93b-2e1594a846fe)
+
+## Make fun projects
+
+Binary clock
+
+
+
+AC Remote
+
+
+
 ## Author
 
 👤 **Iain Prior**
