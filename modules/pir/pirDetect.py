@@ -8,6 +8,8 @@ class PIRDetect(BasicModule):
     commands = []
     valueA = 0
     valueB = 0
+    pinDetectorA = None
+    pinDetectorB = None
 
     def __init__(self):
         pass
