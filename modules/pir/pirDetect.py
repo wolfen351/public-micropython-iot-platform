@@ -17,13 +17,19 @@ class PIRDetect(BasicModule):
     def start(self):
         BasicModule.start(self)
 
-        self.pinDetectorANumber = self.basicSettings['pir']['pinA']
-        SerialLog.log("PIR Pin A: ", self.pinDetectorANumber)
-        self.pinDetectorA = Pin(self.pinDetectorANumber, Pin.IN, Pin.PULL_UP)
+        try:
+            self.pinDetectorANumber = self.basicSettings['pir']['pinA']
+            SerialLog.log("PIR Pin A: ", self.pinDetectorANumber)
+            self.pinDetectorA = Pin(self.pinDetectorANumber, Pin.IN, Pin.PULL_UP)
+        except:
+            SerialLog.log("Error: PIR Pin A not found")
 
-        self.pinDetectorBNumber = self.basicSettings['pir']['pinB']
-        SerialLog.log("PIR Pin B: ", self.pinDetectorBNumber)
-        self.pinDetectorB = Pin(self.pinDetectorBNumber, Pin.IN, Pin.PULL_UP)
+        try:
+            self.pinDetectorBNumber = self.basicSettings['pir']['pinB']
+            SerialLog.log("PIR Pin B: ", self.pinDetectorBNumber)
+            self.pinDetectorB = Pin(self.pinDetectorBNumber, Pin.IN, Pin.PULL_UP)
+        except:
+            SerialLog.log("Error: PIR Pin B not found")
 
      
     def tick(self):
@@ -31,8 +37,15 @@ class PIRDetect(BasicModule):
         oldValueA = self.valueA
         oldValueB = self.valueB
 
-        self.valueA = 1 - self.pinDetectorA.value()
-        self.valueB = 1 - self.pinDetectorB.value()
+        try:
+            self.valueA = 1 - self.pinDetectorA.value()
+        except:
+            pass
+    
+        try:
+            self.valueB = 1 - self.pinDetectorB.value()
+        except:
+            pass
         
         if (oldValueA != self.valueA and self.valueA == 0):
             self.commands.append(self.basicSettings['pir']['pinACommand'])
