@@ -1,5 +1,6 @@
 from machine import Pin
 from modules.basic.basic_module import BasicModule
+from serial_log import SerialLog
 
 class PIRDetect(BasicModule):
 
@@ -15,9 +16,11 @@ class PIRDetect(BasicModule):
         BasicModule.start(self)
 
         self.pinDetectorANumber = self.basicSettings['pir']['pinA']
+        SerialLog.log("PIR Pin A: ", self.pinDetectorANumber)
         self.pinDetectorA = Pin(self.pinDetectorANumber, Pin.IN, Pin.PULL_UP)
 
         self.pinDetectorBNumber = self.basicSettings['pir']['pinB']
+        SerialLog.log("PIR Pin B: ", self.pinDetectorBNumber)
         self.pinDetectorB = Pin(self.pinDetectorBNumber, Pin.IN, Pin.PULL_UP)
 
      
