@@ -40,7 +40,9 @@ class GarageDoorControl(BasicModule):
 
 
     def getTelemetry(self): 
-        telemetry = { "garagedoorStatus": self.doorState, "openForMs": self.openForMs }
+        # round open for ms to seconds
+        openForMsRounded = int(self.openForMs / 1000) * 1000
+        telemetry = { "garagedoorStatus": self.doorState, "openForMs": openForMsRounded }
         return telemetry
 
     def processTelemetry(self, telemetry):
