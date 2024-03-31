@@ -36,7 +36,7 @@ class USRangeSensor(BasicModule):
             return {}
         
         telemetry = { 
-            "distancecm": self.average_cm,
+            "distancecm": self.distance_cm,
             "averagecm": self.average_cm
         }
         return telemetry
