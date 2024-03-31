@@ -21,7 +21,7 @@ class USRangeSensor(BasicModule):
 
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastDetectTime)
-        if (diff > 250):
+        if (diff > 150):
             self.distance_cm = self.sensor.distance_cm()
             if (self.distance_cm != 250):
                 self.lastDetectTime = currentTime
