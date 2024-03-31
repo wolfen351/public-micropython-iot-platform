@@ -6,7 +6,7 @@ class USRangeSensor(BasicModule):
 
     distance_cm = -1
     average_cm = -1
-    average_over = 20
+    average_over = 30
     bucket = []
 
     def __init__(self):
@@ -36,7 +36,7 @@ class USRangeSensor(BasicModule):
             return {}
         
         telemetry = { 
-            "distancecm": self.distance_cm,
+            "distancecm": self.average_cm,
             "averagecm": self.average_cm
         }
         return telemetry
