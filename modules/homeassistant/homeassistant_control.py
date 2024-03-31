@@ -7,6 +7,7 @@ from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps, load
 from time import time, ticks_ms
+from ota import local_version
 
 class HomeAssistantControl(BasicModule):
 
@@ -17,7 +18,7 @@ class HomeAssistantControl(BasicModule):
         self.client = None
         self.lastConnectTime = 0 # to stop from spamming the reconnect
         self.topics = {}
-        self.version = b"1.0.0"
+        self.version = local_version()
         self.ip = b"0.0.0.0"
         self.commands = []
         self.lastConfigureTime = 0
