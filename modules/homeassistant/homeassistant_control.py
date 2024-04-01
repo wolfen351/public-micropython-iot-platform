@@ -7,7 +7,7 @@ from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps, load
 from time import time, ticks_ms
-from ota import local_version
+from modules.ota.ota import local_version
 
 class HomeAssistantControl(BasicModule):
 
