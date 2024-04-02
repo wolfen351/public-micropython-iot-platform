@@ -32,8 +32,8 @@ Many other boards will probably work too!
 * [dht11](https://github.com/wolfen351/public-micropython-iot-platform/wiki/dht11) - This reads the temperature and humidity from a DHT11 sensor
 * [dht22](https://github.com/wolfen351/public-micropython-iot-platform/wiki/dht22) - This reads the temperature and humidity from a DHT22 sensor
 * [ds18b20](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ds18b20) - This reads the temperature from a DS18B20 sensor
-* four_button - This exposes 4 buttons on a board to mqtt etc (Currently used by the esp32r4v3 board)
-* four_relay - This exposes 4 relays on a board to mqtt etc (Currently used by the esp32r4v3 board)
+* [four_button](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_button) - This exposes 4 buttons on a board to mqtt etc (Currently used by the esp32r4v3 board)
+* [four_relay](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_relay) - This exposes 4 relays on a board to mqtt etc (Currently used by the esp32r4v3 board)
 * gps - This reads the GPS data from a GPS module
 * home_assistant - This sends data and receives commands to/from a home assistant instance via mqtt (Auto discovery etc is supported)
 * ledstrip - This controls a WS2812B LED strip
