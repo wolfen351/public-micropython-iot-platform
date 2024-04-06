@@ -1,0 +1,20 @@
+{
+    "name": "S2 Mini IR Detect",
+    "shortName": "s2mini-irdetect",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wdt", "wifi", "ntp", "pir"],
+    "cpuSpeed": 240000000,
+    "statusLedPin" : 15,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    },
+    "pir": {
+        "pinA": 36,      
+        "pinACommand": "/trigger/0", 
+        "pinB": 35,       
+        "pinBCommand": "/trigger/1"
+   }
+
+}
