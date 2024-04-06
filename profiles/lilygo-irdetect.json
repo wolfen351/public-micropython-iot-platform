@@ -13,7 +13,7 @@
     "pir": {
         "pinA": 18,      
         "pinACommand": "/trigger/0", 
-        "pinB": 19,       
+        "pinB": 35,       
         "pinBCommand": "/trigger/1"
    }
 
