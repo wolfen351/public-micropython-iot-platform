@@ -37,6 +37,7 @@
     <div class="line">
         <div class="lineitem">Version</div>
         <div dataitem="version"></div>
+        <div><button onclick="forceUpdate()">🔄️</button></div>
     </div>
 
     <div class="line">
@@ -77,5 +78,9 @@
 <script>
     function switchLed() {
         post("/switchLed");
+    }
+
+    function forceUpdate() {
+        post("/forceUpdate");
     }
 </script>

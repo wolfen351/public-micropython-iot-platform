@@ -79,9 +79,12 @@ def local_version():
             return local_version
     except OSError:
             return "unknown!"
+    
+def force_update():
+    SerialLog.log("Forcing update")
+    check_for_updates(False)
 
-
-def check_for_updates(version_check=True, quiet=False, pubkey_hash=b'') -> bool:
+def check_for_updates(version_check=True) -> bool:
     """
     Check for available updates, download new firmware if available and return True/False whether
     it's ready to be installed, there is enough free space and file hash matches.

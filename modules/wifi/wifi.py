@@ -214,13 +214,23 @@ class WifiHandler(BasicModule):
             b"/log": b"/modules/wifi/log.html",
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings,
-            b"/getlog": self.getlog
+            b"/getlog": self.getlog,
+            b"/forceUpdate": self.forceUpdate
         }
 
     def getIndexFileName(self):
         return {"wifi": "/modules/wifi/index.html"}
 
     # internal functions
+
+    def forceUpdate(self, params):
+        # Squash OTA exceptions
+        try:
+            # Check for update and update if needed
+            ota.force_update()
+        except Exception as e:
+            SerialLog.log('OTA failed: ' + str(e))
+            print_exception(e)
 
     def loadnetsettings(self, params):
 
