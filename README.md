@@ -26,14 +26,14 @@
 Many other boards will probably work too!
 
 ## Supported Modules
-* ac_remote - This presents a simple UI on a touchscreen (ILI9341 XPT2046) to be the remote control unit for a air conditioner.
-* binary_clock - This presents a nice little binary clock UI on a touchscreen ().
-* builtin_button - This exposes the built in button on many of these development boards to mqtt etc
-* dht11 - This reads the temperature and humidity from a DHT11 sensor
-* dht22 - This reads the temperature and humidity from a DHT22 sensor
-* ds18b20 - This reads the temperature from a DS18B20 sensor
-* four_button - This exposes 4 buttons on a board to mqtt etc (Currently used by the esp32r4v3 board)
-* four_relay - This exposes 4 relays on a board to mqtt etc (Currently used by the esp32r4v3 board)
+* [ac_remote](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ac_remote) - This presents a simple UI on a touchscreen (ILI9341 XPT2046) to be the remote control unit for a air conditioner.
+* [binary_clock](https://github.com/wolfen351/public-micropython-iot-platform/wiki/binary_clock) - This presents a nice little binary clock UI on a touchscreen ().
+* [builtin_button](https://github.com/wolfen351/public-micropython-iot-platform/wiki/builtin_button) - This exposes the built in button on many of these development boards to mqtt etc
+* [dht11](https://github.com/wolfen351/public-micropython-iot-platform/wiki/dht11) - This reads the temperature and humidity from a DHT11 sensor
+* [dht22](https://github.com/wolfen351/public-micropython-iot-platform/wiki/dht22) - This reads the temperature and humidity from a DHT22 sensor
+* [ds18b20](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ds18b20) - This reads the temperature from a DS18B20 sensor
+* [four_button](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_button) - This exposes 4 buttons on a board to mqtt etc (Currently used by the esp32r4v3 board)
+* [four_relay](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_relay) - This exposes 4 relays on a board to mqtt etc (Currently used by the esp32r4v3 board)
 * gps - This reads the GPS data from a GPS module
 * home_assistant - This sends data and receives commands to/from a home assistant instance via mqtt (Auto discovery etc is supported)
 * ledstrip - This controls a WS2812B LED strip
