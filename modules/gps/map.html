@@ -41,28 +41,41 @@
 <body>
     <div id="map"></div>
 
-    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA081x7VYanbmIzHt9fDhbIzZ0t10bYyiM&callback=initMap&v=weekly"
-        async></script>
     <script>
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "AIzaSyBC0n7TWVkibdc1YgWmO8_uZZXASXLcuAY",
+            v: "weekly",
+            // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+            // Add other bootstrap parameters as needed, using camel case.
+        });
+        </script>
+          
+
+
+
+<script>
 
         let map, infoWindow, marker ;
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById("map"), {
+        async function initMap() {
+            const { Map } = await google.maps.importLibrary("maps");
+            const { Marker } = await google.maps.importLibrary("marker");
+
+            map = new Map(document.getElementById("map"), {
                 center: { lat: -34.397, lng: 150.644 },
-                zoom: 6,
+                zoom: 8,
+                mapId: "af60cc63ee1d481ab462fddb5646e7ff",
             });
 
-            const myLatLng = { lat: 0, lng: 0};
-            marker = new google.maps.Marker({
-                                position: myLatLng,
-                                map,
-                                title: "Position",
-                            });
+            marker = new Marker({
+                map,
+                position: { lat: 37.4239163, lng: -122.0947209 },
+            });
+
+            getTelemetry();
         }
 
+        initMap();
 
         function getTelemetry() {
             setTimeout(function () {
@@ -71,17 +84,15 @@
                     .then(data => {
 
                         if (data.latitude && data.longitude && marker) {
-                            marker.setPosition(new google.maps.LatLng( data.latitude, data.longitude ));
+                            console.log({ lat: data.latitude, lng: data.longitude});
+                            marker.setPosition({ lat: data.latitude, lng: data.longitude});
                         }
                         getTelemetry();
                     })
             }, 1000);
         }
 
-        getTelemetry();
-
-
-    </script>
+</script>
 </body>
 
 </html>
