@@ -135,6 +135,9 @@ try:
         elif modname == "relay":
             from modules.relay.relay import Relay
             allModules.append(Relay())
+        elif modname == "sim800l":
+            from modules.sim800l.sim800l import SIM800LControl
+            allModules.append(SIM800LControl())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
