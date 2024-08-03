@@ -54,4 +54,4 @@ class Schedule(BasicModule):
         self.setPref("schedule", "delayseconds", unquote(params.get(b"delayseconds", None)))
 
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-        return b"", headers, True
+        return b"", headers
