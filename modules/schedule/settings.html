@@ -82,16 +82,14 @@
     <h4>Please provide settings here</h4>
 
     <div class="sett">
-      <form action="/netsavesettings" method="get">
-        <span class="lbl">SSID:</span><input type="text" name="Ssid" value="NETWORK" id="Ssid"><br />
-        <span class="lbl">Password:</span><input type="password" name="Password" value="******" id="Password"><br />
-        <span class="lbl">Type:</span>
-            <input type="radio" name="Type" value="DHCP" id="dhcp">DHCP
-            <input type="radio" name="Type" value="Static" id="Static">Static
-            <br />
-        <span class="lbl">IP:</span><input type="text" name="Ip" value="10.10.10.1" id="Ip"><br />
-        <span class="lbl">Netmask:</span><input type="text" name="Netmask" value="10.10.10.1" id="Netmask"><br />
-        <span class="lbl">Gateway:</span><input type="text" name="Gateway" value="10.10.10.1" id="Gateway"><br />
+      <form action="/schedulesavesettings" method="get">
+        <span class="lbl">Send Command at boot:</span><input type="text" name="bootcommand" value="/somecommand" id="bootcommand"><br />
+        <br/>
+        <span class="lbl">Delay command is executed x seconds after boot</span><br />
+        <br/>
+        <span class="lbl">Delay Command:</span><input type="text" name="delaycommand" value="/somecommand" id="delaycommand"><br />
+        <span class="lbl">Delay Seconds:</span><input type="text" name="delayseconds" value="600" id="delayseconds"><br />
+        <br/>
         <button type="submit" class="btn">Save</button>
         <button onclick="window.history.back()" class="btn">Back</button>
       </form>
@@ -102,26 +100,13 @@
   <script type="text/javascript">
     $(
 
-      fetch('/netloadsettings')
+      fetch('/scheduleloadsettings')
         .then(response => response.json())
         .then(data => {
           s = data;
-
-
-        $("#Ssid").val(s.ssid);
-        $("#Password").val(s.password);
-
-        if (s.type == "DHCP") {
-          $("#dhcp").prop('checked',true);
-        }
-        else {
-          $("#Static").prop('checked',true);
-        }
-
-        $("#Type").val(s.type);
-        $("#Ip").val(s.ip);
-        $("#Netmask").val(s.netmask);
-        $("#Gateway").val(s.gateway);
+          $("#bootcommand").val(s.bootcommand);
+          $("#delaycommand").val(s.delaycommand);
+          $("#delayseconds").val(s.delayseconds);
       })
     );
   </script>
