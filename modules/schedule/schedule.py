@@ -1,5 +1,5 @@
 from modules.basic.basic_module import BasicModule
-from web.web_processor import okayHeader, unquote
+from modules.web.web_processor import okayHeader, unquote
 
 class Schedule(BasicModule):
 
@@ -54,5 +54,4 @@ class Schedule(BasicModule):
         self.setPref("schedule", "delayseconds", unquote(params.get(b"delayseconds", None)))
 
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
-
         return b"", headers, True
