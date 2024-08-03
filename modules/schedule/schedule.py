@@ -26,7 +26,7 @@ class Schedule(BasicModule):
 
     def getRoutes(self):
         return {
-            b"/network": b"/modules/schedule/settings.html"
+            b"/schedule": b"/modules/schedule/settings.html"
         }
 
 
