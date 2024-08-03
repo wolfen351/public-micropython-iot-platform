@@ -138,6 +138,9 @@ try:
         elif modname == "sim800l":
             from modules.sim800l.sim800l import SIM800LControl
             allModules.append(SIM800LControl())
+        elif modname == "schedule":
+            from modules.schedule.schedule import Schedule
+            allModules.append(Schedule())
         else:
             SerialLog.log("Error: Unsupported Module! ", modname);
         SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
