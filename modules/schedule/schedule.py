@@ -3,6 +3,8 @@ from modules.web.web_processor import okayHeader, unquote
 
 class Schedule(BasicModule):
 
+    bootCommandSent = False
+
     def __init__(self):
         BasicModule.start(self)
         BasicModule.free(self) # release the ram
@@ -20,6 +22,10 @@ class Schedule(BasicModule):
         pass
 
     def getCommands(self):
+        if (self.bootCommandSent == False):
+            self.bootCommandSent = True
+            return [self.getPref("schedule", "bootcommand", "/somecommand")]
+        
         return []
 
     def processCommands(self, commands):
