@@ -25,7 +25,9 @@ class Schedule(BasicModule):
         pass
 
     def getRoutes(self):
-        return {}
+        return {
+            b"/network": b"/modules/schedule/settings.html"
+        }
 
 
     def getIndexFileName(self):
