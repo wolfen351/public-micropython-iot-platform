@@ -1,12 +1,16 @@
 from modules.basic.basic_module import BasicModule
 from modules.web.web_processor import okayHeader, unquote
+from time import ticks_ms
 
 class Schedule(BasicModule):
 
     bootCommandSent = False
+    delayCommandSent = False
+    delaySeconds = 0
 
     def __init__(self):
         BasicModule.start(self)
+        self.delayseconds = int(self.getPref("schedule", "delayseconds", "300"))
         BasicModule.free(self) # release the ram
 
     def start(self):
@@ -25,6 +29,12 @@ class Schedule(BasicModule):
         if (self.bootCommandSent == False):
             self.bootCommandSent = True
             return [self.getPref("schedule", "bootcommand", "/somecommand")]
+        
+        if (self.delayCommandSent == False):
+            timeSinceBoot = ticks_ms() / 1000
+            if (timeSinceBoot >= self.delayseconds):
+                self.delayCommandSent = True
+                return [self.getPref("schedule", "delaycommand", "/somecommand")]
         
         return []
 
