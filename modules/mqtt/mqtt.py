@@ -17,7 +17,7 @@ class MQTTException(Exception):
 
 class MQTTClient:
 
-    def __init__(self, client_id, server, port=0, user=None, password=None, keepalive=0,
+    def __init__(self, client_id, server, port=0, user=None, password=None, keepalive=300,
                  ssl=False, ssl_params={}):
         if port == 0:
             port = 8883 if ssl else 1883

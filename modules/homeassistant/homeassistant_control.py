@@ -207,7 +207,7 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
-            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""))
+            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""), 300)
             self.client.set_callback(self.sub_cb)
             self.client.connect()
             # Wipe all existing telemetry so we send a full update on connect
