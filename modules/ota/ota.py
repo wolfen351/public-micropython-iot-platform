@@ -82,8 +82,10 @@ def local_version():
     
 def force_update():
     SerialLog.log("Forcing update")
-    check_for_updates(False)
-    install_new_firmware()
+    if check_for_updates(False):
+        install_new_firmware()
+    else:
+        return "Update failed"
     return "Update forced"
 
 def check_for_updates(version_check=True) -> bool:
