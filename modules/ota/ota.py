@@ -83,6 +83,7 @@ def local_version():
 def force_update():
     SerialLog.log("Forcing update")
     check_for_updates(False)
+    install_new_firmware()
     return "Update forced"
 
 def check_for_updates(version_check=True) -> bool:
@@ -137,19 +138,23 @@ def check_for_updates(version_check=True) -> bool:
             return False
 
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
-        SerialLog.log("Fetching update updates on: ", downloadUrl)
+        SerialLog.log("Fetching update on: ", downloadUrl)
         if requests == None:
             SerialLog.log("Warning: Requests is None")
-        response = requests.get(downloadUrl)
-        SerialLog.log("Download Response:", response.status_code)
-        with open(ota_config['tmp_filename'], 'wb') as f:
-            while True:
-                chunk = response.raw.read(512)
-                if not chunk:
-                    break
-                f.write(chunk)
-
-        return True
+        try:
+            response = requests.get(downloadUrl)
+            SerialLog.log("Download Response:", response.status_code)
+            with open(ota_config['tmp_filename'], 'wb') as f:
+                while True:
+                    chunk = response.raw.read(512)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+            SerialLog.log("Downloaded update to flash")
+            return True
+        except Exception as e:
+            SerialLog.log("Error downloading update: ", e)
+            return False
     else:
         SerialLog.log("Up to date!")
     return False
