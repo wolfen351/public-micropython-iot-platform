@@ -5,7 +5,7 @@
 # CI_PIPELINE_ID: The unique id of the current pipeline that GitLab CI uses internally
 
 # increment the version
-newVersion=6.0.$CI_PIPELINE_ID
+newVersion=8.0.$CI_PIPELINE_ID
 echo "Version is now: $newVersion"
 echo $newVersion > ./version
 

@@ -94,4 +94,4 @@ notify:
   - apt update -y 
   - apt install mosquitto mosquitto-clients -y
   - sleep 60
-  - mosquitto_pub -h mqtt.wolfen.za.net -t iot-platform/version -m "6.0.$CI_PIPELINE_ID"
+  - mosquitto_pub -h mqtt.wolfen.za.net -t iot-platform/version -m "8.0.$CI_PIPELINE_ID"

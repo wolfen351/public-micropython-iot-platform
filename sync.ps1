@@ -149,8 +149,8 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 }
 
 if ($sent -gt 0) {
-    # Write "7.0.0" to the version file
-    Write-Output "7.0.0" | Out-File -Encoding ascii .\version
+    # Write "8.1.0" to the version file
+    Write-Output "8.1.0" | Out-File -Encoding ascii .\version
 
     Write-Host "Uploading new version file to board.."
     ampy --port $port put version
@@ -169,7 +169,7 @@ if ($args -contains "-prod") {
     Write-Output "1.0.0" | Out-File -Encoding ascii .\version
     Write-Host "Uploading 1.0.0 version file to board, so it will auto update.."
     ampy --port $port put version
-    Write-Output "7.0.0" | Out-File -Encoding ascii .\version
+    Write-Output "8.1.0" | Out-File -Encoding ascii .\version
 }
 
 # Clean up
