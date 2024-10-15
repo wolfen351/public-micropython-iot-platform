@@ -50,6 +50,10 @@ class TempHistory(BasicModule):
 
     def processTelemetry(self, telemetry):
 
+        # skip if we dont have time
+        if (not "time" in telemetry):
+            return
+
         if (telemetry["time"][0] == 2000): # exclude when we dont have ntp time (year 2000)
             return
 
