@@ -228,9 +228,11 @@ class WifiHandler(BasicModule):
         try:
             # Check for update and update if needed
             ota.force_update()
+            return b"Update started, rebooting...", okayHeader, True
         except Exception as e:
             SerialLog.log('OTA failed: ' + str(e))
             print_exception(e)
+            return b"OTA failed: " + str(e).encode('utf-8'), okayHeader
 
     def loadnetsettings(self, params):
 

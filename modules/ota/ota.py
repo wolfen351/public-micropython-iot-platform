@@ -83,6 +83,7 @@ def local_version():
 def force_update():
     SerialLog.log("Forcing update")
     check_for_updates(False)
+    return "Update forced"
 
 def check_for_updates(version_check=True) -> bool:
     """
@@ -137,6 +138,8 @@ def check_for_updates(version_check=True) -> bool:
 
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update updates on: ", downloadUrl)
+        if requests == None:
+            SerialLog.log("Warning: Requests is None")
         response = requests.get(downloadUrl)
         SerialLog.log("Download Response:", response.status_code)
         with open(ota_config['tmp_filename'], 'wb') as f:
