@@ -26,23 +26,16 @@ function Find-MicrocontrollerPort {
 
     $port = $Matches.0
 
-    try {
-
-        if ($null -eq $port) {
-            throw "Unable to find serial port"
-        }
-
-        Write-Host "Detected $port"
-        return $port
+    if ($null -eq $port) {
+        throw "Unable to find serial port"
     }
-    catch 
-    {
-        Write-Host "Failed to connect. ${$_.Exception.Message}"
-        Write-Host "Detected ports:"
-        Write-Host Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-        Write-Host "Aborted." -ErrorAction Stop
-        Exit 5
+
+    if ('COM1' -eq $port) {
+        throw "Only found COM1, which is not a valid port"
     }
+
+    Write-Host "Detected $port"
+    return $port
 }
 
 
@@ -52,10 +45,15 @@ function Show-SerialLog {
         $port
     )
 
-    if ($port -eq $null)
+    while ($null -eq $port)
     {
-        Write-Host "No Port Specified, Auto Detecting.."
-        $port = Find-MicrocontrollerPort
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
     }
 
     Write-Host "-------------------------------------------------------------------------------"
