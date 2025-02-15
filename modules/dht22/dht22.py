@@ -25,10 +25,10 @@ class Dht22Monitor(BasicModule):
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastConvert)
         if (diff > self.readEveryMs and diff > 2500): 
+            self.lastConvert = currentTime
             self.dht.measure()
             self.currentT = self.dht.temperature()
             self.currentH = self.dht.humidity()
-            self.lastConvert = currentTime
             SerialLog.log("%s = %s'C %s %%RH" % ("DHT22", self.currentT, self.currentH))
      
     def getTelemetry(self):
