@@ -5,7 +5,7 @@ Import-Module .\serial-toys.psm1
 
 
 # Set env var for baud
-$env:AMPY_BAUD = 921600
+$env:AMPY_BAUD = 115200
 
 # Load the profile
 try {
