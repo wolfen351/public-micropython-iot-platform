@@ -6,7 +6,7 @@ from machine import unique_id
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps, load
-from time import time, ticks_ms
+from time import time, ticks_ms, ticks_diff
 from modules.ota.ota import local_version
 
 class HomeAssistantControl(BasicModule):
@@ -24,6 +24,7 @@ class HomeAssistantControl(BasicModule):
         self.lastConfigureTime = 0
         self.connected = False
         self.lastFullTelemetrySend = 0
+        self.lastKeepAliveSend = 0
     
     def start(self):
         BasicModule.start(self)
@@ -69,9 +70,9 @@ class HomeAssistantControl(BasicModule):
             self.version = self.telemetry["version"]
 
         # wipe configured keys every hour, so we reregister with ha 
-        if (time() - self.lastConfigureTime > 3600):
+        if (ticks_diff(ticks_ms(), self.lastConfigureTime) > 3600000):  # 3600 seconds = 3600000 milliseconds
             SerialLog.log("Re-registering with Home Assistant, wiping all configured keys")
-            self.lastConfigureTime = time()
+            self.lastConfigureTime = ticks_ms()
             self.topics = {}
 
         # tell home assistant about any new keys
@@ -102,6 +103,11 @@ class HomeAssistantControl(BasicModule):
                 processed.append(attr)
 
             self.telemetry = telemetry.copy()
+        
+        # keep alive every 10 seconds
+        if (ticks_diff(ticks_ms(), self.lastKeepAliveSend) > 10000):  # 10 seconds = 10000 milliseconds
+            self.safePublish("%s/%s/%s/keepalive" % (self.haPrefixUrl, "sensor", self.deviceId), "%s" % (ticks_ms()), False)
+            self.lastKeepAliveSend = ticks_ms()
 
     def sendSingleTelemetry(self, attr, value, telemetry):
         # if value is bytes then convert to string first
@@ -162,8 +168,8 @@ class HomeAssistantControl(BasicModule):
         thingsThatChanged = 0
 
         # every 60s send a full telemetry packet
-        if (time() - self.lastFullTelemetrySend > 60):
-            self.lastFullTelemetrySend = time()
+        if (ticks_diff(ticks_ms(), self.lastFullTelemetrySend) > 60000):  # 60 seconds = 60000 milliseconds
+            self.lastFullTelemetrySend = ticks_ms()
             return True
 
         # otherwise send only the changes
@@ -203,7 +209,7 @@ class HomeAssistantControl(BasicModule):
             self.commands.append(msg)
     
     def connect_and_subscribe(self):
-        if (self.lastConnectTime + 30000 < ticks_ms()):
+        if (ticks_diff(ticks_ms(), self.lastConnectTime) > 30000):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
