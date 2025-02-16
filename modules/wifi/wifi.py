@@ -325,8 +325,7 @@ class WifiHandler(BasicModule):
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            SerialLog.log("Error connecting to wifi:", e)
-            from sys import print_exception
+            SerialLog.log("Error connecting to wifi:", str(e))
             print_exception(e)
             self.powerCycleWifi()
         
@@ -336,7 +335,11 @@ class WifiHandler(BasicModule):
         self.ap_if.active(False)
         time.sleep(2)
         self.sta_if.active(True)
-        self.sta_if.config(pm=self.sta_if.PM_NONE)                
+        try:
+            self.sta_if.config(pm=self.sta_if.PM_NONE)
+        except Exception as e:
+            SerialLog.log("Failed to set power management mode during power cycle")
+            print_exception(e)
 
 
     def ota(self):
