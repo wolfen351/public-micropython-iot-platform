@@ -52,7 +52,6 @@ def recursive_delete(path: str):
         return
     uos.rmdir(path)
 
-
 def check_free_space(min_free_space: int) -> bool:
     """
     Check available free space in filesystem and return True/False if there is enough free space
@@ -102,6 +101,14 @@ def check_for_updates(version_check=True) -> bool:
         import mip
         mip.install('requests')
         import requests
+
+    try:
+        import tls
+    except ImportError:
+        SerialLog.log('tls module not found, attempting to install from online sources')
+        import mip
+        mip.install('tls')
+        import tls
 
     if not load_ota_cfg():
         return False
