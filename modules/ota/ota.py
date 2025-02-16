@@ -96,19 +96,14 @@ def check_for_updates(version_check=True) -> bool:
 
     try:
         import requests
+        import tls
     except ImportError:
         SerialLog.log('requests module not found, attempting to install from online sources')
         import mip
         mip.install('requests')
+        mip.install('ssl')
         import requests
 
-    try:
-        import tls
-    except ImportError:
-        SerialLog.log('tls module not found, attempting to install from online sources')
-        import mip
-        mip.install('tls')
-        import tls
 
     if not load_ota_cfg():
         return False
