@@ -107,6 +107,11 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             continue;
         }
 
+        # Skip prefs.json if "-no-prefs" is specified
+        if ($args -contains "-no-prefs" -and $f -eq "prefs.json") {
+            continue;
+        }
+
         # Ok send the file, all conditions satisfied
         Write-Output "Sending file $f..."
 
