@@ -55,6 +55,11 @@ class GarageDoorControl(BasicModule):
     def processTelemetry(self, telemetry):
         oldSensorState = self.sensorState
 
+        # if critical telemetry is missing, just return
+        if ("averagecm" not in telemetry):
+            self.sensorState = "Unknown"
+            return
+
         # See if the sensor is open or closed
         if (telemetry["averagecm"] == -1):
           self.sensorState = "Unknown"
