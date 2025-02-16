@@ -292,8 +292,7 @@ class WifiHandler(BasicModule):
                 try:
                     self.sta_if.config(pm=self.sta_if.PM_NONE)                
                 except Exception as e:
-                    SerialLog.log("Failed to set power management mode")
-                    print_exception(e)
+                    SerialLog.log("Failed to set power management mode to NONE")
                 time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
 
             # Set The DCHP Hostname
@@ -338,9 +337,7 @@ class WifiHandler(BasicModule):
         try:
             self.sta_if.config(pm=self.sta_if.PM_NONE)
         except Exception as e:
-            SerialLog.log("Failed to set power management mode during power cycle")
-            print_exception(e)
-
+            SerialLog.log("Failed to set power management mode to NONE")
 
     def ota(self):
 
