@@ -7,3 +7,4 @@ profile.json
 .package
 /lib/
 prefs.json
+*.mpy

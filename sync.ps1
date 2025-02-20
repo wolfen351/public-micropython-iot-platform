@@ -40,6 +40,31 @@ Start-Sleep 4
 $MAX = 0
 $MAXEDITTIME = 0
 
+# check basic connectivity to the board
+ampy --port $port ls > $null 2>&1
+if ($? -eq $false) {
+    Write-Error "Could not connect to the board. Aborting." -ErrorAction Stop
+}
+
+# if the user specified -wipe or -prod, delete all files on the board
+if ($args -contains "-wipe" -or $args -contains "-prod") {
+    Write-Host "Wipe option specified. Deleting all files on the board.."
+
+    # wipe all files on the board, recursively
+    $files = ampy --port $port ls -r
+    foreach ($f in $files) {
+        $fn = $f -replace "\s", ""
+        Write-Output "Deleting file $fn.."
+        # skip prefs.json if -nopref is specified
+        if ($args -contains "-nopref" -and $fn -eq "prefs.json") {
+            Write-Output "Skipping prefs.json (-nopref specified)"
+            continue;
+        }
+        ampy --port $port rm $fn > $null
+    }
+    Write-Output "All files deleted."
+}
+
 # if the user added -prod to the command line, send a new file to the board containing 1.0.0 with the file name version
 if ($args -contains "-prod") {
     Write-Host "Prod option specified. Will upload minimum files for flashing, with version 1.0.0."
@@ -51,11 +76,10 @@ if ($args -contains "-prod") {
 } else {
     Write-Host "Checking when board was last updated.."
     Remove-Item ./lastedit.dat
-    ampy --port $port get lastedit.dat > lastedit.dat # 2> $null
+    ampy --port $port get lastedit.dat > lastedit.dat 2> $null
 
     $MAX = Get-Content -Path .\lastedit.dat
     $MAXEDITTIME = $MAX
-    Write-Output "Last sync for this board was at $MAX"
 
     if ((Get-Item "lastedit.dat").length -eq 0) {
         Write-Output "The board does not have a lastedit.dat file, so all files will be copied."
@@ -63,6 +87,9 @@ if ($args -contains "-prod") {
         $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | Out-Null
 
         Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+    }
+    else {
+        Write-Output "Last edit time on board: $MAX"
     }
 }
 
@@ -108,12 +135,13 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         }
 
         # Skip prefs.json if "-no-prefs" is specified
-        if ($args -contains "-no-prefs" -and $f -eq "prefs.json") {
+        if ($args -contains "-nopref" -and $f -eq "prefs.json") {
+            Write-Output "Skipping prefs.json (-nopref specified)"
             continue;
         }
 
         # Ok send the file, all conditions satisfied
-        Write-Output "Sending file $f..."
+        Write-Output "Processing file $f..."
 
         # MAKE SURE PATH EXISTS ON DEVICE
         $bits = $f.ToString() -split '\\'
@@ -132,7 +160,18 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         # SEND THE FILE
         $fn = "$($f)"
         $fnn = $fn -replace "\\", "/"
+
+        # if the file is a .py file cross compile it, skip main.py, boot.py
+        if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
+            Write-Output "...Cross compiling $fn.."
+            python -m mpy_cross -march=xtensawin $fn
+            $fnn = $fnn -replace ".py", ".mpy"
+        }
+
+        # send the file using ampy
+        Write-Output "...Sending file $fnn.."
         ampy --port $port put $fnn $fnn
+
         if (!($?)) {
             Write-Output "Failed to send file to the board, attempting to delete and send again.."
             $boardFile = "$(ampy --port $port get $fnn)" 
@@ -148,6 +187,9 @@ for ($i = 0; $i -lt $files.Count; $i++) {
                 exit 3
             }
             Write-Output "Success, moving to next file"
+        }
+        else {
+            Write-Output "...Sent!"
         }
         $sent++
     }

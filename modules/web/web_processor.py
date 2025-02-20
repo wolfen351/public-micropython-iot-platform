@@ -32,7 +32,13 @@ def unquote(string):
         res.append(char)  # append the converted character
         res.append(item[2:])  # append anything else that occurred before the next escape character
     
-    return b''.join(res)
+    unquoted = b''.join(res)
+
+    # trim all whitespace off the end, protect against unquoted being empty
+    while unquoted and unquoted[-1] == 32:
+        unquoted = unquoted[:-1]
+
+    return unquoted
 
 
 class WebProcessor(BasicModule):
