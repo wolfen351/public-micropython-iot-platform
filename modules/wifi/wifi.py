@@ -30,6 +30,7 @@ class WifiHandler(BasicModule):
         self.freediskbytes = -1
         self.apModeGaveUp = False
         self.everConnected = False
+        self.stationCount = 0
 
     # Called by the startup code as booting the board
     def preStart(self):
@@ -80,8 +81,8 @@ class WifiHandler(BasicModule):
     def tick(self):
         if (not self.apMode):
 
+            # Ongoing connection
             if (self.sta_if.isconnected() and self.connected):
-                # Ongoing connection
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastrssitime)
                 if (diff > 50000):
@@ -115,16 +116,17 @@ class WifiHandler(BasicModule):
             # Check that the wifi is actually configured, start AP if not
             ssid = self.getPref("wifi", "ssid", self.defaultSSID)
             password = self.getPref("wifi", "password", self.defaultPassword)
+            now = time.ticks_ms()
+
             if (self.defaultSSID == ssid and self.defaultPassword == password):   
+                # wifi is not configured, switch to AP mode
                 SerialLog.log("Wifi not configured, starting AP")             
                 self.ap()                
-
-            if (not self.sta_if.isconnected()):
-                # Connection lost
-                now = time.ticks_ms()
+            elif (not self.sta_if.isconnected()):
+                # Connection lost, but wifi is configured
                 diff = time.ticks_diff(now, self.lastReconnectTime)
                 if (diff > 30000):
-                    SerialLog.log('No wifi for 30s, attempting to reconnect ...')
+                    SerialLog.log('Connecting to wifi ...')
                     self.lastReconnectTime = now
                     self.connected = False
                     self.station()
@@ -136,7 +138,7 @@ class WifiHandler(BasicModule):
             if (not self.sta_if.isconnected() and not self.everConnected and not self.apModeGaveUp):
                 diff = time.ticks_diff(now, self.downTimeStart)
                 if (diff > 60000):
-                    SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
+                    SerialLog.log("Failed to connect to wifi (60s), enabling configuration AP ...")
                     self.ap()
 
         else:
@@ -164,6 +166,14 @@ class WifiHandler(BasicModule):
                             SerialLog.log("Wifi is not configured, AP timed out, disabling all wifi")
                             if (self.sta_if.active()):
                                 self.sta_if.active(False)
+                else:
+                    # AP is active and there are stations connected
+                    if (self.stationCount < len(self.ap_if.status('stations'))):
+                        SerialLog.log("New station connected to AP")
+                    elif (self.stationCount > len(self.ap_if.status('stations'))):
+                        SerialLog.log("Station disconnected from AP")
+                    self.stationCount = len(self.ap_if.status('stations'))
+                    
             else:
                 # Wifi is disabled
                 pass
@@ -293,10 +303,10 @@ class WifiHandler(BasicModule):
                     self.sta_if.config(pm=self.sta_if.PM_NONE)                
                 except Exception as e:
                     SerialLog.log("Failed to set power management mode to NONE")
-                time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
 
             # Set The DCHP Hostname
             try:
+                time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
                 self.sta_if.config(dhcp_hostname=self.hostname)
             except Exception as e:
                 SerialLog.log("Failed to set DHCP hostname")
@@ -320,6 +330,12 @@ class WifiHandler(BasicModule):
             startTime = time.ticks_ms()
             while (time.ticks_diff(time.ticks_ms(), startTime) < 20000 and not self.sta_if.isconnected()):
                 time.sleep(0.1)
+            
+            # Check if wifi is up
+            if not self.sta_if.isconnected():
+                SerialLog.log('Failed to connect to wifi')
+            else:
+                SerialLog.log('Wifi Connected!')
 
         except KeyboardInterrupt:
             raise
