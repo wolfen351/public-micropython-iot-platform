@@ -5,10 +5,6 @@
 from serial_log import SerialLog
 SerialLog.log("Boot starting...")
 
-# sleep for 15s to allow the serial port to connect
-from time import sleep
-sleep(15)
-
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
