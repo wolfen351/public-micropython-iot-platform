@@ -171,11 +171,14 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         $fn = "$($f)"
         $fnn = $fn -replace "\\", "/"
 
-        # if the file is a .py file cross compile it, skip main.py, boot.py
-        if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
-            Write-Progress "Uploading files:" -Status "Cross Compiling file $fn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
-            python -m mpy_cross -march=xtensawin $fn
-            $fnn = $fnn -replace ".py", ".mpy"
+        # Only precompile if -precompile is specified
+        if ($args -contains "-precompile") {
+            # if the file is a .py file cross compile it, skip main.py, boot.py
+            if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
+                Write-Progress "Uploading files:" -Status "Cross Compiling file $fn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+                python -m mpy_cross -march=xtensawin $fn
+                $fnn = $fnn -replace ".py", ".mpy"
+            }
         }
 
         # send the file using ampy
