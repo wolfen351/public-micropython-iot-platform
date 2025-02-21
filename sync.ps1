@@ -52,9 +52,13 @@ if ($args -contains "-wipe" -or $args -contains "-prod") {
 
     # wipe all files on the board, recursively
     $files = ampy --port $port ls -r
+    $i = 0
     foreach ($f in $files) {
         $fn = $f -replace "\s", ""
-        Write-Output "Deleting file $fn.."
+        $i++
+        # Use Write Progress to show progress
+        Write-Progress "Deleting:" -Status "Deleting file $fn.." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+
         # skip prefs.json if -nopref is specified
         if ($args -contains "-nopref" -and $fn -eq "prefs.json") {
             Write-Output "Skipping prefs.json (-nopref specified)"
@@ -73,6 +77,9 @@ if ($args -contains "-prod") {
 } elseif ($args -contains "-force") {
     Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
     Write-Output "Force option specified. All files will be copied!"
+} elseif ($args -contains "-wipe") {
+    Write-Output 0 | Out-File -Encoding ascii .\lastedit.dat
+    Write-Output "Wipe option specified. All files will be copied!"
 } else {
     Write-Host "Checking when board was last updated.."
     Remove-Item ./lastedit.dat
@@ -98,6 +105,9 @@ $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg
 $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
+
+    Write-Progress "Uploading files:" -Status "Starting $f..." -PercentComplete (($i / $files.Count) * 100) -Id 1
+
     $LE = (Get-ChildItem $f).LastWriteTimeUtc | Get-Date -UFormat %s
 
     if ($LE -gt $MAX) {
@@ -141,7 +151,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         }
 
         # Ok send the file, all conditions satisfied
-        Write-Output "Processing file $f..."
+        Write-Progress "Uploading files:" -Status "Processing file $f..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
 
         # MAKE SURE PATH EXISTS ON DEVICE
         $bits = $f.ToString() -split '\\'
@@ -163,13 +173,13 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 
         # if the file is a .py file cross compile it, skip main.py, boot.py
         if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
-            Write-Output "...Cross compiling $fn.."
+            Write-Progress "Uploading files:" -Status "Cross Compiling file $fn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
             python -m mpy_cross -march=xtensawin $fn
             $fnn = $fnn -replace ".py", ".mpy"
         }
 
         # send the file using ampy
-        Write-Output "...Sending file $fnn.."
+        Write-Progress "Uploading files:" -Status "Sending file $fnn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
         ampy --port $port put $fnn $fnn
 
         if (!($?)) {
@@ -189,7 +199,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Success, moving to next file"
         }
         else {
-            Write-Output "...Sent!"
+            Write-Progress "Uploading files:" -Status "Sent $fnn!" -PercentComplete (($i / $files.Count) * 100)  -Id 1
         }
         $sent++
     }
@@ -224,5 +234,8 @@ Remove-Item profile.json
 
 Write-Output "Rebooting..."
 Restart-Microcontroller $port
+
+# Remove the progress bar
+Write-Progress -Id 1 -Completed
 
 Show-SerialLog $port
