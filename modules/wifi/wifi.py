@@ -95,8 +95,8 @@ class WifiHandler(BasicModule):
                     self.freerambytes = gc.mem_free()
                 return
 
+            # New connection
             if (self.sta_if.isconnected() and not self.connected):
-                # New connection
                 self.connected = True
                 self.everConnected = True
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
@@ -131,8 +131,8 @@ class WifiHandler(BasicModule):
                     self.connected = False
                     self.station()
                 diff = time.ticks_diff(now, self.downTimeStart)
-                if (diff > 86400000):
-                    SerialLog.log("Failed to connect to wifi for 24h, rebooting ...")
+                if (diff > 5400000):  # 90 minutes in milliseconds
+                    SerialLog.log("Failed to connect to wifi for 90 minutes, rebooting ...")
                     reset()
 
             if (not self.sta_if.isconnected() and not self.everConnected and not self.apModeGaveUp):
@@ -142,6 +142,7 @@ class WifiHandler(BasicModule):
                     self.ap()
 
         else:
+            # we are in apmode
             if (self.ap_if.active()):
                 if (len(self.ap_if.status('stations')) == 0):
                     now = time.ticks_ms()
