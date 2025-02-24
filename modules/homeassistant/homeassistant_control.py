@@ -149,7 +149,7 @@ class HomeAssistantControl(BasicModule):
             return True
 
         for attr, value in newTelemetry.items():
-            if value != self.telemetry.get(attr) and attr not in {"time", "voltage", "freeram", "rssi"}:
+            if value != self.telemetry.get(attr) and attr not in {"time", "voltage", "freeram", "rssi", "wifiUptime"}:
                 return True
         return False
     
