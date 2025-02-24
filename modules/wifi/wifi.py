@@ -31,6 +31,7 @@ class WifiHandler(BasicModule):
         self.apModeGaveUp = False
         self.everConnected = False
         self.stationCount = 0
+        self.connectionTime = 0
 
     # Called by the startup code as booting the board
     def preStart(self):
@@ -99,6 +100,7 @@ class WifiHandler(BasicModule):
             if (self.sta_if.isconnected() and not self.connected):
                 self.connected = True
                 self.everConnected = True
+                self.connectionTime = time.ticks_ms()  # Store the connection time
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
                 # Disable AP on station mode successful connection
                 ap_if = network.WLAN(network.AP_IF)
@@ -198,16 +200,19 @@ class WifiHandler(BasicModule):
                 return {
                     "wifiMode": b"Disabled",
                 }
-        return {
-            "ssid": self.sta_if.config('essid'),
-            "ip": self.sta_if.ifconfig()[0],
-            "rssi": self.rssi,
-            "version": ota.local_version(),
-            "freeram": self.freerambytes,
-            "freedisk": self.freediskbytes,
-            "osname": uname().release,
-            "wifiMode": b"Station"
-        }
+        else:
+            wifiUptime = time.ticks_diff(time.ticks_ms(), self.connectionTime) // 1000  # Calculate connected time in seconds
+            return {
+                "ssid": self.sta_if.config('essid'),
+                "ip": self.sta_if.ifconfig()[0],
+                "rssi": self.rssi,
+                "version": ota.local_version(),
+                "freeram": self.freerambytes,
+                "freedisk": self.freediskbytes,
+                "osname": uname().release,
+                "wifiMode": b"Station",
+                "wifiUptime": wifiUptime
+            }
     
 
     def processTelemetry(self, telemetry):

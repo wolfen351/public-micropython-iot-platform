@@ -18,5 +18,6 @@
     "freeram": "Free RAM",
     "name": "Device Name",
     "onboard/led": "Onboard LED",
-    "osname": "Micropython Version"
+    "osname": "Micropython Version",
+    "wifiUptime": "WiFi Uptime"
 }
