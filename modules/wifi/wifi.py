@@ -57,6 +57,7 @@ class WifiHandler(BasicModule):
                 # New connection
                 self.connected = True
                 self.everConnected = True
+                self.connectionTime = time.ticks_ms()  # Store the connection time
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
 
                 self.ota()
