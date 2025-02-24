@@ -2,7 +2,7 @@ from modules.basic.basic_module import BasicModule
 from modules.mqtt.mqtt import MQTTClient
 from serial_log import SerialLog
 from ubinascii import hexlify
-from machine import unique_id
+from machine import unique_id, reset
 from network import WLAN, STA_IF
 from modules.web.web_processor import okayHeader, unquote
 from ujson import dumps, load
@@ -72,6 +72,11 @@ class HomeAssistantControl(BasicModule):
             if attr not in self.topics:
                 self.home_assistant_configure(attr, value)
 
+        # configure home assistant with a reboot button too
+        if "rebootbtn" not in self.topics:
+            self.home_assistant_configure("rebootbtn", 0)
+
+
         if self.hasTelemetryChanged(telemetry):
             processed = set()
             for attr, value in telemetry.items():
@@ -134,7 +139,9 @@ class HomeAssistantControl(BasicModule):
         return c
 
     def processCommands(self, commands):
-        pass
+        # if commanded to reboot, do so
+        if "/system/reboot" in commands:
+            reset()
 
     def getRoutes(self):
         return {
@@ -260,6 +267,10 @@ class HomeAssistantControl(BasicModule):
             if key.startswith('trigger'):
                 payload.update({ "payload_on": "/mosfet/on/"+key[-1], "payload_press": "/trigger/"+key[-1], "cmd_t": "~/command" })
                 telemetryType = "button"                
+
+            if key.startswith('rebootbtn'):
+                payload.update({ "payload_on": "/system/reboot", "payload_press": "/system/reboot", "cmd_t": "~/command" })
+                telemetryType = "button" 
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
             payload.update({"~": telemetryUrl}),
