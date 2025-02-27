@@ -20,8 +20,17 @@ function Test-Port {
 }
 
 function Find-MicrocontrollerPort {
+    $acceptableDescriptions = @(
+        'USB Serial Device',
+        'USB-SERIAL CH340K',
+        'Prolific USB-to-Serial Comm Port',
+        'USB-Enhanced-SERIAL CH9102',
+        'USB-SERIAL CH340',
+        'Silicon Labs CP210x USB to UART Bridge'
+    )
+
     $SerialPorts = Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-    $Name = $SerialPorts | Where-Object { ($_.Description -eq 'USB Serial Device') -or ($_.Description -eq 'USB-SERIAL CH340K') -or ($_.Description -eq 'Prolific USB-to-Serial Comm Port') -or ($_.Description -eq 'USB-Enhanced-SERIAL CH9102') -or ($_.Description -eq 'USB-SERIAL CH340') } | Select-Object -ExpandProperty Name
+    $Name = $SerialPorts | Where-Object { $acceptableDescriptions -contains $_.Description } | Select-Object -ExpandProperty Name
     $Name -match "COM\d+" > $null
 
     $port = $Matches.0

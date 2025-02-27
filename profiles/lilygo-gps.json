@@ -1,7 +1,7 @@
 {
     "name": "LilyGo Battery Powered Temp Sensor",
     "shortName": "lilygo-gps",
-    "activeModules": ["basic", "mqtt", "ota", "thingsboard", "web", "wifi", "gps", "homeassistant"],
+    "activeModules": ["basic", "mqtt", "ota", "web", "wifi", "gps", "homeassistant"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
     "gps": {

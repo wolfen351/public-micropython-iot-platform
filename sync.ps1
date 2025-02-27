@@ -61,7 +61,7 @@ if ($args -contains "-wipe" -or $args -contains "-prod") {
 
         # skip prefs.json if -nopref is specified
         if ($args -contains "-nopref" -and $fn -eq "prefs.json") {
-            Write-Output "Skipping prefs.json (-nopref specified)"
+            Write-Output "Skipping deleting prefs.json (-nopref specified)"
             continue;
         }
         ampy --port $port rm $fn > $null
@@ -146,7 +146,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
 
         # Skip prefs.json if "-no-prefs" is specified
         if ($args -contains "-nopref" -and $f -eq "prefs.json") {
-            Write-Output "Skipping prefs.json (-nopref specified)"
+            Write-Output "Skipping sending prefs.json (-nopref specified)"
             continue;
         }
 
