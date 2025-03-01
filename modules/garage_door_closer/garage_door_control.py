@@ -36,9 +36,9 @@ class GarageDoorControl(BasicModule):
 
             if (not self.locked):
                 if (self.openForMs > 600000 and self.openForMs < 602000):
-                    self.commands.append("/mosfet/allon")
+                    self.commands.append("/relay/on/1")
                 if (self.openForMs > 602000):
-                    self.commands.append("/mosfet/alloff")
+                    self.commands.append("/relay/off/1")
                     self.lastOpenAt = time.ticks_ms()
 
 
