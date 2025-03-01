@@ -22,7 +22,7 @@ class USRangeSensor(BasicModule):
 
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastPulseTime)
-        if (diff > 200):
+        if (diff > 750):
             self.lastPulseTime = currentTime
             reading = self.sensor.distance_cm()
             if (reading != 250):
