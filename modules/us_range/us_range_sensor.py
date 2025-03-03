@@ -1,12 +1,13 @@
 from modules.basic.basic_module import BasicModule
 from modules.us_range.hcsr04 import HCSR04
 import time
+from serial_log import SerialLog
 
 class USRangeSensor(BasicModule):
 
     distance_cm = -1
     average_cm = -1
-    average_over = 30
+    average_over = 10
     bucket = []
 
     def __init__(self):
@@ -22,17 +23,27 @@ class USRangeSensor(BasicModule):
 
         currentTime = time.ticks_ms()
         diff = time.ticks_diff(currentTime, self.lastPulseTime)
-        if (diff > 750):
+        if (diff > 715):
             self.lastPulseTime = currentTime
             reading = self.sensor.distance_cm()
-            if (reading != 250):
+            SerialLog.log("US Range Sensor Reading (cm): " + str(reading))
+            if (reading != 250 and reading > 10):
                 self.lastDetectTime = currentTime
                 self.bucket.append(reading)
                 self.distance_cm = sum(self.bucket) / len(self.bucket)
-                if (len(self.bucket) >= self.average_over):
-                    self.average_cm = sum(self.bucket) / len(self.bucket)
+                if (len(self.bucket) > self.average_over + 5): # keep the bucket from getting too big
+                    self.bucket.pop(0)
+            else:
+                SerialLog.log("US Range Sensor Reading (cm) out of range: " + str(reading))
+                if len(self.bucket) > 0:
                     self.bucket.pop(0)
 
+            if (len(self.bucket) >= self.average_over):
+                self.average_cm = sum(self.bucket) / len(self.bucket)
+                SerialLog.log("US Range Sensor Average (cm): " + str(self.average_cm) + " - Readings: " + str(len(self.bucket)))
+            else:
+                SerialLog.log("US Range Sensor Average (cm): Not enough data - Readings: " + str(len(self.bucket)))
+                self.average_cm = -1
 
     def getTelemetry(self): 
 
@@ -45,8 +56,9 @@ class USRangeSensor(BasicModule):
         if (diff > 5000 or len(self.bucket) < 5):
             return {}
         
+        # round off to the nearest cm and send
         telemetry = { 
-            "averagecm": self.average_cm
+            "averagecm": int(self.average_cm)
         }
         return telemetry
         
