@@ -4,6 +4,16 @@ from modules.web.web_processor import okayHeader
 from serial_log import SerialLog
 import ujson
 
+# Try to import datetime, if it fails download and install it
+try:
+    from datetime import datetime
+except ImportError:
+    import mip
+    mip.install("datetime")
+    from datetime import datetime
+
+
+
 class TempHistory(BasicModule):
 
     def __init__(self):
@@ -54,7 +64,12 @@ class TempHistory(BasicModule):
         if (not "time" in telemetry):
             return
 
-        if (telemetry["time"][0] == 2000): # exclude when we dont have ntp time (year 2000)
+        try:
+            telemetry_time = datetime.fromisoformat(telemetry["time"])
+        except ValueError:
+            return
+
+        if (telemetry_time.year == 2000): # exclude when we dont have ntp time (year 2000)
             return
 
         if (not "tempReadAt" in telemetry): # quit if we havent read a temp
@@ -82,9 +97,9 @@ class TempHistory(BasicModule):
                         self.daymax = value
 
             if (attr == "time"):
-                hour = value[3]
-                day = value[2]
-                month = value[1]
+                hour = telemetry_time.hour
+                day = telemetry_time.day
+                month = telemetry_time.month
 
                 # reset counters every month
                 if (self.currentMonth != month):
