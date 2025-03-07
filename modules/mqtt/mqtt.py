@@ -21,6 +21,11 @@ class MQTTClient:
                  ssl=False, ssl_params={}):
         if port == 0:
             port = 8883 if ssl else 1883
+
+        # if the server is a byte string, convert to a string
+        if isinstance(server, bytes):
+            server = server.decode('ascii')
+
         self.client_id = client_id
         self.sock = None
         self.addr = socket.getaddrinfo(server, port)[0][-1]
@@ -139,6 +144,11 @@ class MQTTClient:
             assert 0
 
     def publish(self, topic, msg, retain=False, qos=0):
+
+        # if the topic is a byte string, convert to a string
+        if isinstance(topic, bytes):
+            topic = topic.decode('ascii')
+
         SerialLog.log("MQTT Sending: ", self.server, self.port, topic, msg)
         try:
             self.publishInternal(topic, msg, retain=retain, qos=qos)

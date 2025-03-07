@@ -84,7 +84,9 @@ class Relayx2(BasicModule):
 
 
     def getIndexFileName(self):
-        return { "relay" : "/modules/relay/relayx2_index.html" }
+        return { 
+            "relayx2" : "/modules/relayx2/relayx2_index.html" 
+        }
 
 
     # internal code
