@@ -147,6 +147,9 @@ try:
             elif modname == "schedule":
                 from modules.schedule.schedule import Schedule
                 allModules.append(Schedule())
+            elif modname == "relayx2":
+                from modules.relayx2.relayx2 import Relayx2
+                allModules.append(Relayx2())
             else:
                 SerialLog.log("Error: Unsupported Module! ", modname);
             SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
