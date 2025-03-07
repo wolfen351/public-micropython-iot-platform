@@ -45,8 +45,8 @@ class Relayx2(BasicModule):
 
     def getTelemetry(self):
         return {
-            "relayx2/S1" : self.States[0],
-            "relayx2/S2" : self.States[1]
+            "relay/S1" : self.States[0],
+            "relay/S2" : self.States[1]
         }
 
     def processTelemetry(self, telemetry):
@@ -57,20 +57,20 @@ class Relayx2(BasicModule):
 
     def processCommands(self, commands):
         for c in commands:
-            if (c.startswith("/relayx2/on/1")):
+            if (c.startswith("/relay/on/1")):
                 self.on(1)
-            if (c.startswith("/relayx2/off/1")):
+            if (c.startswith("/relay/off/1")):
                 self.off(1)
-            if (c.startswith("/relayx2/flip/1")):
+            if (c.startswith("/relay/flip/1")):
                 self.flip(1)
             if (c.startswith(self.flip1command)):
                 self.flip(1)
 
-            if (c.startswith("/relayx2/on/2")):
+            if (c.startswith("/relay/on/2")):
                 self.on(2)
-            if (c.startswith("/relayx2/off/2")):
+            if (c.startswith("/relay/off/2")):
                 self.off(2)
-            if (c.startswith("/relayx2/flip/2")):
+            if (c.startswith("/relay/flip/2")):
                 self.flip(2)
             if (c.startswith(self.flip2command)):
                 self.flip(2)
@@ -78,13 +78,13 @@ class Relayx2(BasicModule):
 
     def getRoutes(self):
         return { 
-            b"/relayx2/flip/1" : self.webFlip1,
-            b"/relayx2/flip/2" : self.webFlip2 
+            b"/relay/flip/1" : self.webFlip1,
+            b"/relay/flip/2" : self.webFlip2 
         }
 
 
     def getIndexFileName(self):
-        return { "relay" : "/modules/relayx2/relayx2_index.html" }
+        return { "relay" : "/modules/relay/relayx2_index.html" }
 
 
     # internal code
@@ -104,12 +104,12 @@ class Relayx2(BasicModule):
     def on(self, num):
         self.States[num - 1] = 1
         self.Switches[num - 1].on()
-        self.setPref("relayx2", "S" + str(num), 1)
+        self.setPref("relayx1", "S" + str(num), 1)
 
     def off(self, num):
         self.States[num - 1] = 0
         self.Switches[num - 1].off()
-        self.setPref("relayx2", "S" + str(num), 0)
+        self.setPref("relayx1", "S" + str(num), 0)
 
     def flip(self, num): # num is 1-4, but arrays are 0-3
         if (self.States[num - 1] == 0):
