@@ -15,9 +15,13 @@ class USRangeSensor(BasicModule):
 
     def start(self):
         BasicModule.start(self)
-        self.sensor = HCSR04(trigger_pin=18, echo_pin=16)
         self.lastPulseTime = time.ticks_ms()
         self.lastDetectTime = time.ticks_ms()
+        self.triggerPinNumber = self.basicSettings["usrange"]["triggerPinNumber"]
+        self.echoPinNumber = self.basicSettings["usrange"]["echoPinNumber"]
+        SerialLog.log("US Range Sensor Trigger Pin: " + str(self.triggerPinNumber))
+        SerialLog.log("US Range Sensor Echo Pin: " + str(self.echoPinNumber))
+        self.sensor = HCSR04(trigger_pin=self.triggerPinNumber, echo_pin=self.echoPinNumber)
 
     def tick(self):
 

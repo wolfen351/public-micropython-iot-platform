@@ -20,6 +20,9 @@ class GarageDoorControl(BasicModule):
         self.openForMs = 0
         self.commands = []
 
+        self.openAtMs = 15 * 60 * 1000 # 15 minutes
+        self.pressMs = 750
+
     def tick(self):
         # reset timer
         if (self.doorState == "Closed" and self.lastOpenAt != 0):
@@ -35,9 +38,9 @@ class GarageDoorControl(BasicModule):
             self.openForMs = time.ticks_diff(currentTime, self.lastOpenAt)
 
             if (not self.locked):
-                if (self.openForMs > 600000 and self.openForMs < 602000):
+                if (self.openForMs > self.openAtMs and self.openForMs < self.openAtMs + self.pressMs):
                     self.commands.append("/relay/on/1")
-                if (self.openForMs > 602000):
+                if (self.openForMs > self.openAtMs + self.pressMs):
                     self.commands.append("/relay/off/1")
                     self.lastOpenAt = time.ticks_ms()
 
