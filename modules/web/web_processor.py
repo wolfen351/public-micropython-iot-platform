@@ -2,13 +2,13 @@ from modules.basic.basic_module import BasicModule
 from modules.web.web_server import WebServer
 import json
 
-#public static vars
+# Public static vars
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
 okayHeaderHtml = b"HTTP/1.1 200 Ok\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n"
 refreshDoc = b"<html><head><meta http-equiv='refresh' content='15; url=/'></head><body>Rebooting, please wait...</body></html>"
 redirectHomeHeader = b"HTTP/1.1 302 Ok\r\nLocation: /\r\n"
 
-# public static methods
+# Public static methods
 def unquote(string):
     if not string:
         return b''
@@ -18,23 +18,23 @@ def unquote(string):
 
     string = string.replace(b"+", b" ")
 
-    # split into substrings on each escape character
+    # Split into substrings on each escape character
     bits = string.split(b'%')
     if len(bits) == 1:
-        return string  # there was no escape character
+        return string  # There was no escape character
     
-    res = [bits[0]]  # everything before the first escape character
+    res = [bits[0]]  # Everything before the first escape character
 
-    # for each escape character, get the next two digits and convert to 
+    # For each escape character, get the next two digits and convert to 
     for item in bits[1:]:
         code = item[:2]
-        char = bytes([int(code, 16)])  # convert to utf-8-encoded byte
-        res.append(char)  # append the converted character
-        res.append(item[2:])  # append anything else that occurred before the next escape character
+        char = bytes([int(code, 16)])  # Convert to utf-8-encoded byte
+        res.append(char)  # Append the converted character
+        res.append(item[2:])  # Append anything else that occurred before the next escape character
     
     unquoted = b''.join(res)
 
-    # trim all whitespace off the end, protect against unquoted being empty
+    # Trim all whitespace off the end, protect against unquoted being empty
     while unquoted and unquoted[-1] == 32:
         unquoted = unquoted[:-1]
 
@@ -44,13 +44,14 @@ def unquote(string):
 class WebProcessor(BasicModule):
    
     def __init__(self):
+        super().__init__()
         self.telemetry = {}
         self.panels = {}
         self.boardName = ""
         self.statusLedEnabled = self.getPref("web", "statusLedEnabled", True)     
 
     def start(self):
-        BasicModule.start(self)
+        super().start()
         self.server = WebServer()
         self.server.start()
         self.boardName = self.getPref("web", "name", self.basicSettings["name"])
@@ -64,19 +65,15 @@ class WebProcessor(BasicModule):
             "onboard/led": "Enabled" if self.statusLedEnabled else "Disabled"
         }
 
-     
     def processTelemetry(self, telemetry):
         pass
 
-     
     def getCommands(self):
         return []
 
-     
     def processCommands(self, commands):
         pass
 
-     
     def getRoutes(self):
         return {
             b"/": b"/modules/web/web_index.html",
@@ -88,40 +85,30 @@ class WebProcessor(BasicModule):
             b"/switchLed": self.switchLed
         }
 
-    # special code called from main to set ALL routes
-     
     def setRoutes(self, routes):
         self.server.setRoutes(routes)
 
-    # special code called from main to set ALL telemetry
-     
     def setTelemetry(self, telemetry):
         self.telemetry = telemetry
 
-    # special code called from main to set ALL panels
-     
     def setPanels(self, panels):
         self.panels = panels
 
-    # special code called from main to see if Led must be on
     def getLedEnabled(self):
         return self.statusLedEnabled
 
-    # return json telemetry to ui
     def webTelemetry(self, params):
         headers = okayHeader
         data = json.dumps(self.telemetry)
         return data, headers  
 
-    # return json panel list to ui
     def webPanels(self, params):
         headers = okayHeader
         data = json.dumps(self.panels)
         return data, headers  
 
-    # Simple reboot
     def webReboot(self, params):
-        return refreshDoc, okayHeaderHtml, True # true for reboot
+        return refreshDoc, okayHeaderHtml, True  # True for reboot
      
     def webSaveName(self, params):
         name = unquote(params.get(b"name", None))
@@ -131,15 +118,14 @@ class WebProcessor(BasicModule):
         data = name
         return data, headers  
 
-     
     def switchLed(self, params):
         headers = okayHeader
         data = "ok"
         self.statusLedEnabled = not self.statusLedEnabled
         self.setPref("web", "statusLedEnabled", self.statusLedEnabled)
-        return data, headers    
+        return data, headers
 
 
 
-    
+
 

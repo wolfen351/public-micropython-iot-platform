@@ -165,7 +165,7 @@ try:
     routes = {}
     panels = {}
     for mod in allModules:
-        SerialLog.log("Starting: ", type(mod))
+        SerialLog.log("Starting: ", str(type(mod)).replace("<class '", "").replace("'>", ""))
         runSafe(mod.start)
         routes.update(runSafe(mod.getRoutes))
         panels.update(runSafe(mod.getIndexFileName))

@@ -5,7 +5,6 @@ import uio
 import uselect as select
 import usocket as socket
 from collections import namedtuple
-import ussl
 import gc
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
@@ -77,17 +76,17 @@ class WebServer():
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
 
-        if (route == None):
+        if route is None:
             # assume misses are a file
             try:
-                if (req.path.endswith(b".js")):
+                if req.path.endswith(b".js"):
                     headers += "content-type: application/javascript\r\n"
                 return open(req.path, "rb"), headers, False
-            except OSError: #open failed
+            except OSError:  # open failed
                 headers = b"HTTP/1.1 404 Not Found\r\n"
                 return uio.BytesIO(b""), headers, False
 
-        if type(route) is bytes:
+        if isinstance(route, bytes):
             # expect a filename, so return contents of file
             SerialLog.log("Returning file:", route)
             return open(route, "rb"), headers, False
@@ -152,7 +151,7 @@ class WebServer():
         headers += "\r\n"
 
         # force strings to have utf-8 encoding so they have a defined length
-        if type(headers) is str:
+        if isinstance(headers, str):
             headers = headers.encode("utf-8")
 
         # TCP/IP MSS is 536 bytes, so create buffer of this size and
@@ -163,7 +162,7 @@ class WebServer():
         # start reading body data into the memoryview starting after
         # the headers, and writing at most the remaining space of the buffer
         # return the number of bytes written into the memoryview from the body
-        bw = body.readinto(buffmv[len(headers) :], 536 - len(headers))
+        bw = body.readinto(buffmv[len(headers):], 536 - len(headers))
         # save place for next write event
         c = WriteConn(body, buff, buffmv, [0, len(headers) + bw])
         self.conns[id(s)] = c
