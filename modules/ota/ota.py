@@ -80,6 +80,7 @@ def local_version():
             return "unknown!"
     
 def force_update():
+    SerialLog.purge()
     SerialLog.log("Forcing update")
     if check_for_updates(False):
         install_new_firmware()
