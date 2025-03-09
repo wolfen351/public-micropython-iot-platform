@@ -17,7 +17,7 @@ class SerialLog(object):
     @staticmethod
     def log(*messages):
         # Check free memory, if we have less than 10k, then clear logs
-        if mem_free() < 10000:
+        if mem_free() < 20000:
             SerialLog.logHistoryData.clear()
             SerialLog.logHistoryData.append("Log history purged due to low memory")
             collect()
