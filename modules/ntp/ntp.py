@@ -33,14 +33,14 @@ class NtpSync(BasicModule):
             if (self.sta_if.isconnected()):
                 # Set up NTP
                 try:
-                    SerialLog.log(b"Local time before synchronization: %s" %str(time.localtime()))
+                    SerialLog.log("Local time before synchronization: %s" %str(time.localtime()))
                     ntptime.settime()
-                    SerialLog.log(b"Local time after synchronization: %s" %str(time.localtime(time.time())))
+                    SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
                     localTime = time.localtime(time.time() + self.UTC_OFFSET)
-                    SerialLog.log(b"Local time after UTC Offet & DST Calculation: %s" %str(localTime))
+                    SerialLog.log("Local time after UTC Offet & DST Calculation: %s" %str(localTime))
                     self.gotTime = True
                 except Exception as e:
-                    SerialLog.log(b"Error syncing time: ", e)
+                    SerialLog.log("Error syncing time: ", e)
                     import sys
                     sys.print_exception(e)
 

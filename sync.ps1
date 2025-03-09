@@ -106,7 +106,8 @@ $sent = 0
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
 
-    Write-Progress "Uploading files:" -Status "Starting $f..." -PercentComplete (($i / $files.Count) * 100) -Id 1
+    $percentComplete = [math]::Round(($i / $files.Count) * 100)
+    Write-Progress "Uploading files:" -Status "($percentComplete%) Starting $f..." -PercentComplete $percentComplete -Id 1
 
     $LE = (Get-ChildItem $f).LastWriteTimeUtc | Get-Date -UFormat %s
 
@@ -151,7 +152,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         }
 
         # Ok send the file, all conditions satisfied
-        Write-Progress "Uploading files:" -Status "Processing file $f..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+        Write-Progress "Uploading files:" -Status "($percentComplete%) Processing file $f..." -PercentComplete $percentComplete -Id 1
 
         # MAKE SURE PATH EXISTS ON DEVICE
         $bits = $f.ToString() -split '\\'
@@ -175,14 +176,14 @@ for ($i = 0; $i -lt $files.Count; $i++) {
         if ($args -contains "-precompile") {
             # if the file is a .py file cross compile it, skip main.py, boot.py
             if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
-                Write-Progress "Uploading files:" -Status "Cross Compiling file $fn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+                Write-Progress "Uploading files:" -Status "($percentComplete%) Cross Compiling file $fn..." -PercentComplete $percentComplete -Id 1
                 python -m mpy_cross -march=xtensawin $fn
                 $fnn = $fnn -replace ".py", ".mpy"
             }
         }
 
         # send the file using ampy
-        Write-Progress "Uploading files:" -Status "Sending file $fnn..." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+        Write-Progress "Uploading files:" -Status "($percentComplete%) Sending file $fnn..." -PercentComplete $percentComplete -Id 1
         ampy --port $port put $fnn $fnn
 
         if (!($?)) {
@@ -202,7 +203,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Success, moving to next file"
         }
         else {
-            Write-Progress "Uploading files:" -Status "Sent $fnn!" -PercentComplete (($i / $files.Count) * 100)  -Id 1
+            Write-Progress "Uploading files:" -Status "($percentComplete%) Sent $fnn!" -PercentComplete $percentComplete -Id 1
         }
         $sent++
     }

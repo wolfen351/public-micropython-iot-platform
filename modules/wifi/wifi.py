@@ -249,7 +249,7 @@ class WifiHandler(BasicModule):
         except Exception as e:
             SerialLog.log('OTA failed: ' + str(e))
             print_exception(e)
-            return b"OTA failed: " + str(e).encode('utf-8'), okayHeader
+            return b"OTA failed exf: " + str(e).encode('utf-8'), okayHeader
 
     def loadnetsettings(self, params):
 
@@ -372,6 +372,6 @@ class WifiHandler(BasicModule):
                 SerialLog.log('Update installed, rebooting...')
                 reset()
         except Exception as e:
-            SerialLog.log('OTA failed: ' + str(e))
+            SerialLog.log('OTA failed ex: ' + str(e))
             print_exception(e)
 

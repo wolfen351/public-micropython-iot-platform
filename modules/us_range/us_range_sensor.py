@@ -9,6 +9,7 @@ class USRangeSensor(BasicModule):
     average_cm = -1
     average_over = 10
     bucket = []
+    sensor = None
 
     def __init__(self):
         pass

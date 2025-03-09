@@ -1,9 +1,3 @@
-"""
-Update firmware written in MicroPython over the air.
-
-MIT license; Copyright (c) 2021 Martin Komon
-"""
-
 import gc
 import uos
 from micropython import const
@@ -110,9 +104,21 @@ def check_for_updates(version_check=True) -> bool:
 
     latestUrl = ota_config['url']  + shortName + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
-    response = requests.get(latestUrl)
-    SerialLog.log("Update Response:", response.status_code, response.text)
-    if (response.status_code != 200):
+
+    for attempt in range(3):
+        try:
+            response = requests.get(latestUrl)
+        except Exception as e:
+            SerialLog.log(f"Attempt {attempt + 1} failed with error: {e}, retrying...")
+            continue
+
+        SerialLog.log("Update Response:", response.status_code, response.text)
+        if response.status_code == 200:
+            break
+
+        SerialLog.log(f"Attempt {attempt + 1} failed, retrying...")
+        response.close()
+    else:
         SerialLog.log("Unable to check for updates, bad response from server. Giving up!")
         return False
 
@@ -138,24 +144,31 @@ def check_for_updates(version_check=True) -> bool:
             SerialLog.log('Error! Not enough free space for the new firmware, staying on this version')
             return False
 
+        gc.collect()
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update on: ", downloadUrl)
         if requests == None:
             SerialLog.log("Warning: Requests is None")
-        try:
-            response = requests.get(downloadUrl)
-            SerialLog.log("Download Response:", response.status_code)
-            with open(ota_config['tmp_filename'], 'wb') as f:
-                while True:
-                    chunk = response.raw.read(512)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-            SerialLog.log("Downloaded update to flash")
-            return True
-        except Exception as e:
-            SerialLog.log("Error downloading update: ", e)
-            return False
+        for attempt in range(3):
+            try:
+                response = requests.get(downloadUrl)
+                SerialLog.log("Download Response:", response.status_code)
+                if response.status_code == 200:
+                    with open(ota_config['tmp_filename'], 'wb') as f:
+                        while True:
+                            chunk = response.raw.read(512)
+                            if not chunk:
+                                break
+                            f.write(chunk)
+                    SerialLog.log("Downloaded update to flash")
+                    return True
+                else:
+                    SerialLog.log(f"Attempt {attempt + 1} failed with status code {response.status_code}, retrying...")
+            except Exception as e:
+                SerialLog.log(f"Attempt {attempt + 1} failed with error: {str(e)}, retrying...")
+                gc.collect()
+        SerialLog.log("Error! Unable to download update after multiple attempts")
+        return False
     else:
         SerialLog.log("Up to date!")
     return False
@@ -192,8 +205,8 @@ def install_new_firmware(quiet=False):
 
     with open(ota_config['tmp_filename'], 'rb') as f1:
         with (deflate.DeflateIO(f1, deflate.GZIP)) as f2:
-            f3 = tarfile.TarFile(fileobj=f2)
-            for _file in f3:
+            tar = tarfile.TarFile(fileobj=f2)
+            for _file in tar:
                 file_name = _file.name
                 if file_name in ota_config['excluded_files']:
                     item_type = 'directory' if file_name.endswith('/') else 'file'
@@ -211,7 +224,7 @@ def install_new_firmware(quiet=False):
                         else:
                             raise e
                     continue
-                file_obj = f3.extractfile(_file)
+                file_obj = tar.extractfile(_file)
                 with open(file_name, 'wb') as f_out:
                     written_bytes = 0
                     while True:
