@@ -272,9 +272,29 @@ class WifiHandler(BasicModule):
         data = SerialLog.logHistory()
         return data, headers
     
-    def webUpload(self, params):
+    def webUpload(self, params, post_params):
         headers = okayHeader
-        data = 'UPLOAD COMPLETE'
+
+        # in post_params array, each element has a name. The file data is in filedata and the file name is in location
+        # eg: [{'name': b'location', 'filename': None, 'value': b'/k3s.yaml'}, {'name': b'file', 'filename': b'k3s.yaml', 'filedata': b'aaa'}]
+
+        location = None
+        filedata = None
+        for param in post_params:
+            if param.get(b'name', None) == b'location':
+                location = param.get(b'value', None)
+                SerialLog.log("File upload location:", location)
+                break
+            if param.get(b'name', None) == b'file':
+                filedata = param.get(b'value', None)
+                break
+
+        SerialLog.log("File upload location:", location)
+        if filedata:
+            SerialLog.log("File upload data bytes:", len(filedata))
+
+        data = 'NO FILE UPLOADED'
+        
         return data, headers
 
     def savenetsettings(self, params):

@@ -36,6 +36,10 @@ function Find-MicrocontrollerPort {
     $port = $Matches.0
 
     if ($null -eq $port) {
+        # Print a list of serial ports 
+        Write-Host "Available Serial Ports:"
+        $SerialPorts | ForEach-Object { Write-Host "$($_.Name) - $($_.Description)" }
+        
         throw "Unable to find serial port"
     }
 

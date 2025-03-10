@@ -8,7 +8,7 @@ from collections import namedtuple
 import gc
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
-ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
+ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host", "post_params"])
 
 from modules.web.server import Server
 
@@ -44,23 +44,74 @@ class WebServer():
                 return
 
     def parse_request(self, req):
-        req_lines = req.split(b"\r\n")
-        req_type, full_path, http_ver = req_lines[0].split(b" ")
-        path = full_path.split(b"?")
-        SerialLog.log("Web:", path)
-        base_path = path[0]
-        query = path[1] if len(path) > 1 else None
+        allDataLines = req.split(b"\r\n")
+        httpVerb, reqUrl, httpVersion = allDataLines[0].split(b" ")
+        reqPath = reqUrl.split(b"?")
+        SerialLog.log("Web:", httpVerb, reqPath)
+        basePath = reqPath[0]
+        queryString = reqPath[1] if len(reqPath) > 1 else None
         query_params = (
             {
                 key: val
-                for key, val in [param.split(b"=") for param in query.split(b"&")]
+                for key, val in [param.split(b"=") for param in queryString.split(b"&")]
             }
-            if query
+            if queryString
             else {}
         )
-        host = [line.split(b": ")[1] for line in req_lines if b"Host:" in line][0]
 
-        return ReqInfo(req_type, base_path, query_params, host)
+        host = [line.split(b": ")[1] for line in allDataLines if b"Host:" in line][0]
+
+        # Initialize post_params as an empty array
+        post_params = []
+
+        # If the request method is POST, parse the body
+        if httpVerb == b"POST":
+            # Get the content length
+            contentLength = int([line.split(b": ")[1] for line in allDataLines if b"Content-Length:" in line][0])
+
+            # Get the content type
+            contentType = [line.split(b": ")[1] for line in allDataLines if b"Content-Type:" in line][0]
+
+            # Get the boundary
+            multipartBoundary = contentType.split(b"boundary=")[1]
+
+            # extract each part
+            rawparts = req.split(b"--" + multipartBoundary)
+            for part in rawparts:
+                if part == b"" or part == b"--\r\n":
+                    continue
+                # Get the headers and the body
+                headers, body = part.split(b"\r\n\r\n")
+                headers = headers.split(b"\r\n")
+
+                # Remove the last two characters from the body
+                body = body[:-2]
+
+                # If the body is empty, skip
+                if body == b"":
+                    continue
+
+                # Trim whitespace from the body
+                body = body.strip()
+
+                # Get the name of the field
+                name = [line.split(b"; ")[1] for line in headers if b"name=" in line][0].split(b'"')[1]
+
+                # Get the filename of the field
+                filename = None
+                # if any header contains filename, get the filename
+                for line in headers:
+                    if b"filename=" in line:
+                        filename = line.split(b"; ")[2].split(b'"')[1]
+                        post_params.append({ "name": name, "filename": filename, "filedata": body })
+                        break
+
+                # If the filename is None, it is a regular field
+                if filename is None:
+                    post_params.append({ "name": name, "filename": filename, "value": body })
+
+
+        return ReqInfo(httpVerb, basePath, query_params, host, post_params)
 
     def get_response(self, req):
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
@@ -81,7 +132,7 @@ class WebServer():
 
         if callable(route):
             try:
-                response = route(req.params)
+                response = route(req.params, req.post_params)
                 gc.collect()
                 body = response[0] or b""
                 headers = response[1]
@@ -108,17 +159,21 @@ class WebServer():
                 self.close(s)
                 return
 
+            # log the data
+            # SerialLog.log("Data received", data)
+
             sid = id(s)
             self.request[sid] = self.request.get(sid, b"") + data
-            if len(self.request[sid]) > 1000:
-                SerialLog.log("Stream closed")
+            if len(self.request[sid]) > 10000:
+                SerialLog.log("Stream closed (too much data)")
                 self.close(s)
                 return
 
-            if data[-4:] != b"\r\n\r\n":
-                SerialLog.log("Waiting for more data...", data)
+            if data[-4:] != b"\r\n\r\n" and data[-4:] != b"--\r\n":
+                SerialLog.log("Waiting for more data...", len(data), "bytes received")
                 return
 
+            SerialLog.log("Request received, id:", sid, " Length:", len(self.request[sid]))
             req = self.parse_request(self.request.pop(sid))
             body, headers, shouldReboot = self.get_response(req)
             self.shouldReboot = shouldReboot

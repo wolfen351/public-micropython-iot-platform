@@ -103,6 +103,11 @@ if ($args -contains "-prod") {
 # send all files to the device
 $files = Get-ChildItem . -name -recurse -include *.py, *.html, *.sh, *.js, *.cfg, *.crt, *.key, *.c, *.raw, profile.json, *.json
 $sent = 0
+
+# Remove all .venv files from $files
+$files = $files | Where-Object {$_ -notlike ".venv*"}
+$files = $files | Where-Object {$_ -notlike ".vscode*"}
+
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
 
@@ -241,6 +246,6 @@ Write-Output "Rebooting..."
 Restart-Microcontroller $port
 
 # Remove the progress bar
-Write-Progress -Id 1 -Completed
+Write-Progress -Id 1 -Completed "Clearing Progress Bar"
 
 Show-SerialLog $port
