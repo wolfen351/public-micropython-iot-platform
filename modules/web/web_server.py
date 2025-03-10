@@ -78,18 +78,23 @@ class WebServer():
             # extract each part
             rawparts = req.split(b"--" + multipartBoundary)
             for part in rawparts:
+
                 if part == b"" or part == b"--\r\n":
                     continue
+
                 # Get the headers and the body
-                headers, body = part.split(b"\r\n\r\n")
+                bits = part.split(b"\r\n\r\n")
+                headers = bits[0]
+                body = b"\r\n\r\n".join(bits[1:])
+
                 headers = headers.split(b"\r\n")
+
+                # If the body is empty or just 2 chars long, skip
+                if len(body) <= 2:
+                    continue
 
                 # Remove the last two characters from the body
                 body = body[:-2]
-
-                # If the body is empty, skip
-                if body == b"":
-                    continue
 
                 # Trim whitespace from the body
                 body = body.strip()
@@ -108,8 +113,7 @@ class WebServer():
 
                 # If the filename is None, it is a regular field
                 if filename is None:
-                    post_params.append({ "name": name, "filename": filename, "value": body })
-
+                    post_params.append({ "name": name, "value": body })
 
         return ReqInfo(httpVerb, basePath, query_params, host, post_params)
 
@@ -132,7 +136,10 @@ class WebServer():
 
         if callable(route):
             try:
-                response = route(req.params, req.post_params)
+                if (req.type == b"POST"):
+                    response = route(req.params, req.post_params)
+                else:
+                    response = route(req.params)
                 gc.collect()
                 body = response[0] or b""
                 headers = response[1]

@@ -281,19 +281,19 @@ class WifiHandler(BasicModule):
         location = None
         filedata = None
         for param in post_params:
-            if param.get(b'name', None) == b'location':
-                location = param.get(b'value', None)
-                SerialLog.log("File upload location:", location)
-                break
-            if param.get(b'name', None) == b'file':
-                filedata = param.get(b'value', None)
-                break
+            if param.get('name', None) == b'location':
+                location = param.get('value', None).decode('ascii')
+            if param.get('name', None) == b'file':
+                filedata = param.get('filedata', None)
 
-        SerialLog.log("File upload location:", location)
-        if filedata:
+        if filedata and location:
             SerialLog.log("File upload data bytes:", len(filedata))
-
-        data = 'NO FILE UPLOADED'
+            # save the filedata bytes to the location on disk
+            with open(location, "wb") as f:
+                f.write(filedata)
+            data = 'FILE UPLOADED'
+        else:
+            data = 'NO FILE UPLOADED'
         
         return data, headers
 
