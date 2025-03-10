@@ -203,6 +203,7 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             Write-Output "Success, moving to next file"
         }
         else {
+            $percentComplete = [math]::Round((($i+1) / $files.Count) * 100)
             Write-Progress "Uploading files:" -Status "($percentComplete%) Sent $fnn!" -PercentComplete $percentComplete -Id 1
         }
         $sent++

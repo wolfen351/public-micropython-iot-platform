@@ -232,7 +232,9 @@ class WifiHandler(BasicModule):
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings,
             b"/getlog": self.getlog,
-            b"/forceUpdate": self.forceUpdate
+            b"/forceUpdate": self.forceUpdate,
+            b"/firmware": b"/modules/wifi/firmware.html",
+            b'/upload': self.webUpload
         }
 
     def getIndexFileName(self):
@@ -268,6 +270,11 @@ class WifiHandler(BasicModule):
     def getlog(self, params):
         headers = okayHeader
         data = SerialLog.logHistory()
+        return data, headers
+    
+    def webUpload(self, params):
+        headers = okayHeader
+        data = 'UPLOAD COMPLETE'
         return data, headers
 
     def savenetsettings(self, params):
