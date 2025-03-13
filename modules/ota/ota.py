@@ -3,6 +3,7 @@ import uos
 from micropython import const
 from serial_log import SerialLog
 import ujson
+import network
 
 GZDICT_SZ = const(31)
 ota_config = {}
@@ -82,12 +83,34 @@ def force_update():
         return "Update failed"
     return "Update forced"
 
+def check_for_update_file() -> bool:
+    try:
+        if uos.stat(ota_config['tmp_filename']):
+            SerialLog.log("Previous firmware found, installing it")
+            # if the file is too small delete it
+            if uos.stat(ota_config['tmp_filename'])[6] < 10000:
+                SerialLog.log("Firmware file is too small, deleting it")
+                uos.remove(ota_config['tmp_filename'])
+                return False
+            
+            return True
+    except OSError as e:
+        SerialLog.log("No previous firmware file found")
+    return False
+
 def check_for_updates(version_check=True) -> bool:
     """
     Check for available updates, download new firmware if available and return True/False whether
     it's ready to be installed, there is enough free space and file hash matches.
     """
     gc.collect()
+
+    if not load_ota_cfg():
+        return False
+
+    # If we have previously downloaded firmware, we should install it
+    if (check_for_update_file()):
+        return True
 
     try:
         import requests
@@ -96,8 +119,6 @@ def check_for_updates(version_check=True) -> bool:
         import mip
         mip.install('requests')
 
-    if not load_ota_cfg():
-        return False
 
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
@@ -194,6 +215,7 @@ def install_new_firmware(quiet=False):
         import mip
         mip.install('deflate')
         import deflate
+        del mip
 
     try:
         import tarfile
@@ -202,6 +224,17 @@ def install_new_firmware(quiet=False):
         import mip
         mip.install('tarfile')
         import tarfile
+        del mip
+
+    # take drastic measures to ensure that enough ram is free
+    if (gc.mem_free() < 40000):
+        SerialLog.purge()
+        sta_if = network.WLAN(network.STA_IF)
+        sta_if.active(False)
+        del sta_if    
+        gc.collect()
+    SerialLog.log("Free memory: ", gc.mem_free())
+    
 
     with open(ota_config['tmp_filename'], 'rb') as f1:
         with (deflate.DeflateIO(f1, deflate.GZIP)) as f2:
