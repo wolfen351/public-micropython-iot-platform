@@ -1,18 +1,26 @@
+import network
 import json
 from modules.basic.basic_module import BasicModule
 from modules.web.web_processor import okayHeader
 from serial_log import SerialLog
 import ujson
 
+# Check for WiFi connectivity
+def is_wifi_connected():
+    wlan = network.WLAN(network.STA_IF)
+    return wlan.isconnected()
+
 # Try to import datetime, if it fails download and install it
 try:
     from datetime import datetime
 except ImportError:
-    import mip
-    mip.install("datetime")
-    from datetime import datetime
-
-
+    if is_wifi_connected():
+        import mip
+        mip.install("datetime")
+        from datetime import datetime
+    else:
+        SerialLog.log("Error: Unable to install datetime module. No WiFi connection.")
+        datetime = None
 
 class TempHistory(BasicModule):
 
@@ -62,6 +70,9 @@ class TempHistory(BasicModule):
 
         # skip if we dont have time
         if (not "time" in telemetry):
+            return
+
+        if datetime is None:
             return
 
         try:
