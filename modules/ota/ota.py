@@ -25,12 +25,6 @@ def load_ota_cfg():
         return False
 
 def recursive_delete(path: str):
-    """
-    Delete a directory recursively, removing files from all sub-directories before
-    finally removing empty directory. Works for both files and directories.
-
-    No limit to the depth of recursion, will fail on too deep dir structures.
-    """
     # prevent deleting the whole filesystem and skip non-existent files
     if not path or not uos.stat(path):
         return
@@ -48,12 +42,6 @@ def recursive_delete(path: str):
     uos.rmdir(path)
 
 def check_free_space(min_free_space: int) -> bool:
-    """
-    Check available free space in filesystem and return True/False if there is enough free space
-    or not.
-
-    min_free_space is measured in kB
-    """
     if not any([isinstance(min_free_space, int), isinstance(min_free_space, float)]):
         SerialLog.log('min_free_space must be an int or float')
         return False
@@ -99,10 +87,6 @@ def check_for_update_file() -> bool:
     return False
 
 def check_for_updates(version_check=True) -> bool:
-    """
-    Check for available updates, download new firmware if available and return True/False whether
-    it's ready to be installed, there is enough free space and file hash matches.
-    """
     gc.collect()
 
     if not load_ota_cfg():
