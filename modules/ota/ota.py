@@ -235,36 +235,39 @@ def install_new_firmware(quiet=False):
     SerialLog.log("Free memory: ", gc.mem_free())
     
 
-    with open(ota_config['tmp_filename'], 'rb') as f1:
-        with (deflate.DeflateIO(f1, deflate.GZIP)) as f2:
-            tar = tarfile.TarFile(fileobj=f2)
-            for _file in tar:
-                file_name = _file.name
-                if file_name in ota_config['excluded_files']:
-                    item_type = 'directory' if file_name.endswith('/') else 'file'
-                    SerialLog.log('Skipping excluded %s %s' % (item_type, file_name))
-                    continue
+    try:
+        with open(ota_config['tmp_filename'], 'rb') as f1:
+            with (deflate.DeflateIO(f1, deflate.GZIP)) as f2:
+                tar = tarfile.TarFile(fileobj=f2)
+                for _file in tar:
+                    file_name = _file.name
+                    if file_name in ota_config['excluded_files']:
+                        item_type = 'directory' if file_name.endswith('/') else 'file'
+                        SerialLog.log('Skipping excluded %s %s' % (item_type, file_name))
+                        continue
 
-                if file_name.endswith('/'):  # is a directory
-                    try:
-                        SerialLog.log('creating directory %s ... ' % file_name)
-                        uos.mkdir(file_name[:-1])  # without trailing slash or fail with errno 2
-                        SerialLog.log('ok')
-                    except OSError as e:
-                        if e.errno == 17:
-                            SerialLog.log('already exists')
-                        else:
-                            raise e
-                    continue
-                file_obj = tar.extractfile(_file)
-                with open(file_name, 'wb') as f_out:
-                    written_bytes = 0
-                    while True:
-                        buf = file_obj.read(512)
-                        if not buf:
-                            break
-                        written_bytes += f_out.write(buf)
-                    SerialLog.log('file %s (%s B) written to flash' % (file_name, written_bytes))
+                    if file_name.endswith('/'):  # is a directory
+                        try:
+                            SerialLog.log('creating directory %s ... ' % file_name)
+                            uos.mkdir(file_name[:-1])  # without trailing slash or fail with errno 2
+                            SerialLog.log('ok')
+                        except OSError as e:
+                            if e.errno == 17:
+                                SerialLog.log('already exists')
+                            else:
+                                raise e
+                        continue
+                    file_obj = tar.extractfile(_file)
+                    with open(file_name, 'wb') as f_out:
+                        written_bytes = 0
+                        while True:
+                            buf = file_obj.read(512)
+                            if not buf:
+                                break
+                            written_bytes += f_out.write(buf)
+                        SerialLog.log('file %s (%s B) written to flash' % (file_name, written_bytes))
+    except EOFError as e:
+        SerialLog.log("EOF Error: ", e)
 
     uos.remove(ota_config['tmp_filename'])
     if load_ota_cfg():
