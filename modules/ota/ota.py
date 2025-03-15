@@ -126,7 +126,7 @@ def check_for_updates(version_check=True) -> bool:
     latestUrl = ota_config['url']  + shortName + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
 
-    for attempt in range(3):
+    for attempt in range(20):
         try:
             response = requests.get(latestUrl)
         except Exception as e:
@@ -169,7 +169,7 @@ def check_for_updates(version_check=True) -> bool:
         gc.collect()
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update on: ", downloadUrl)
-        for attempt in range(3):
+        for attempt in range(20):
             try:
                 response = requests.get(downloadUrl)
                 SerialLog.log("Download Response:", response.status_code)
