@@ -147,6 +147,7 @@ def check_for_updates(version_check=True) -> bool:
     min_free_space, *remote_hash = optional if optional else (0, '')
     min_free_space = int(min_free_space)
     remote_hash = remote_hash[0] if remote_hash else ''
+    response.close()
 
     try:
         with open('version', 'r') as f:
@@ -168,8 +169,6 @@ def check_for_updates(version_check=True) -> bool:
         gc.collect()
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
         SerialLog.log("Fetching update on: ", downloadUrl)
-        if requests == None:
-            SerialLog.log("Warning: Requests is None")
         for attempt in range(3):
             try:
                 response = requests.get(downloadUrl)
