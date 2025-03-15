@@ -130,14 +130,14 @@ def check_for_updates(version_check=True) -> bool:
         try:
             response = requests.get(latestUrl)
         except Exception as e:
-            SerialLog.log(f"Attempt {attempt + 1} failed with error: {e}, retrying...")
+            SerialLog.log("Attempt", attempt + 1, "failed with error: ", e, ", retrying...")
             continue
 
         SerialLog.log("Update Response:", response.status_code, response.text)
         if response.status_code == 200:
             break
 
-        SerialLog.log(f"Attempt {attempt + 1} failed, retrying...")
+        SerialLog.log("Attempt", attempt + 1, "failed, retrying...")
         response.close()
     else:
         SerialLog.log("Unable to check for updates, bad response from server. Giving up!")
@@ -184,9 +184,9 @@ def check_for_updates(version_check=True) -> bool:
                     SerialLog.log("Downloaded update to flash")
                     return True
                 else:
-                    SerialLog.log(f"Attempt {attempt + 1} failed with status code {response.status_code}, retrying...")
+                    SerialLog.log("Attempt", attempt + 1, "failed with status code ", response.status_code, "retrying...")
             except Exception as e:
-                SerialLog.log(f"Attempt {attempt + 1} failed with error: {str(e)}, retrying...")
+                SerialLog.log("Attempt", attempt + 1, "failed with error: ", str(e), "retrying...")
                 gc.collect()
         SerialLog.log("Error! Unable to download update after multiple attempts")
         return False
