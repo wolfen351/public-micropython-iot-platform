@@ -1,0 +1,1 @@
+{"wifi": {"ip": "", "netmask": "", "ssid": "Sonic", "gateway": "", "password": "HudsonTobey2014", "type": "DHCP"}, "homeassistant": {"enabled": "Y", "mqtt_password": "", "mqtt_server": "192.168.1.137", "mqtt_user": ""}}

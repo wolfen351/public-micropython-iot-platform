@@ -16,5 +16,5 @@ Write-Host "Press any key to continue..."
 $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
 esptool --chip esp32 --port $port erase_flash
-esptool --chip esp32 --port $port write_flash -z 0x1000 ./firmware/ESP32_GENERIC-SPIRAM-20240105-v1.22.1.bin
+esptool --chip esp32 --port $port write_flash -z 0x1000 ./firmware/ESP32_GENERIC-SPIRAM-20241129-v1.24.1.bin
 

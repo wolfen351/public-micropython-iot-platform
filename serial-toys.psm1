@@ -19,6 +19,50 @@ function Test-Port {
     }
 }
 
+function CopyFileFromMicrocontrollerToPc {
+
+    # This uses ampy to copy a file from the microcontroller to the PC
+    param(
+        $file,
+        $port
+    )
+
+    while ($null -eq $port)
+    {
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
+    }
+
+    ampy --port $port get $file > $file
+}
+
+function CopyFileFromPcToMicrocontroller {
+
+    # This uses ampy to copy a file from the PC to the microcontroller
+    param(
+        $file,
+        $port
+    )
+
+    while ($null -eq $port)
+    {
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
+    }
+
+    ampy --port $port put $file
+}
+
 function Find-MicrocontrollerPort {
     $acceptableDescriptions = @(
         'USB Serial Device',

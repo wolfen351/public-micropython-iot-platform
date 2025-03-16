@@ -1,0 +1,23 @@
+{
+    "name": "Esp32R4 4 Relays Board",
+    "shortName": "esp32r4v3-4relay",
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "four_relay", "four_button", "dion_hallway_lights", "pir"],
+    "cpuSpeed": 160000000,
+    "statusLedPin" : 2,
+    "ota": {
+        "url": "https://firmware.wolfen.nz/firmware",
+        "tmp_filename": "new_firmware.tar.gz",
+        "excluded_files": [],
+        "delete": []
+    },
+    "four_button": {
+        "commandsOn": [ "/relay/flip/1","/relay/flip/2","/relay/flip/3","/relay/flip/4"],
+        "commandsOff": [ "","","",""]
+    },
+    "pir": {
+         "pinA": 23,      
+         "pinACommand": "/trigger/0", 
+         "pinB": 19,       
+         "pinBCommand": "/trigger/1"
+    }
+}
