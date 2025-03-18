@@ -1,6 +1,7 @@
 {
     "name": "Esp32R4 Hallway Lights",
     "shortName": "esp32r4v3-dionhallwaylights",
+    "suppressHostName": true,
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "four_relay", "four_button", "dion_hallway_lights", "pir"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 2,

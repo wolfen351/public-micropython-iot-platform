@@ -1,6 +1,7 @@
 {
     "name": "Esp32R4 4 Relays Board",
     "shortName": "esp32r4v3-4relay",
+    "suppressHostName": true,
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "four_relay", "four_button", "dion_hallway_lights", "pir"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 2,

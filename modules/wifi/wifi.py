@@ -43,6 +43,8 @@ class WifiHandler(BasicModule):
 
         BasicModule.start(self)
         self.hostname = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
+        # limit hostname to 15 chars
+        self.hostname = self.hostname[:15]
 
         # If wifi is configured, then attempt to connect
         if (self.defaultSSID != ssid or self.defaultPassword != password):
@@ -338,13 +340,18 @@ class WifiHandler(BasicModule):
                 except Exception as e:
                     SerialLog.log("Failed to set power management mode to NONE")
 
-            # Set The DCHP Hostname
-            try:
-                time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
-                self.sta_if.config(dhcp_hostname=self.hostname)
-            except Exception as e:
-                SerialLog.log("Failed to set DHCP hostname")
-                print_exception(e)
+            SerialLog.log("Suppress Hostname:", self.basicSettings.get("suppressHostName", False))
+            if self.basicSettings.get("suppressHostName", False) == True:
+                SerialLog.log("Suppressing DHCP hostname")
+            else:
+                # Set The DCHP Hostname
+                try:
+                    SerialLog.log("Setting DHCP hostname", self.hostname)
+                    time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
+                    self.sta_if.config(dhcp_hostname=self.hostname)
+                except Exception as e:
+                    SerialLog.log("Failed to set DHCP hostname")
+                    print_exception(e)
 
             # set static ip
             type = self.getPref("wifi", "type", "DHCP")
