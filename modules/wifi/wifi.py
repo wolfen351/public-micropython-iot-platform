@@ -340,7 +340,6 @@ class WifiHandler(BasicModule):
                 except Exception as e:
                     SerialLog.log("Failed to set power management mode to NONE")
 
-            SerialLog.log("Suppress Hostname:", self.basicSettings.get("suppressHostName", False))
             if self.basicSettings.get("suppressHostName", False) == True:
                 SerialLog.log("Suppressing DHCP hostname")
             else:
