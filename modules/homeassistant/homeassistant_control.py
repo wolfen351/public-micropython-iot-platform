@@ -190,7 +190,7 @@ class HomeAssistantControl(BasicModule):
             self.commands.append(msg)
     
     def connect_and_subscribe(self):
-        if ticks_diff(ticks_ms(), self.lastConnectTime) > 30000:
+        if ticks_diff(ticks_ms(), self.lastConnectTime) > 90000:
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
