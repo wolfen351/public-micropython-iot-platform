@@ -57,7 +57,8 @@ if ($args -contains "-wipe" -or $args -contains "-prod") {
         $fn = $f -replace "\s", ""
         $i++
         # Use Write Progress to show progress
-        Write-Progress "Deleting:" -Status "Deleting file $fn.." -PercentComplete (($i / $files.Count) * 100)  -Id 1
+        $percentComplete = [math]::Round(($i / $files.Count) * 100)
+        Write-Progress "Deleting:" -Status "($percentComplete%) Deleting file $fn.." -PercentComplete (($i / $files.Count) * 100)  -Id 1
 
         # skip prefs.json if -nopref is specified
         if ($args -contains "-nopref" -and $fn -eq "prefs.json") {
@@ -108,11 +109,14 @@ $sent = 0
 $files = $files | Where-Object {$_ -notlike ".venv*"}
 $files = $files | Where-Object {$_ -notlike ".vscode*"}
 
+# Create an array to store the files to send
+$filesToSend = @()
+
 for ($i = 0; $i -lt $files.Count; $i++) {
     $f = $files[$i]
 
     $percentComplete = [math]::Round(($i / $files.Count) * 100)
-    Write-Progress "Uploading files:" -Status "($percentComplete%) Starting $f..." -PercentComplete $percentComplete -Id 1
+    Write-Progress "Processing files:" -Status "($percentComplete%) Checking $f..." -PercentComplete $percentComplete -Id 1
 
     $LE = (Get-ChildItem $f).LastWriteTimeUtc | Get-Date -UFormat %s
 
@@ -156,63 +160,76 @@ for ($i = 0; $i -lt $files.Count; $i++) {
             continue;
         }
 
-        # Ok send the file, all conditions satisfied
-        Write-Progress "Uploading files:" -Status "($percentComplete%) Processing file $f..." -PercentComplete $percentComplete -Id 1
+        # Add the file to the array to send
+        $filesToSend += $f
+    }
+}
 
-        # MAKE SURE PATH EXISTS ON DEVICE
-        $bits = $f.ToString() -split '\\'
-        $dir = ""
-        for ($j = 0; $j -lt $bits.Count - 1; $j++) {
-            if ($j -gt 0) {
-                $dir = $dir + "/" + $bits[$j]
-            }
-            else {
-                $dir = $bits[$j]
-            }
+# Let user know how many files will be transferred
+Write-Output "Files to send: $($filesToSend.Count)"
 
-            ampy --port $port mkdir $dir > $null  2>&1
-        }
+# Send all the identified files
+for ($i = 0; $i -lt $filesToSend.Count; $i++) {
+    $f = $filesToSend[$i]
 
-        # SEND THE FILE
-        $fn = "$($f)"
-        $fnn = $fn -replace "\\", "/"
+    $percentComplete = [math]::Round(($i / $filesToSend.Count) * 100)
 
-        # Only precompile if -precompile is specified
-        if ($args -contains "-precompile") {
-            # if the file is a .py file cross compile it, skip main.py, boot.py
-            if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
-                Write-Progress "Uploading files:" -Status "($percentComplete%) Cross Compiling file $fn..." -PercentComplete $percentComplete -Id 1
-                python -m mpy_cross -march=xtensawin $fn
-                $fnn = $fnn -replace ".py", ".mpy"
-            }
-        }
+    # Ok send the file, all conditions satisfied
+    Write-Progress "Uploading files:" -Status "($percentComplete%) Processing file $f..." -PercentComplete $percentComplete -Id 1
 
-        # send the file using ampy
-        Write-Progress "Uploading files:" -Status "($percentComplete%) Sending file $fnn..." -PercentComplete $percentComplete -Id 1
-        ampy --port $port put $fnn $fnn
-
-        if (!($?)) {
-            Write-Output "Failed to send file to the board, attempting to delete and send again.."
-            $boardFile = "$(ampy --port $port get $fnn)" 
-            Write-Output "File on microcontoller is $($boardFile.length) bytes"
-            Write-Output "File on disk is $((Get-Item $fnn).length) bytes"
-
-            Write-Output "Deleting file on microcontroller:"
-            ampy --port $port rm $fnn
-            Write-Output "Trying another copy:"
-            ampy --port $port put $fnn $fnn
-            if (!($?)) {
-                Write-Output "Failed again. Giving up."
-                exit 3
-            }
-            Write-Output "Success, moving to next file"
+    # MAKE SURE PATH EXISTS ON DEVICE
+    $bits = $f.ToString() -split '\\'
+    $dir = ""
+    for ($j = 0; $j -lt $bits.Count - 1; $j++) {
+        if ($j -gt 0) {
+            $dir = $dir + "/" + $bits[$j]
         }
         else {
-            $percentComplete = [math]::Round((($i+1) / $files.Count) * 100)
-            Write-Progress "Uploading files:" -Status "($percentComplete%) Sent $fnn!" -PercentComplete $percentComplete -Id 1
+            $dir = $bits[$j]
         }
-        $sent++
+
+        ampy --port $port mkdir $dir > $null  2>&1
     }
+
+    # SEND THE FILE
+    $fn = "$($f)"
+    $fnn = $fn -replace "\\", "/"
+
+    # Only precompile if -precompile is specified
+    if ($args -contains "-precompile") {
+        # if the file is a .py file cross compile it, skip main.py, boot.py
+        if ($fn -like "*.py" -and $fn -ne "main.py" -and $fn -ne "boot.py") {
+            Write-Progress "Uploading files:" -Status "($percentComplete%) Cross Compiling file $fn..." -PercentComplete $percentComplete -Id 1
+            python -m mpy_cross -march=xtensawin $fn
+            $fnn = $fnn -replace ".py", ".mpy"
+        }
+    }
+
+    # send the file using ampy
+    Write-Progress "Uploading files:" -Status "($percentComplete%) Sending file $fnn..." -PercentComplete $percentComplete -Id 1
+    ampy --port $port put $fnn $fnn
+
+    if (!($?)) {
+        Write-Output "Failed to send file to the board, attempting to delete and send again.."
+        $boardFile = "$(ampy --port $port get $fnn)" 
+        Write-Output "File on microcontoller is $($boardFile.length) bytes"
+        Write-Output "File on disk is $((Get-Item $fnn).length) bytes"
+
+        Write-Output "Deleting file on microcontroller:"
+        ampy --port $port rm $fnn
+        Write-Output "Trying another copy:"
+        ampy --port $port put $fnn $fnn
+        if (!($?)) {
+            Write-Output "Failed again. Giving up."
+            exit 3
+        }
+        Write-Output "Success, moving to next file"
+    }
+    else {
+        $percentComplete = [math]::Round((($i+1) / $filesToSend.Count) * 100)
+        Write-Progress "Uploading files:" -Status "($percentComplete%) Sent $fnn!" -PercentComplete $percentComplete -Id 1
+    }
+    $sent++
 }
 
 if ($sent -gt 0) {
