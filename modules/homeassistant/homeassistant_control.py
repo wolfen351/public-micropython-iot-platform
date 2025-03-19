@@ -96,7 +96,7 @@ class HomeAssistantControl(BasicModule):
             self.telemetry = telemetry.copy()
         
         if ticks_diff(ticks_ms(), self.lastKeepAliveSend) > 10000:
-            self.safePublish("%s/%s/%s/keepalive" % (self.haPrefixUrl, "sensor", self.deviceId), "%s" % (ticks_ms()), False)
+            self.safePublish("%s/%s/%s/keepalive" % (self.haPrefixUrl, "sensor", self.deviceId), "online", False)
             self.lastKeepAliveSend = ticks_ms()
 
     def sendSingleTelemetry(self, attr, value, telemetry):
@@ -194,8 +194,9 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
-            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""), 300)
+            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""), 30)
             self.client.set_callback(self.sub_cb)
+            self.client.set_last_will("%s/sensor/%s/keepalive" % (self.haPrefixUrl, self.deviceId), "offline", True)
             self.client.connect()
             self.telemetry.clear()
             self.topics.clear()
@@ -218,7 +219,9 @@ class HomeAssistantControl(BasicModule):
                 "mdl": self.basicSettings["shortName"],
                 "cu": "http://%s" % (self.ip)
             },
-            "stat_t": "~/state"
+            "stat_t": "~/state",
+            "avty_t": "%s/sensor/%s/keepalive" % (self.haPrefixUrl, self.deviceId),
+            "pl_avail": "online",
         }
         if isinstance(value, (int, float)):
             basicPayload.update({
