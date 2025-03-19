@@ -138,13 +138,27 @@ class DionHallwayLightsControl(BasicModule):
         return {
             b"/light": b"/modules/dion_hallway_lights/settings.html",
             b"/lightsavesettings": self.webSaveSettings,
-            b"/lightloadsettings": self.webLoadSettings
+            b"/lightloadsettings": self.webLoadSettings,
+            b"/hallwaylight/trigger/1": self.webtrigger1,
+            b"/hallwaylight/trigger/2": self.webtrigger2
         }
      
     def getIndexFileName(self):
         return { "dion_hallway_lights": "/modules/dion_hallway_lights/index.html" }
 
     # Internal Methods
+    def webtrigger1(self, params):
+        headers = okayHeader
+        data = b""
+        self.triggerState[0] = 1
+        return data, headers
+    
+    def webtrigger2(self, params):
+        headers = okayHeader
+        data = b""
+        self.triggerState[1] = 1
+        return data, headers
+
     def webLoadSettings(self, params):
         headers = okayHeader
         data = b"{ \"timeOn\": %s, \"delay\": %s }" % (self.stayOnFor, self.delayBetweenLights)
