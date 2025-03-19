@@ -93,7 +93,7 @@ class ThingsboardControl(BasicModule):
         thingsThatChanged = 0
         for attr, value in newTelemetry.items():
             if (value != self.telemetry.get(attr)):
-                if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time or voltage every second
+                if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi" and attr != "wifiUptime"): # dont post the time or voltage every second
                     thingsThatChanged += 1
         return thingsThatChanged > 0
 
