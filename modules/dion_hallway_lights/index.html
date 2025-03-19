@@ -81,17 +81,17 @@
 </style>
 
 <div class="panel" id="lights4">
-  <div class="title">4 Lights</div>
+  <div class="title">Hallway Lights</div>
 
   <div class="status">
-    <div class="trigger" dataitem="trigger/1" datadisplay="onoff">T1</div>
+    <div class="trigger" dataitem="trigger/1" datadisplay="onoff" onclick="post('/4light/trigger/1')">T1</div>
 
     <div class="light" dataitem="light1" datadisplay="onoff">1</div>
     <div class="light" dataitem="light2" datadisplay="onoff">2</div>
     <div class="light" dataitem="light3" datadisplay="onoff">3</div>
     <div class="light" dataitem="light4" datadisplay="onoff">4</div>
 
-    <div class="trigger" dataitem="trigger/2" datadisplay="onoff">T2</div>
+    <div class="trigger" dataitem="trigger/2" datadisplay="onoff" onclick="post('/4light/trigger/2')">T2</div>
   </div>
 
   <div class="nav">
