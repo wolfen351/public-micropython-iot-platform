@@ -1,5 +1,17 @@
 param($profileName) 
 
+# If /? is specified then print help
+if ($args -contains "/?") {
+    Write-Output "Usage: sync.ps1 [profileName] [-wipe] [-prod] [-force] [-nopref] [-precompile]"
+    Write-Output "profileName: The name of the profile to sync"
+    Write-Output "-wipe: Wipe all files on the board before syncing"
+    Write-Output "-prod: Sync only the minimum files for flashing, with version 1.0.0"
+    Write-Output "-force: Sync all files, regardless of last edit time"
+    Write-Output "-nopref: Skip sending prefs.json"
+    Write-Output "-precompile: Precompile .py files to .mpy files"
+    exit 0
+}
+
 # Globals
 Import-Module .\serial-toys.psm1
 

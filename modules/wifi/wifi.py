@@ -43,8 +43,6 @@ class WifiHandler(BasicModule):
 
         BasicModule.start(self)
         self.hostname = "%s-%s" % (self.basicSettings['shortName'], self.client_id.decode('ascii')[-4:])
-        # limit hostname to 15 chars
-        self.hostname = self.hostname[:15]
 
         # If wifi is configured, then attempt to connect
         if (self.defaultSSID != ssid or self.defaultPassword != password):

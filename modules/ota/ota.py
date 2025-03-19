@@ -74,12 +74,28 @@ def force_update():
 def check_for_update_file() -> bool:
     try:
         if uos.stat(ota_config['tmp_filename']):
-            SerialLog.log("Previous firmware found, installing it")
+            SerialLog.log("Previous firmware found")
+            # make a new file next to tmp_filename with a .1 extension to indicate that we are attempting to install it
+            # if the file exists with the .1 extension, then we delete both files
+            # this allows us to recover from a failed install
+            try:
+                uos.stat(ota_config['tmp_filename'] + ".1")
+                SerialLog.log("Previous attempt to install firmware file failed. Deleting it")
+                uos.remove(ota_config['tmp_filename'])
+                uos.remove(ota_config['tmp_filename'] + ".1")
+                return False
+            except OSError:
+                SerialLog.log("This is the first attempt to install")
+
             # if the file is too small delete it
             if uos.stat(ota_config['tmp_filename'])[6] < 10000:
                 SerialLog.log("Firmware file is too small, deleting it")
                 uos.remove(ota_config['tmp_filename'])
                 return False
+            
+            # create a blank file with .1 extension to show we are attempting to install the firmware
+            with open(ota_config['tmp_filename'] + ".1", 'w') as f:
+                f.write("Attempt")
             
             return True
     except OSError as e:
