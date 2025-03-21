@@ -21,7 +21,9 @@
 * LilyGo-T-OI-PLUS - This is a ESP32 based board that has a built in battery and charging circuit: https://github.com/Xinyuan-LilyGO/LilyGo-T-OI-PLUS
 * LilyGo-T-Internet-POE - This is a ESP32 based board with ethernet support:  https://www.lilygo.cc/products/t-internet-poe
 * Wemos S2 Mini - This is a small ESP32 that has USB-C support: https://www.wemos.cc/en/latest/s2/s2_mini.html 
-* Sonoff Basic R4 - This is a mains power rated relay board: https://itead.cc/product/sonoff-basicr4-wi-fi-smart-switch/ 
+* Sonoff Basic R4 - This is a mains power rated relay board: https://itead.cc/product/sonoff-basicr4-wi-fi-smart-switch/
+* Czzl Esp32 WROOM - This is a little board with 2 relays on it powered by a ESP32WROOM32E: https://www.aliexpress.com/item/1005007481369265.html
+     * Warning: This board has very little RAM only 200k, so while it works, I've had issues with memory management, including broken web responses.
 
 Many other boards will probably work too!
 
