@@ -9,3 +9,4 @@ profile.json
 prefs.json
 *.mpy
 __pycache__
+/.vscode
