@@ -1,1 +1,0 @@
-https://community.blynk.cc/t/using-the-lilygo-ttgo-t-internet-poe-esp32-ethernet-board-with-blynk/63309
