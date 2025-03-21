@@ -36,24 +36,24 @@ Many other boards will probably work too!
 * [ds18b20](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ds18b20) - This reads the temperature from a DS18B20 sensor
 * [four_button](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_button) - This exposes 4 buttons on a board to mqtt etc (Currently used by the esp32r4v3 board)
 * [four_relay](https://github.com/wolfen351/public-micropython-iot-platform/wiki/four_relay) - This exposes 4 relays on a board to mqtt etc (Currently used by the esp32r4v3 board)
-* gps - This reads the GPS data from a GPS module
-* home_assistant - This sends data and receives commands to/from a home assistant instance via mqtt (Auto discovery etc is supported)
-* ledstrip - This controls a WS2812B LED strip
-* ledstrip_remote - This presents a simple UI on a touchscreen () to be the remote control unit for a WS2812B LED strip.
-* lilygo_battery - This exposes the battery voltage and charging status of a LilyGo T-OI-PLUS board
-* mosfet - This exposes the 4 mosfets on this great little board to mqtt etc
-* mqtt - This sends data and receives commands to/from a mqtt broker
-* ntp - This adds ntp support (currently fairly primitive)
-* ota - This adds in OTA update support. You will need a web server to host the update packages
-* pir - This reads the data from a PIR sensor
-* relay - This controls a relay
-* temphistory - This stores a history of temperature readings, saved locally on the board and sends it to mqtt and the web
-* thingsboard - This sends data and receives commands to/from a thingsboard instance via mqtt
-* touchscreen - This adds a touchscreen support to the board
-* us_range - This allows the board to read data from a US-100 ultrasonic range sensor
-* wdt - This exposes the WDT function on the board, so you can reset the board if it locks up
-* web - This enables the board to have a web ui including configuration of wifi and all modules can contribute and use the web ui
-* wifi - This enables the board to connect to wifi
+* [gps](https://github.com/wolfen351/public-micropython-iot-platform/wiki/gps) - This reads the GPS data from a GPS module
+* [home_assistant](https://github.com/wolfen351/public-micropython-iot-platform/wiki/home_assistant) - This sends data and receives commands to/from a home assistant instance via mqtt (Auto discovery etc is supported)
+* [ledstrip](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ledstrip) - This controls a WS2812B LED strip
+* [ledstrip_remote](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ledstrip_remote) - This presents a simple UI on a touchscreen () to be the remote control unit for a WS2812B LED strip.
+* [lilygo_battery](https://github.com/wolfen351/public-micropython-iot-platform/wiki/lilygo_battery) - This exposes the battery voltage and charging status of a LilyGo T-OI-PLUS board
+* [mosfet](https://github.com/wolfen351/public-micropython-iot-platform/wiki/mosfet) - This exposes the 4 mosfets on this great little board to mqtt etc
+* [mqtt](https://github.com/wolfen351/public-micropython-iot-platform/wiki/mqtt) - This sends data and receives commands to/from a mqtt broker
+* [ntp](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ntp) - This adds ntp support (currently fairly primitive)
+* [ota](https://github.com/wolfen351/public-micropython-iot-platform/wiki/ota) - This adds in OTA update support. You will need a web server to host the update packages
+* [pir](https://github.com/wolfen351/public-micropython-iot-platform/wiki/pir) - This reads the data from a PIR sensor
+* [relay](https://github.com/wolfen351/public-micropython-iot-platform/wiki/relay) - This controls a relay
+* [temphistory](https://github.com/wolfen351/public-micropython-iot-platform/wiki/temphistory) - This stores a history of temperature readings, saved locally on the board and sends it to mqtt and the web
+* [thingsboard](https://github.com/wolfen351/public-micropython-iot-platform/wiki/thingsboard) - This sends data and receives commands to/from a thingsboard instance via mqtt
+* [touchscreen](https://github.com/wolfen351/public-micropython-iot-platform/wiki/touchscreen) - This adds a touchscreen support to the board
+* [us_range](https://github.com/wolfen351/public-micropython-iot-platform/wiki/us_range) - This allows the board to read data from a US-100 ultrasonic range sensor
+* [wdt](https://github.com/wolfen351/public-micropython-iot-platform/wiki/wdt) - This exposes the WDT function on the board, so you can reset the board if it locks up
+* [web](https://github.com/wolfen351/public-micropython-iot-platform/wiki/web) - This enables the board to have a web ui including configuration of wifi and all modules can contribute and use the web ui
+* [wifi](https://github.com/wolfen351/public-micropython-iot-platform/wiki/wifi) - This enables the board to connect to wifi
 
 
 
