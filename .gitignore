@@ -8,3 +8,4 @@ profile.json
 /lib/
 prefs.json
 *.mpy
+__pycache__
