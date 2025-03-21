@@ -16,5 +16,6 @@ Write-Host "Press any key to continue..."
 $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
 esptool --chip esp32 --port $port erase_flash
+# 1.20 last version that works, after this the wifi is causing issues - setting the dhcp hostname causes crashes
+# 1.22 now works, provided that the setting is set to suppress setting the dhcp hostname in the profile
 esptool --chip esp32 --port $port write_flash -z 0x1000 ./firmware/ESP32_GENERIC-SPIRAM-20240105-v1.22.1.bin
-
