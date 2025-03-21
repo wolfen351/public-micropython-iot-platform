@@ -16,7 +16,7 @@ class Relay(BasicModule):
         BasicModule.start(self)
         self.flipcommand = self.basicSettings["relay"]["flipcommand"]
         self.pinnumber = self.basicSettings["relay"]["pin"]
-        self.S1 = Pin(self.pinnumber, Pin.OUT)
+        self.S1 = Pin(self.pinnumber, Pin.OUT, pull=Pin.PULL_DOWN)
         self.Switches.append(self.S1)
         BasicModule.free(self) # release the ram
 

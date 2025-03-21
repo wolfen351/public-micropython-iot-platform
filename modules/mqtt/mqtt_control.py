@@ -97,7 +97,7 @@ class MqttControl(BasicModule):
             thingsThatChanged = 0
             for attr, value in newTelemetry.items():
                 if (value != self.telemetry.get(attr)):
-                    if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi"): # dont post the time, voltage or rssi every second
+                    if (attr != "time" and attr != "voltage" and attr != "freeram" and attr != "rssi" and attr != 'wifiUptime'): # dont post the time, voltage or rssi every second
                         thingsThatChanged += 1
             return thingsThatChanged > 0
 
@@ -140,6 +140,7 @@ class MqttControl(BasicModule):
                 SerialLog.log("Firmware version match, no action (we are on: ", local_version(), ")")
 
     def connect_and_subscribe(self):
+        SerialLog.log('Connecting to %s MQTT broker' % (self.mqtt_server))
         self.client = MQTTClient(b"mqtt-%s" % (self.client_id), self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password, 300) # 300 second keepalive
         self.client.set_callback(self.sub_cb)
         self.client.connect()

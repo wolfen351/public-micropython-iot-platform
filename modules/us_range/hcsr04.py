@@ -28,7 +28,7 @@ class HCSR04:
         self.trigger.value(0)
 
         # Init echo pin (in)
-        self.echo = Pin(echo_pin, mode=Pin.IN, pull=None)
+        self.echo = Pin(echo_pin, mode=Pin.IN, pull=Pin.PULL_DOWN)
 
     def _send_pulse_and_wait(self):
         """

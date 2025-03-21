@@ -17,10 +17,15 @@ class MQTTException(Exception):
 
 class MQTTClient:
 
-    def __init__(self, client_id, server, port=0, user=None, password=None, keepalive=0,
+    def __init__(self, client_id, server, port=0, user=None, password=None, keepalive=300,
                  ssl=False, ssl_params={}):
         if port == 0:
             port = 8883 if ssl else 1883
+
+        # if the server is a byte string, convert to a string
+        if isinstance(server, bytes):
+            server = server.decode('ascii')
+
         self.client_id = client_id
         self.sock = None
         self.addr = socket.getaddrinfo(server, port)[0][-1]
@@ -65,6 +70,10 @@ class MQTTClient:
 
     def connect(self, clean_session=True):
         self.sock = socket.socket()
+        try:
+            self.sock.settimeout(1)
+        except:
+            pass
         self.sock.connect(self.addr)
         if self.ssl:
             import ussl
@@ -139,6 +148,11 @@ class MQTTClient:
             assert 0
 
     def publish(self, topic, msg, retain=False, qos=0):
+
+        # if the topic is a byte string, convert to a string
+        if isinstance(topic, bytes):
+            topic = topic.decode('ascii')
+
         SerialLog.log("MQTT Sending: ", self.server, self.port, topic, msg)
         try:
             self.publishInternal(topic, msg, retain=retain, qos=qos)
@@ -167,10 +181,8 @@ class MQTTClient:
         self.sock.write(qos.to_bytes(1, "little"))
         while 1:
             op = self.wait_msg()
-            SerialLog.log("Resp Op: ", str(op))
             if op == 0x90:
                 resp = self.sock.read(4)
-                SerialLog.log("Resp:", resp)
                 assert resp[1] == pkt[2] and resp[2] == pkt[3]
                 if resp[3] == 0x80:
                     raise MQTTException(resp[3])

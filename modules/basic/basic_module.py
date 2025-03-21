@@ -84,6 +84,10 @@ class BasicModule:
 
     def setPref(self, sectionName, settingName, value):
 
+        # if the value is a byte array, convert it to a string
+        if (isinstance(value, bytes)):
+            value = value.decode("utf-8")
+
         if (self.getPref(sectionName, settingName, None) == value):
             return
 

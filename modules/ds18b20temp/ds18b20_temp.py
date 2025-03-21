@@ -96,7 +96,7 @@ class DS18B20Temp(BasicModule):
         # try again if no devices found
         attempt = 0
         while (len(self.roms) == 0 and attempt < tries):
-            SerialLog.log('Scanning for DS18B20 Devices...')
+            SerialLog.log('Scanning for DS18B20 Devices on pin %s...' % (self.pinNumber))
             self.roms = self.ds_sensor.scan()
             time.sleep(0.75)
             if (len(self.roms) > 0):

@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini Garage Door Closer",
     "shortName": "s2mini-garagedoorcloser",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "mosfet", "us_range", "garage_door_closer"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "us_range", "garage_door_closer"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {
@@ -9,5 +9,15 @@
         "tmp_filename": "new_firmware.tar.gz",
         "excluded_files": [],
         "delete": []
+    },
+    "relayx2": {
+        "flipcommand1": "/relayx2/flip/1",
+        "flipcommand2": "/relayx2/flip/2",
+        "pin1": 16,
+        "pin2": 17
+    },
+    "usrange": {
+        "triggerPinNumber": 18,
+        "echoPinNumber": 21 
     }
 }

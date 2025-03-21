@@ -5,41 +5,32 @@ import uio
 import uselect as select
 import usocket as socket
 from collections import namedtuple
-import ussl
 import gc
 
 WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
-ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host"])
+ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host", "post_params"])
 
 from modules.web.server import Server
 
 class WebServer():
     def __init__(self):
-
         self.poller = select.poll()
-
-        self.httpServer = Server(self.poller, 80, socket.SOCK_STREAM, "WebHTTP Server")
-
+        self.httpServer = Server(self.poller, 80, socket.SOCK_STREAM)
         self.request = dict()
         self.conns = dict()
 
-        # queue up to 5 connection requests before refusing
+        # queue up to 2 connection requests before refusing
         self.httpServer.sock.listen(2)
         self.httpServer.sock.setblocking(False)
 
         self.shouldReboot = False
 
-    
     def handle(self, sock, event, others):
         if sock is self.httpServer.sock:
-            # client connecting on port 80, so spawn off a new
-            # socket to handle this connection
             self.accept(sock)
         elif event & select.POLLIN:
-            # socket has data to read in
             self.read(sock)
         elif event & select.POLLOUT:
-            # existing connection has space to send more data
             self.write_to(sock)
 
     def accept(self, server_sock):
@@ -53,49 +44,103 @@ class WebServer():
                 return
 
     def parse_request(self, req):
-        req_lines = req.split(b"\r\n")
-        req_type, full_path, http_ver = req_lines[0].split(b" ")
-        path = full_path.split(b"?")
-        SerialLog.log("Web:", path)
-        base_path = path[0]
-        query = path[1] if len(path) > 1 else None
+        allDataLines = req.split(b"\r\n")
+        httpVerb, reqUrl, httpVersion = allDataLines[0].split(b" ")
+        reqPath = reqUrl.split(b"?")
+        SerialLog.log("Web:", httpVerb, reqPath)
+        basePath = reqPath[0]
+        queryString = reqPath[1] if len(reqPath) > 1 else None
         query_params = (
             {
                 key: val
-                for key, val in [param.split(b"=") for param in query.split(b"&")]
+                for key, val in [param.split(b"=") for param in queryString.split(b"&")]
             }
-            if query
+            if queryString
             else {}
         )
-        host = [line.split(b": ")[1] for line in req_lines if b"Host:" in line][0]
 
-        return ReqInfo(req_type, base_path, query_params, host)
+        host = [line.split(b": ")[1] for line in allDataLines if b"Host:" in line][0]
+
+        # Initialize post_params as an empty array
+        post_params = []
+
+        # If the request method is POST, parse the body
+        if httpVerb == b"POST":
+            # Get the content length
+            contentLength = int([line.split(b": ")[1] for line in allDataLines if b"Content-Length:" in line][0])
+
+            # Get the content type
+            contentType = [line.split(b": ")[1] for line in allDataLines if b"Content-Type:" in line][0]
+
+            # Get the boundary
+            multipartBoundary = contentType.split(b"boundary=")[1]
+
+            # extract each part
+            rawparts = req.split(b"--" + multipartBoundary)
+            for part in rawparts:
+
+                if part == b"" or part == b"--\r\n":
+                    continue
+
+                # Get the headers and the body
+                bits = part.split(b"\r\n\r\n")
+                headers = bits[0]
+                body = b"\r\n\r\n".join(bits[1:])
+
+                headers = headers.split(b"\r\n")
+
+                # If the body is empty or just 2 chars long, skip
+                if len(body) <= 2:
+                    continue
+
+                # Remove the last two characters from the body
+                body = body[:-2]
+
+                # Trim whitespace from the body
+                body = body.strip()
+
+                # Get the name of the field
+                name = [line.split(b"; ")[1] for line in headers if b"name=" in line][0].split(b'"')[1]
+
+                # Get the filename of the field
+                filename = None
+                # if any header contains filename, get the filename
+                for line in headers:
+                    if b"filename=" in line:
+                        filename = line.split(b"; ")[2].split(b'"')[1]
+                        post_params.append({ "name": name, "filename": filename, "filedata": body })
+                        break
+
+                # If the filename is None, it is a regular field
+                if filename is None:
+                    post_params.append({ "name": name, "value": body })
+
+        return ReqInfo(httpVerb, basePath, query_params, host, post_params)
 
     def get_response(self, req):
-        """generate a response body and headers, given a route"""
-
         headers = "HTTP/1.1 200 Ok\r\nCache-Control: max-age=300\r\n"
         route = self.routes.get(req.path, None)
 
-        if (route == None):
-            # assume misses are a file
+        if route is None:
             try:
-                if (req.path.endswith(b".js")):
+                if req.path.endswith(b".js"):
                     headers += "content-type: application/javascript\r\n"
                 return open(req.path, "rb"), headers, False
-            except OSError: #open failed
+            except OSError:
                 headers = b"HTTP/1.1 404 Not Found\r\n"
                 return uio.BytesIO(b""), headers, False
 
-        if type(route) is bytes:
-            # expect a filename, so return contents of file
+        if isinstance(route, bytes):
             SerialLog.log("Returning file:", route)
             return open(route, "rb"), headers, False
 
         if callable(route):
-            # call a function, which may or may not return a response
             try:
-                response = route(req.params)
+                if (req.type == b"POST"):
+                    response = route(req.params, req.post_params)
+                else:
+                    response = route(req.params)
+                gc.collect()
                 body = response[0] or b""
                 headers = response[1]
                 shouldReboot = False
@@ -117,27 +162,25 @@ class WebServer():
         try:
             data = s.read()
             if not data:
-                # no data in the TCP stream, so close the socket
                 SerialLog.log("Closed socket, no more data")
                 self.close(s)
                 return
 
-            # add new data to the full request
+            # log the data
+            # SerialLog.log("Data received", data)
+
             sid = id(s)
             self.request[sid] = self.request.get(sid, b"") + data
-            if (len(self.request[sid]) > 1000):
-                SerialLog.log("Stream closed")
+            if len(self.request[sid]) > 10000:
+                SerialLog.log("Stream closed (too much data)")
                 self.close(s)
                 return
 
-            # check if additional data expected
-            if data[-4:] != b"\r\n\r\n":
-                # HTTP request is not finished if no blank line at the end
-                # wait for next read event on this socket instead
-                SerialLog.log("Waiting for more data...", data)
+            if data[-4:] != b"\r\n\r\n" and data[-4:] != b"--\r\n":
+                SerialLog.log("Waiting for more data...", len(data), "bytes received")
                 return
 
-            # get the completed request
+            SerialLog.log("Request received, id:", sid, " Length:", len(self.request[sid]))
             req = self.parse_request(self.request.pop(sid))
             body, headers, shouldReboot = self.get_response(req)
             self.shouldReboot = shouldReboot
@@ -145,65 +188,43 @@ class WebServer():
         except Exception as e:
             SerialLog.log("Error reading from socket", e)
             self.close(s)
-        
 
     def prepare_write(self, s, body, headers):
-        # add newline to headers to signify transition to body
         headers += "\r\n"
-
-        # force strings to have utf-8 encoding so they have a defined length
-        if type(headers) is str:
+        if isinstance(headers, str):
             headers = headers.encode("utf-8")
 
-        # TCP/IP MSS is 536 bytes, so create buffer of this size and
-        # initially populate with header data
-        buff = bytearray(headers + "\x00" * (536 - len(headers)))
-        # use memoryview to read directly into the buffer without copying
-        buffmv = memoryview(buff)
-        # start reading body data into the memoryview starting after
-        # the headers, and writing at most the remaining space of the buffer
-        # return the number of bytes written into the memoryview from the body
-        bw = body.readinto(buffmv[len(headers) :], 536 - len(headers))
-        # save place for next write event
+        gc.collect()
+        buff = bytearray(536)  
+        buffmv = memoryview(buff) 
+        buff[:len(headers)] = headers
+        bw = body.readinto(buffmv[len(headers):], 536 - len(headers))
         c = WriteConn(body, buff, buffmv, [0, len(headers) + bw])
         self.conns[id(s)] = c
-        # let the poller know we want to know when it's OK to write
         self.poller.modify(s, select.POLLOUT)
 
     def write_to(self, sock):
-        # get the data that needs to be written to this socket
         c = self.conns[id(sock)]
         if c:
-            # write next 536 bytes (max) into the socket
             try:
                 bytes_written = sock.write(c.buffmv[c.write_range[0] : c.write_range[1]])
             except OSError as e:
-                if (e.errno == 128): # Not connected anymore
+                if e.errno == 128:
                     self.close(sock)
-                if (e.errno == 104): # Connection Reset
+                if e.errno == 104:
                     self.close(sock)
                 return
             if not bytes_written or c.write_range[1] < 536:
-                # either we wrote no bytes, or we wrote < TCP MSS of bytes
-                # so we're done with this connection
                 self.close(sock)
                 gc.collect()
             else:
-                # more to write, so read the next portion of the data into
-                # the memoryview for the next send event
                 self.buff_advance(c, bytes_written)
 
     def buff_advance(self, c, bytes_written):
         if bytes_written == c.write_range[1] - c.write_range[0]:
-            # wrote all the bytes we had buffered into the memoryview
-            # set next write start on the memoryview to the beginning
             c.write_range[0] = 0
-            # set next write end on the memoryview to length of bytes
-            # read in from remainder of the body, up to TCP MSS
             c.write_range[1] = c.body.readinto(c.buff, 536)
         else:
-            # didn't read in all the bytes that were in the memoryview
-            # so just set next write start to where we ended the write
             c.write_range[0] += bytes_written
 
     def close(self, s):
@@ -214,7 +235,7 @@ class WebServer():
             del self.request[sid]
         if sid in self.conns:
             del self.conns[sid]
-        if (self.shouldReboot):
+        if self.shouldReboot:
             machine.reset()
 
     def start(self):
@@ -224,7 +245,6 @@ class WebServer():
         self.routes = routes
 
     def tick(self):
-        # check for socket events and handle them
         for response in self.poller.ipoll(0):
             sock, event, *others = response
             self.handle(sock, event, others)

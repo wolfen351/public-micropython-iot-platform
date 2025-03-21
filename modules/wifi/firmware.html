@@ -1,0 +1,258 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Firmware</title>
+  <style>
+ body {
+      background: #3498db;
+      width: 100%;
+      text-align: center;
+      margin: 2rem;
+      font: 14px system-ui;
+    }
+
+    span {
+      width: 40px;
+      display: inline-block;
+    }
+
+    input[type='text'],
+    input[type='password'] {
+      border: #ccc 1px solid;
+      padding: 8px;
+      margin-top: 10px;
+      font-size: 1em;
+      border-radius: 4px;
+    }
+
+    .btn {
+      width: 50px;
+      height: 50px;
+    }
+
+    .navbtn {
+      margin-top: 25px;
+      height: 50px;
+      width: 130px;
+    }
+
+    .sett {
+      text-align: left;
+      margin-left: auto;
+      margin-right: auto;
+      width: 350px;
+    }
+
+    .sett input {
+      width: 100px;
+      margin-left: 20px;
+    }
+
+    .sett input[type="radio"] {
+      width: 20px;
+      margin-left: 2px;
+      margin-top: 15px;
+    }
+
+    .sett button {
+      margin-top: 25px;
+      width: 80%;
+    }
+
+    .lbl {
+      width: 180px;
+    }
+
+    .status {
+      display: flex;
+      width: 100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-right: 1rem;
+      max-width: 90%;
+    }
+
+    .grid>div {
+      background: #adbeef;
+      padding: 1.5rem;
+      border-radius: 1rem;
+    }
+
+    .grid>div>.title {
+      font-weight: bold;
+      padding-bottom: 20px;
+    }
+
+    .line {
+      display: flex;
+    }
+
+    .lineitem {
+      width: 50%;
+      padding-left: 0%;
+      text-align: left;
+    }
+  </style>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <h1>System Firmware</h1>
+
+  <div class="allsett">
+    <br />
+    <h4>System firmware</h4>
+
+    <div id='panels' class="grid">
+
+
+      <div class="panel" id="system">
+        <div class="title">System</div>
+    
+        <div class="line">
+            <div class="lineitem">Version</div>
+            <div dataitem="version"></div>
+        </div>
+    
+        <div class="line">
+            <div class="lineitem">OS Version</div>
+            <div dataitem="osname"></div>
+        </div>
+    
+        <div class="line">
+            <div class="lineitem">Free RAM</div>
+            <div dataitem="freeram"></div>
+            <div>&nbsp;bytes</div>
+        </div>
+    
+        <div class="line">
+            <div class="lineitem">Free Disk</div>
+            <div dataitem="freedisk"></div>
+            <div>&nbsp;bytes</div>
+        </div>
+    
+        <div class="line">
+          <div class="lineitem">Upload File</div>
+
+          <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="text" name="location" value="firmware" />
+            <input type="file" name="file" />
+            <input type="submit" value="Upload" />
+          </form>
+      </div>
+
+        <input type="button" class="navbtn" value="Reboot" onclick="window.location='/reboot'"></input>
+        <input type="button" class="navbtn" value="Force Update" onclick="forceUpdate()"></input>
+    
+    </div>
+  
+  </div>
+
+
+    <button onclick="window.history.back()" class="btn">Back</button>
+  </div>
+
+  <script type="text/javascript">
+
+    window.telHandlers = [];
+    getTelemetry();
+
+    function leftFillNum(num, targetLength) {
+      return num.toString().padStart(targetLength, 0);
+    }
+
+    function getTelemetry() {
+      setTimeout(function () {
+        fetch('/telemetry')
+          .then(response => response.json())
+          .then(data => {
+            s = data;
+            html = "";
+            for (let key of Object.keys(s)) {
+
+              panelItem = $(`*[dataitem="${key}"]`);
+              if (panelItem[0]) {
+                // FORMAT AS ONOFF
+                if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+                  if (s[key] == 1) {
+                    panelItem.html("ON");
+                    panelItem.addClass("on");
+                    panelItem.removeClass("off");
+                  }
+                  else {
+                    panelItem.html("OFF");
+                    panelItem.removeClass("on");
+                    panelItem.addClass("off");
+                  }
+                  // FORMAT AS CLASS
+                } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
+                  val = panelItem.attr('data');
+                  panelItem.removeClass('data_' + val);
+                  panelItem.addClass('data_' + s[key]);
+                  panelItem.attr("data", s[key]);
+                }
+                // FORMAT AS SWITCH
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
+                  if (s[key] == 'Enabled') {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales" checked="checked">');
+                  } else {
+                    panelItem.html('<input type="checkbox" id="scales" name="scales">');
+                  }
+                }
+                // FORMAT AS TIME
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'timearray') {
+                  panelItem.html(s[key][0] + "/" + s[key][1] + "/" + s[key][2] + "  " + leftFillNum(s[key][3],2) + ":" + leftFillNum(s[key][4],2) + ":" + leftFillNum(s[key][5],2));
+                }
+                // JUST DISPLAY IT
+                else {
+                  panelItem.html(s[key]);
+                }
+
+                if ($("#nameval").val() === "Name Here") {
+                  $("#nameval").val(s.name);
+                }
+              }
+              else {
+                // IGNORE IT
+                if (key != 'tempReadAt')
+                {
+                  // FALLBACK FOR UNHANDLED
+                  for (const h of window.telHandlers) {
+                    h(key);
+                  }
+                  html += "<p>" + key + ": " + s[key] + "</p>"
+                }
+              }
+            }
+            $('#rawdisplay').html(html);
+            getTelemetry();
+          })
+      }, 1000);
+    }
+
+    function post(url) {
+      fetch(url, { method: 'GET' })
+        .then(response => response.text())
+    }
+
+    function forceUpdate() {
+        post("/forceUpdate");
+    }    
+
+  </script>
+
+  
+
+
+
+</body>
+
+</html>

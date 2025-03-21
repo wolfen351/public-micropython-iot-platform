@@ -32,8 +32,8 @@ class Dht11Monitor(BasicModule):
         # only return telemetry if we got readings
         if (self.currentT != 0 or self.currentH != 0):
             telemetry = {
-                "temperature/dht11" : self.currentT,
-                "humidity/dht11" : self.currentH,
+                "temperature/dht22" : self.currentT,
+                "humidity/dht22" : self.currentH,
                 "tempReadAt": self.lastConvert
             }
             return telemetry

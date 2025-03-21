@@ -28,6 +28,7 @@ class LightControl(BasicModule):
     T1 = Pin(35, Pin.IN)
     T2 = Pin(33, Pin.IN)
     SoftT1 = 0
+    SoftT2 = 0
 
     # When to change a light to ON
     LightOnAt = [-1, -1, -1, -1]
@@ -66,6 +67,10 @@ class LightControl(BasicModule):
         if (self.SoftT1 == 1):
             Trigger1 = 0
             self.SoftT1 = 0
+
+        if (self.SoftT2 == 1):
+            Trigger2 = 0
+            self.SoftT2 = 0
 
         if (self.Triggers[0] != Trigger1):
             self.Triggers[0] = Trigger1
@@ -120,7 +125,10 @@ class LightControl(BasicModule):
         for command in commands:
             if (command == "/button/onboard/1"):
                 self.SoftT1 = 1
-
+            if (command == "/trigger/on/1"):
+                self.SoftT1 = 1
+            if (command == "/trigger/on/2"):
+                self.SoftT2 = 1
      
     def getRoutes(self):
         return {
@@ -129,7 +137,9 @@ class LightControl(BasicModule):
             b"/4light/auto": self.webCommandAuto,
             b"/light": b"/modules/fourlights/web_light.html",
             b"/lightsavesettings": self.webSaveSettings,
-            b"/lightloadsettings": self.webLoadSettings
+            b"/lightloadsettings": self.webLoadSettings,
+            b"/4light/trigger/1": self.webtrigger1,
+            b"/4light/trigger/2": self.webtrigger2
         }
 
      
@@ -137,8 +147,18 @@ class LightControl(BasicModule):
         return { "lights4": "/modules/fourlights/light_index.html" }
 
     # Internal Methods
-
-     
+    def webtrigger1(self, params):
+        headers = okayHeader
+        data = b""
+        self.SoftT1 = 1
+        return data, headers
+    
+    def webtrigger2(self, params):
+        headers = okayHeader
+        data = b""
+        self.SoftT2 = 1
+        return data, headers
+    
     def webLoadSettings(self, params):
         settings =  self.getsettings()
         headers = okayHeader

@@ -19,30 +19,80 @@ function Test-Port {
     }
 }
 
+function CopyFileFromMicrocontrollerToPc {
+
+    # This uses ampy to copy a file from the microcontroller to the PC
+    param(
+        $file,
+        $port
+    )
+
+    while ($null -eq $port)
+    {
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
+    }
+
+    ampy --port $port get $file > $file
+}
+
+function CopyFileFromPcToMicrocontroller {
+
+    # This uses ampy to copy a file from the PC to the microcontroller
+    param(
+        $file,
+        $port
+    )
+
+    while ($null -eq $port)
+    {
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
+    }
+
+    ampy --port $port put $file
+}
+
 function Find-MicrocontrollerPort {
+    $acceptableDescriptions = @(
+        'USB Serial Device',
+        'USB-SERIAL CH340K',
+        'Prolific USB-to-Serial Comm Port',
+        'USB-Enhanced-SERIAL CH9102',
+        'USB-SERIAL CH340',
+        'Silicon Labs CP210x USB to UART Bridge'
+    )
+
     $SerialPorts = Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-    $Name = $SerialPorts | Where-Object { ($_.Description -eq 'USB Serial Device') -or ($_.Description -eq 'USB-SERIAL CH340K') -or ($_.Description -eq 'Prolific USB-to-Serial Comm Port') -or ($_.Description -eq 'USB-Enhanced-SERIAL CH9102') -or ($_.Description -eq 'USB-SERIAL CH340') } | Select-Object -ExpandProperty Name
+    $Name = $SerialPorts | Where-Object { $acceptableDescriptions -contains $_.Description } | Select-Object -ExpandProperty Name
     $Name -match "COM\d+" > $null
 
     $port = $Matches.0
 
-    try {
-
-        if ($null -eq $port) {
-            throw "Unable to find serial port"
-        }
-
-        Write-Host "Detected $port"
-        return $port
+    if ($null -eq $port) {
+        # Print a list of serial ports 
+        Write-Host "Available Serial Ports:"
+        $SerialPorts | ForEach-Object { Write-Host "$($_.Name) - $($_.Description)" }
+        
+        throw "Unable to find serial port"
     }
-    catch 
-    {
-        Write-Host "Failed to connect. ${$_.Exception.Message}"
-        Write-Host "Detected ports:"
-        Write-Host Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-        Write-Host "Aborted." -ErrorAction Stop
-        Exit 5
+
+    if ('COM1' -eq $port) {
+        throw "Only found COM1, which is not a valid port"
     }
+
+    Write-Host "Detected $port"
+    return $port
 }
 
 
@@ -52,10 +102,15 @@ function Show-SerialLog {
         $port
     )
 
-    if ($port -eq $null)
+    while ($null -eq $port)
     {
-        Write-Host "No Port Specified, Auto Detecting.."
-        $port = Find-MicrocontrollerPort
+        try {
+            $port = Find-MicrocontrollerPort
+        }
+        catch {
+            $err = "Error. $_"
+            Write-Progress -Activity "Detecting COM Port" -Status $err
+        }
     }
 
     Write-Host "-------------------------------------------------------------------------------"

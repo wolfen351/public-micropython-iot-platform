@@ -19,7 +19,7 @@ class NtpSync(BasicModule):
 
     def start(self):
         self.sta_if = network.WLAN(network.STA_IF)
-        self.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 0) * 60 * 60
+        self.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 43200) * 60 * 60 # default is 12 hours
         self.tzName = self.getPref("ntp", "tzIANA", "pacific/auckland")
 
         # Implement DST here
@@ -33,14 +33,14 @@ class NtpSync(BasicModule):
             if (self.sta_if.isconnected()):
                 # Set up NTP
                 try:
-                    SerialLog.log(b"Local time before synchronization: %s" %str(time.localtime()))
+                    SerialLog.log("Local time before synchronization: %s" %str(time.localtime()))
                     ntptime.settime()
-                    SerialLog.log(b"Local time after synchronization: %s" %str(time.localtime(time.time())))
+                    SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
                     localTime = time.localtime(time.time() + self.UTC_OFFSET)
-                    SerialLog.log(b"Local time after UTC Offet & DST Calculation: %s" %str(localTime))
+                    SerialLog.log("Local time after UTC Offet & DST Calculation: %s" %str(localTime))
                     self.gotTime = True
                 except Exception as e:
-                    SerialLog.log(b"Error syncing time: ", e)
+                    SerialLog.log("Error syncing time: ", e)
                     import sys
                     sys.print_exception(e)
 
@@ -54,6 +54,8 @@ class NtpSync(BasicModule):
             return { "ntp": "Waiting" }
         
         localTime = time.localtime(time.time() + self.UTC_OFFSET)
+        # format localTime as a ISO 8601 string
+        localTime = "%04d-%02d-%02dT%02d:%02d:%02d" % (localTime[0], localTime[1], localTime[2], localTime[3], localTime[4], localTime[5])
         telemetry = {
             "time" : localTime,
             "timeZone": self.tzName,

@@ -1,0 +1,116 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schedule Configuration</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #3498db;
+      width: 100%;
+      text-align: center;
+      margin: 20px 0px 20px 0px;
+    }
+
+    span {
+      width: 40px;
+      display: inline-block;
+    }
+
+    input[type='text'],
+    input[type='password'] {
+      border: #ccc 1px solid;
+      padding: 8px;
+      margin-top: 10px;
+      font-size: 1em;
+      border-radius: 4px;
+    }
+
+    .btn {
+      width: 50px;
+      height: 50px;
+    }
+
+    .sett {
+      text-align: left;
+      margin-left: auto;
+      margin-right: auto;
+      width: 500px; 
+    }
+
+    .sett input {
+      /* width: 100px; */
+      margin-left: 20px;
+    }
+
+    .sett input[type="radio"] {
+      width: 20px;
+      margin-left: 2px;
+      margin-top:15px;
+    }
+
+    .sett button {
+      margin-top: 25px;
+      width: 80%;
+      margin-left: 10%; 
+      margin-right: 10%;
+    }
+
+    .lbl {
+      width: 180px;
+    }
+
+    .status {
+      display: flex;
+      width: 100px;
+      margin-left:auto;
+      margin-right: auto;
+    }
+
+
+  </style>
+  <script src="cash.min.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <h1>Schedule Settings</h1>
+
+  <div class="allsett">
+    <br />
+    <h3>After Boot Settings:</h3>
+    <h4>Please provide settings here</h4>
+
+    <div class="sett">
+      <form action="/schedulesavesettings" method="get">
+        <span class="lbl">Send Command at boot:</span><input type="text" name="bootcommand" value="/somecommand" id="bootcommand"><br />
+        <br/>
+        <span class="lbl">Delay command is executed x seconds after boot</span><br />
+        <br/>
+        <span class="lbl">Delay Command:</span><input type="text" name="delaycommand" value="/somecommand" id="delaycommand"><br />
+        <span class="lbl">Delay Seconds:</span><input type="text" name="delayseconds" value="600" id="delayseconds"><br />
+        <br/>
+        <button type="submit" class="btn">Save</button>
+        <button onclick="window.history.back()" class="btn">Back</button>
+      </form>
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+    $(
+
+      fetch('/scheduleloadsettings')
+        .then(response => response.json())
+        .then(data => {
+          s = data;
+          $("#bootcommand").val(s.bootcommand);
+          $("#delaycommand").val(s.delaycommand);
+          $("#delayseconds").val(s.delayseconds);
+      })
+    );
+  </script>
+
+</body>
+
+</html>

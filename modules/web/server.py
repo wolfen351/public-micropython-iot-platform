@@ -4,8 +4,7 @@ import uselect as select
 
 
 class Server:
-    def __init__(self, poller, port, sock_type, name):
-        self.name = name
+    def __init__(self, poller, port, sock_type):
         # create socket with correct type: stream (TCP) or datagram (UDP)
         self.sock = socket.socket(socket.AF_INET, sock_type)
 
@@ -18,11 +17,11 @@ class Server:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(addr)
 
-        SerialLog.log(self.name, "listening on", addr)
+        SerialLog.log("Web Server listening on", addr)
 
     
     def stop(self, poller):
         poller.unregister(self.sock)
         self.sock.close()
-        SerialLog.log(self.name, "stopped")
+        SerialLog.log("Web Server stopped")
  

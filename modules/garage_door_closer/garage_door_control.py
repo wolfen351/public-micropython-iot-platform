@@ -1,9 +1,11 @@
 from modules.basic.basic_module import BasicModule
 import time
-
+from modules.web.web_processor import okayHeader
 from serial_log import SerialLog
 
 class GarageDoorControl(BasicModule):
+
+    locked = False
 
     def __init__(self):
         pass
@@ -17,6 +19,9 @@ class GarageDoorControl(BasicModule):
         self.lastOpenAt = 0
         self.openForMs = 0
         self.commands = []
+
+        self.openAtMs = 15 * 60 * 1000 # 15 minutes
+        self.pressMs = 750
 
     def tick(self):
         # reset timer
@@ -32,24 +37,36 @@ class GarageDoorControl(BasicModule):
             currentTime = time.ticks_ms()
             self.openForMs = time.ticks_diff(currentTime, self.lastOpenAt)
 
-            if (self.openForMs > 600000 and self.openForMs < 602000):
-                self.commands.append("/mosfet/allon")
-            if (self.openForMs > 602000):
-                self.commands.append("/mosfet/alloff")
-                self.lastOpenAt = time.ticks_ms()
+            if (not self.locked):
+                if (self.openForMs > self.openAtMs and self.openForMs < self.openAtMs + self.pressMs):
+                    self.commands.append("/relay/on/1")
+                if (self.openForMs > self.openAtMs + self.pressMs):
+                    self.commands.append("/relay/off/1")
+                    self.lastOpenAt = time.ticks_ms()
 
 
     def getTelemetry(self): 
-        telemetry = { "garagedoorStatus": self.doorState, "openForMs": self.openForMs }
+        # round open for ms to seconds
+        openForMsRounded = int(self.openForMs / 1000) * 1000
+        telemetry = { 
+            "garagedoorStatus": self.doorState, 
+            "openForMs": openForMsRounded,
+            "garageDoorLocked": self.locked
+        }
         return telemetry
 
     def processTelemetry(self, telemetry):
         oldSensorState = self.sensorState
 
+        # if critical telemetry is missing, just return
+        if ("averagecm" not in telemetry):
+            self.sensorState = "Unknown"
+            return
+
         # See if the sensor is open or closed
         if (telemetry["averagecm"] == -1):
           self.sensorState = "Unknown"
-        elif (telemetry["averagecm"] > 90):
+        elif (telemetry["averagecm"] > 60):
           self.sensorState = "Closed"
         else:
           self.sensorState = "Open"
@@ -71,12 +88,36 @@ class GarageDoorControl(BasicModule):
         return toSend
 
     def processCommands(self, commands):
-        pass
+        for c in commands:
+            if (c.startswith("/garagedoor/lock")):
+                self.lock()
+            if (c.startswith("/garagedoor/unlock")):
+                self.unlock()
 
     def getRoutes(self):
-        return {}
+        return { 
+            b"/garagedoor/lock" : self.webLock,
+            b"/garagedoor/unlock" : self.webUnlock
+        }
 
     def getIndexFileName(self):
         return { "garagedoorcloser" : "/modules/garage_door_closer/index.html" }
 
     # Internal code here
+    def webLock(self, params): 
+        self.lock()
+        headers = okayHeader
+        data = b""
+        return data, headers
+    
+    def webUnlock(self, params): 
+        self.unlock()
+        headers = okayHeader
+        data = b""
+        return data, headers
+    
+    def lock(self):
+        self.locked = True
+
+    def unlock(self):
+        self.locked = False

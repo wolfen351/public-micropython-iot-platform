@@ -30,6 +30,8 @@ class WifiHandler(BasicModule):
         self.freediskbytes = -1
         self.apModeGaveUp = False
         self.everConnected = False
+        self.stationCount = 0
+        self.connectionTime = 0
 
     # Called by the startup code as booting the board
     def preStart(self):
@@ -55,6 +57,7 @@ class WifiHandler(BasicModule):
                 # New connection
                 self.connected = True
                 self.everConnected = True
+                self.connectionTime = time.ticks_ms()  # Store the connection time
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
 
                 self.ota()
@@ -80,8 +83,8 @@ class WifiHandler(BasicModule):
     def tick(self):
         if (not self.apMode):
 
+            # Ongoing connection
             if (self.sta_if.isconnected() and self.connected):
-                # Ongoing connection
                 now = time.ticks_ms()
                 diff = time.ticks_diff(now, self.lastrssitime)
                 if (diff > 50000):
@@ -94,10 +97,11 @@ class WifiHandler(BasicModule):
                     self.freerambytes = gc.mem_free()
                 return
 
+            # New connection
             if (self.sta_if.isconnected() and not self.connected):
-                # New connection
                 self.connected = True
                 self.everConnected = True
+                self.connectionTime = time.ticks_ms()  # Store the connection time
                 SerialLog.log('Wifi Connected! Config:', self.sta_if.ifconfig())
                 # Disable AP on station mode successful connection
                 ap_if = network.WLAN(network.AP_IF)
@@ -115,31 +119,33 @@ class WifiHandler(BasicModule):
             # Check that the wifi is actually configured, start AP if not
             ssid = self.getPref("wifi", "ssid", self.defaultSSID)
             password = self.getPref("wifi", "password", self.defaultPassword)
+            now = time.ticks_ms()
+
             if (self.defaultSSID == ssid and self.defaultPassword == password):   
+                # wifi is not configured, switch to AP mode
                 SerialLog.log("Wifi not configured, starting AP")             
                 self.ap()                
-
-            if (not self.sta_if.isconnected()):
-                # Connection lost
-                now = time.ticks_ms()
+            elif (not self.sta_if.isconnected()):
+                # Connection lost, but wifi is configured
                 diff = time.ticks_diff(now, self.lastReconnectTime)
                 if (diff > 30000):
-                    SerialLog.log('No wifi for 30s, attempting to reconnect ...')
+                    SerialLog.log('Connecting to wifi ...')
                     self.lastReconnectTime = now
                     self.connected = False
                     self.station()
                 diff = time.ticks_diff(now, self.downTimeStart)
-                if (diff > 86400000):
-                    SerialLog.log("Failed to connect to wifi for 24h, rebooting ...")
+                if (diff > 5400000):  # 90 minutes in milliseconds
+                    SerialLog.log("Failed to connect to wifi for 90 minutes, rebooting ...")
                     reset()
 
             if (not self.sta_if.isconnected() and not self.everConnected and not self.apModeGaveUp):
                 diff = time.ticks_diff(now, self.downTimeStart)
                 if (diff > 60000):
-                    SerialLog.log("Failed to connect to wifi, enabling configuration AP ...")
+                    SerialLog.log("Failed to connect to wifi (60s), enabling configuration AP ...")
                     self.ap()
 
         else:
+            # we are in apmode
             if (self.ap_if.active()):
                 if (len(self.ap_if.status('stations')) == 0):
                     now = time.ticks_ms()
@@ -164,6 +170,14 @@ class WifiHandler(BasicModule):
                             SerialLog.log("Wifi is not configured, AP timed out, disabling all wifi")
                             if (self.sta_if.active()):
                                 self.sta_if.active(False)
+                else:
+                    # AP is active and there are stations connected
+                    if (self.stationCount < len(self.ap_if.status('stations'))):
+                        SerialLog.log("New station connected to AP")
+                    elif (self.stationCount > len(self.ap_if.status('stations'))):
+                        SerialLog.log("Station disconnected from AP")
+                    self.stationCount = len(self.ap_if.status('stations'))
+                    
             else:
                 # Wifi is disabled
                 pass
@@ -187,16 +201,19 @@ class WifiHandler(BasicModule):
                 return {
                     "wifiMode": b"Disabled",
                 }
-        return {
-            "ssid": self.sta_if.config('essid'),
-            "ip": self.sta_if.ifconfig()[0],
-            "rssi": self.rssi,
-            "version": ota.local_version(),
-            "freeram": self.freerambytes,
-            "freedisk": self.freediskbytes,
-            "osname": uname().release,
-            "wifiMode": b"Station"
-        }
+        else:
+            wifiUptime = time.ticks_diff(time.ticks_ms(), self.connectionTime) // 1000  # Calculate connected time in seconds
+            return {
+                "ssid": self.sta_if.config('essid'),
+                "ip": self.sta_if.ifconfig()[0],
+                "rssi": self.rssi,
+                "version": ota.local_version(),
+                "freeram": self.freerambytes,
+                "freedisk": self.freediskbytes,
+                "osname": uname().release,
+                "wifiMode": b"Station",
+                "wifiUptime": wifiUptime
+            }
     
 
     def processTelemetry(self, telemetry):
@@ -214,13 +231,27 @@ class WifiHandler(BasicModule):
             b"/log": b"/modules/wifi/log.html",
             b"/netloadsettings": self.loadnetsettings,
             b"/netsavesettings": self.savenetsettings,
-            b"/getlog": self.getlog
+            b"/getlog": self.getlog,
+            b"/forceUpdate": self.forceUpdate,
+            b"/firmware": b"/modules/wifi/firmware.html",
+            b'/upload': self.webUpload
         }
 
     def getIndexFileName(self):
         return {"wifi": "/modules/wifi/index.html"}
 
     # internal functions
+
+    def forceUpdate(self, params):
+        # Squash OTA exceptions
+        try:
+            # Check for update and update if needed
+            ota.force_update()
+            return b"Update started, rebooting...", okayHeader, True
+        except Exception as e:
+            SerialLog.log('OTA failed: ' + str(e))
+            print_exception(e)
+            return b"OTA failed exf: " + str(e).encode('utf-8'), okayHeader
 
     def loadnetsettings(self, params):
 
@@ -239,6 +270,31 @@ class WifiHandler(BasicModule):
     def getlog(self, params):
         headers = okayHeader
         data = SerialLog.logHistory()
+        return data, headers
+    
+    def webUpload(self, params, post_params):
+        headers = okayHeader
+
+        # in post_params array, each element has a name. The file data is in filedata and the file name is in location
+        # eg: [{'name': b'location', 'filename': None, 'value': b'/k3s.yaml'}, {'name': b'file', 'filename': b'k3s.yaml', 'filedata': b'aaa'}]
+
+        location = None
+        filedata = None
+        for param in post_params:
+            if param.get('name', None) == b'location':
+                location = param.get('value', None).decode('ascii')
+            if param.get('name', None) == b'file':
+                filedata = param.get('filedata', None)
+
+        if filedata and location:
+            SerialLog.log("File upload data bytes:", len(filedata))
+            # save the filedata bytes to the location on disk
+            with open(location, "wb") as f:
+                f.write(filedata)
+            data = 'FILE UPLOADED'
+        else:
+            data = 'NO FILE UPLOADED'
+        
         return data, headers
 
     def savenetsettings(self, params):
@@ -277,15 +333,22 @@ class WifiHandler(BasicModule):
             # Make sure the interface is active
             if (not self.sta_if.active()):
                 self.sta_if.active(True)
-                self.sta_if.config(pm=self.sta_if.PM_NONE)                
-                time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
+                try:
+                    self.sta_if.config(pm=self.sta_if.PM_NONE)                
+                except Exception as e:
+                    SerialLog.log("Failed to set power management mode to NONE")
 
-            # Set The DCHP Hostname
-            try:
-                self.sta_if.config(dhcp_hostname=self.hostname)
-            except Exception as e:
-                SerialLog.log("Failed to set DHCP hostname")
-                print_exception(e)
+            if self.basicSettings.get("suppressHostName", False) == True:
+                SerialLog.log("Suppressing DHCP hostname")
+            else:
+                # Set The DCHP Hostname
+                try:
+                    SerialLog.log("Setting DHCP hostname", self.hostname)
+                    time.sleep(0.1) # Sleep here to prevent issues when setting dhcp hostname
+                    self.sta_if.config(dhcp_hostname=self.hostname)
+                except Exception as e:
+                    SerialLog.log("Failed to set DHCP hostname")
+                    print_exception(e)
 
             # set static ip
             type = self.getPref("wifi", "type", "DHCP")
@@ -305,12 +368,17 @@ class WifiHandler(BasicModule):
             startTime = time.ticks_ms()
             while (time.ticks_diff(time.ticks_ms(), startTime) < 20000 and not self.sta_if.isconnected()):
                 time.sleep(0.1)
+            
+            # Check if wifi is up
+            if not self.sta_if.isconnected():
+                SerialLog.log('Failed to connect to wifi')
+            else:
+                SerialLog.log('Wifi Connected!')
 
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            SerialLog.log("Error connecting to wifi:", e)
-            from sys import print_exception
+            SerialLog.log("Error connecting to wifi:", str(e))
             print_exception(e)
             self.powerCycleWifi()
         
@@ -320,8 +388,10 @@ class WifiHandler(BasicModule):
         self.ap_if.active(False)
         time.sleep(2)
         self.sta_if.active(True)
-        self.sta_if.config(pm=self.sta_if.PM_NONE)                
-
+        try:
+            self.sta_if.config(pm=self.sta_if.PM_NONE)
+        except Exception as e:
+            SerialLog.log("Failed to set power management mode to NONE")
 
     def ota(self):
 
@@ -333,6 +403,6 @@ class WifiHandler(BasicModule):
                 SerialLog.log('Update installed, rebooting...')
                 reset()
         except Exception as e:
-            SerialLog.log('OTA failed: ' + str(e))
+            SerialLog.log('OTA failed ex: ' + str(e))
             print_exception(e)
 

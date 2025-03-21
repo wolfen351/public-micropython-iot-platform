@@ -7,3 +7,13 @@ profile.json
 .package
 /lib/
 prefs.json
+*.mpy
+/__pycache__/
+/firmware/
+/.vscode/
+/firmware-web/
+/.gitlab-ci.yml
+/heartbeat.py
+/ssl.crt
+/ssl.key
+/package.sh
