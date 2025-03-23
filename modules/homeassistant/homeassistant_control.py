@@ -19,7 +19,7 @@ class HomeAssistantControl(BasicModule):
         self.lastConnectTime = 0
         self.topics = {}
         self.version = local_version()
-        self.ip = b"0.0.0.0"
+        self.ip = "0.0.0.0"
         self.commands = []
         self.lastConfigureTime = 0
         self.connected = False
@@ -51,13 +51,20 @@ class HomeAssistantControl(BasicModule):
         return {}
 
     def processTelemetry(self, telemetry):
+
+        # Capture critical telemetry
+        if "ip" in telemetry:
+            self.ip = telemetry["ip"]
+        if "version" in telemetry:
+            self.version = telemetry["version"]
+
+        # if not enabled, or not connected to wifi, or not connected to HA, return
         if self.enabled != "Y" or not WLAN(STA_IF).isconnected() or not self.connected:
             return
-
-        if "ip" in self.telemetry:
-            self.ip = self.telemetry["ip"]
-        if "version" in self.telemetry:
-            self.version = self.telemetry["version"]
+        
+        # wait until critical telemetry is received
+        if self.ip == "0.0.0.0":
+            return
 
         if ticks_diff(ticks_ms(), self.lastConfigureTime) > 3600000:
             SerialLog.log("Re-registering with Home Assistant, wiping all configured keys")
