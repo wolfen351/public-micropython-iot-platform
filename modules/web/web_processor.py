@@ -62,7 +62,8 @@ class WebProcessor(BasicModule):
     def getTelemetry(self):
         return { 
             "name": self.boardName,
-            "onboard/led": "Enabled" if self.statusLedEnabled else "Disabled"
+            "onboard/led": "Enabled" if self.statusLedEnabled else "Disabled",
+            "switch/messageled": 1 if self.statusLedEnabled else 0
         }
 
     def processTelemetry(self, telemetry):
@@ -72,7 +73,13 @@ class WebProcessor(BasicModule):
         return []
 
     def processCommands(self, commands):
-        pass
+        for c in commands:
+            if (c.startswith("/switch/on/messageled")):
+                self.statusLedEnabled = True
+                self.setPref("web", "statusLedEnabled", self.statusLedEnabled)
+            if (c.startswith("/switch/off/messageled")):
+                self.statusLedEnabled = False
+                self.setPref("web", "statusLedEnabled", self.statusLedEnabled)
 
     def getRoutes(self):
         return {

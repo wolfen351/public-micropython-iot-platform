@@ -20,5 +20,6 @@
     "onboard/led": "Onboard LED",
     "osname": "Micropython Version",
     "wifiUptime": "WiFi Uptime",
-    "rebootbtn": "Reboot"
+    "rebootbtn": "Reboot",
+    "switch/messageled": "Message LED"
 }

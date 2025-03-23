@@ -83,6 +83,10 @@ class HomeAssistantControl(BasicModule):
         if "rebootbtn" not in self.topics:
             self.home_assistant_configure("rebootbtn", 0)
 
+        # configure home assistant with a reboot button too
+        if "switch/messageled" not in self.topics:
+            self.home_assistant_configure("switch/messageled", 0)
+
 
         if self.hasTelemetryChanged(telemetry):
             processed = set()
@@ -268,6 +272,12 @@ class HomeAssistantControl(BasicModule):
 
             if key.startswith('relay'):
                 payload.update({ "payload_on": "/relay/on/"+key[-1], "payload_off": "/relay/off/"+key[-1], "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
+                telemetryType = "switch"
+
+            if key.startswith('switch'):
+                # get the part after switch/ and use that to configure the payload
+                endbit = key.split("/")[1]
+                payload.update({ "payload_on": "/switch/on/"+endbit, "payload_off": "/switch/off/"+endbit, "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
 
             if key.startswith('mosfet'):

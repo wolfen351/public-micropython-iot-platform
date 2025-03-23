@@ -8,5 +8,6 @@
     "daymax": "temperature",
     "humidity": "humidity",
     "rssi": "signal_strength",
-    "relay": "switch"
+    "relay": "switch",
+    "switch": "switch"
 }
