@@ -201,7 +201,7 @@ class HomeAssistantControl(BasicModule):
             SerialLog.log('Connecting to %s HA MQTT broker...' % (self.mqtt_server))
             self.lastConnectTime = ticks_ms()
 
-            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""), 30)
+            self.client = MQTTClient(b"ha-%s" % (self.deviceId), self.mqtt_server, 1883, self.getPref("homeassistant", "mqtt_user", ""), self.getPref("homeassistant", "mqtt_password", ""), 300)
             self.client.set_callback(self.sub_cb)
             self.client.set_last_will("%s/sensor/%s/keepalive" % (self.haPrefixUrl, self.deviceId), "offline", True)
             self.client.connect()
