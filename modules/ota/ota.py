@@ -41,18 +41,18 @@ def recursive_delete(path: str):
         return
     uos.rmdir(path)
 
-def check_free_space(min_free_space: int) -> bool:
-    if not any([isinstance(min_free_space, int), isinstance(min_free_space, float)]):
+def check_free_space(updateSize: int) -> bool:
+    if not any([isinstance(updateSize, int), isinstance(updateSize, float)]):
         SerialLog.log('min_free_space must be an int or float')
         return False
 
     fs_stat = uos.statvfs('/')
     block_sz = fs_stat[0]
     free_blocks = fs_stat[3]
-    free_kb = block_sz * free_blocks / 1024
-    SerialLog.log('Update size: %s kB' % min_free_space)
-    SerialLog.log('Free disk space: %s kB' % free_kb)
-    return free_kb >= min_free_space
+    free_b = block_sz * free_blocks
+    SerialLog.log('Update size: %s B' % updateSize)
+    SerialLog.log('Free disk space: %s B' % free_b)
+    return free_b >= updateSize
 
 def local_version():
     try:
@@ -143,10 +143,8 @@ def check_for_updates(version_check=True) -> bool:
         SerialLog.log("Unable to check for updates, bad response from server. Giving up!")
         return False
 
-    remote_version, remote_filename, *optional = response.text.strip().rstrip(';').split(';')
-    min_free_space, *remote_hash = optional if optional else (0, '')
-    min_free_space = int(min_free_space)
-    remote_hash = remote_hash[0] if remote_hash else ''
+    remote_version, remote_filename, filesizerawkb, filesizerawb, hash = response.text.strip().rstrip(';').split(';')
+    filesize = int(filesizerawb)
     response.close()
 
     try:
@@ -162,9 +160,10 @@ def check_for_updates(version_check=True) -> bool:
     SerialLog.log("Remote version: ", remote_version)
     if not version_check or remote_version > local_version:
         SerialLog.log('new version %s is available' % remote_version)
-        if not check_free_space(min_free_space):
+        if not check_free_space(filesize):
             SerialLog.log('Error! Not enough free space for the new firmware, staying on this version')
             return False
+        SerialLog.log('We have enough disk space to download the new firmware')
 
         gc.collect()
         downloadUrl = ota_config['url']  + shortName + '/' + remote_filename
@@ -180,7 +179,20 @@ def check_for_updates(version_check=True) -> bool:
                             if not chunk:
                                 break
                             f.write(chunk)
+                    response.close()
                     SerialLog.log("Downloaded update to flash")
+
+                    # Check the file size
+                    if uos.stat(ota_config['tmp_filename'])[6] != filesize:
+                        SerialLog.log("Firmware file wrong size (It is", uos.stat(ota_config['tmp_filename'])[6] ," but it should be ",filesize,"), deleting it")
+                        uos.remove(ota_config['tmp_filename'])
+                        SerialLog.log("Error! Firmware file wrong size")
+                        return False
+                    SerialLog.log("Firmware file correct size: ", filesize)
+                    
+                    # Check the OTA hash
+                    SerialLog.log("Checking the hash is currently not implemented")
+
                     return True
                 else:
                     SerialLog.log("Attempt", attempt + 1, "failed with status code ", response.status_code, "retrying...")
