@@ -9,7 +9,7 @@
     "ip": "IP",
     "ssid": "SSID",
     "ac_mode": "AC Mode",
-    "button": "Onboard Button",
+    "button": "Button",
     "ledprimaryb": "Primary Colour",
     "ledsecondaryb": "Secondary Colour",
     "relay": "Relay",
@@ -17,9 +17,9 @@
     "freedisk": "Free Disk Space",
     "freeram": "Free RAM",
     "name": "Device Name",
-    "onboard/led": "Onboard LED",
+    "onboard": "Onboard",
     "osname": "Micropython Version",
     "wifiUptime": "WiFi Uptime",
     "rebootbtn": "Reboot",
-    "switch/messageled": "Message LED"
+    "switch": "Switch"
 }

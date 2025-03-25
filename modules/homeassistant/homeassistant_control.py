@@ -257,7 +257,7 @@ class HomeAssistantControl(BasicModule):
             telemetryType = "sensor"
                         
             if "/" in key:
-                name = name + " (%s)" % (key.split("/")[1])
+                name = "%s %s" % (name, key.split("/")[1])
             payload = self.get_basic_payload(name, telemetryId, attr, value) 
             if uom:
                 payload.update({ "unit_of_meas": uom })
@@ -275,7 +275,7 @@ class HomeAssistantControl(BasicModule):
                 telemetryType = "switch"
 
             if key.startswith('switch'):
-                # get the part after switch/ and use that to configure the payload
+                # get the part after switch/
                 endbit = key.split("/")[1]
                 payload.update({ "payload_on": "/switch/on/"+endbit, "payload_off": "/switch/off/"+endbit, "cmd_t": "~/command", "state_off": 0, "state_on": 1 })
                 telemetryType = "switch"
@@ -290,6 +290,12 @@ class HomeAssistantControl(BasicModule):
 
             if key.startswith('rebootbtn'):
                 payload.update({ "payload_on": "/system/reboot", "payload_press": "/system/reboot", "cmd_t": "~/command" })
+                telemetryType = "button" 
+
+            if key.startswith('button'):
+                # get the part after button/
+                endbit = key.split("/")[1]
+                payload.update({ "payload_press": "/buttton/press/"+endbit, "cmd_t": "~/command" })
                 telemetryType = "button" 
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)

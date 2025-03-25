@@ -13,11 +13,11 @@
 
     <div class="line">
         <div class="lineitem">Locked</div>
-        <div dataitem="garageDoorLocked"></div>
+        <div dataitem="switch/garagedoorlock" datadisplay="onoff"></div>
     </div>
 
-    <input type="button" class="navbtn" value="Lock" onclick="post('/garagedoor/lock')"></input>
-    <input type="button" class="navbtn" value="Unlock" onclick="post('/gragedoor/unlock')"></input>
+    <input type="button" class="navbtn" value="Lock" onclick="post('/switch/on/garagedoorlock')"></input>
+    <input type="button" class="navbtn" value="Unlock" onclick="post('/switch/off/garagedoorlock')"></input>
 
 </div>
 

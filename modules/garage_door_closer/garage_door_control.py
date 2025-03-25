@@ -51,7 +51,8 @@ class GarageDoorControl(BasicModule):
         telemetry = { 
             "garagedoorStatus": self.doorState, 
             "openForMs": openForMsRounded,
-            "garageDoorLocked": self.locked
+            "switch/garagedoorlock": 1 if self.locked else 0,  # Send 1 for locked, 0 otherwise
+            "button/garagedoortrigger": 0
         }
         return telemetry
 
@@ -93,11 +94,15 @@ class GarageDoorControl(BasicModule):
                 self.lock()
             if (c.startswith("/garagedoor/unlock")):
                 self.unlock()
+            if (c.startswith("/switch/on/garagedoorlock")):
+                self.lock()
+            if (c.startswith("/switch/off/garagedoorlock")):
+                self.unlock()
 
     def getRoutes(self):
         return { 
-            b"/garagedoor/lock" : self.webLock,
-            b"/garagedoor/unlock" : self.webUnlock
+            b"/switch/on/garagedoorlock" : self.webLock,
+            b"/switch/off/garagedoorlock" : self.webUnlock
         }
 
     def getIndexFileName(self):
