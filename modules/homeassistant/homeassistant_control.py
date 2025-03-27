@@ -295,7 +295,7 @@ class HomeAssistantControl(BasicModule):
             if key.startswith('button'):
                 # get the part after button/
                 endbit = key.split("/")[1]
-                payload.update({ "payload_press": "/buttton/press/"+endbit, "cmd_t": "~/command" })
+                payload.update({ "payload_press": "/button/press/"+endbit, "cmd_t": "~/command" })
                 telemetryType = "button" 
 
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)

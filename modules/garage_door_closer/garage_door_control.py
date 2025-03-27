@@ -23,6 +23,8 @@ class GarageDoorControl(BasicModule):
         self.openAtMs = 15 * 60 * 1000 # 15 minutes
         self.pressMs = 750
 
+        self.commandTrigger = 0
+
     def tick(self):
         # reset timer
         if (self.doorState == "Closed" and self.lastOpenAt != 0):
@@ -43,7 +45,16 @@ class GarageDoorControl(BasicModule):
                 if (self.openForMs > self.openAtMs + self.pressMs):
                     self.commands.append("/relay/off/1")
                     self.lastOpenAt = time.ticks_ms()
+            
+        if self.commandTrigger == 2:
+            self.commandTrigger = 0
+            self.commands.append("/relay/off/1")
+            SerialLog.log("Garage Door Trigger Deactivated")
 
+        if self.commandTrigger == 1:
+            self.commandTrigger = 2
+            self.commands.append("/relay/on/1")
+            SerialLog.log("Garage Door Triggered")
 
     def getTelemetry(self): 
         # round open for ms to seconds
@@ -98,6 +109,9 @@ class GarageDoorControl(BasicModule):
                 self.lock()
             if (c.startswith("/switch/off/garagedoorlock")):
                 self.unlock()
+                
+        if "/button/press/garagedoortrigger" in commands:
+            self.commandTrigger = 1
 
     def getRoutes(self):
         return { 
