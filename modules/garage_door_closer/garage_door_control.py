@@ -59,8 +59,11 @@ class GarageDoorControl(BasicModule):
     def getTelemetry(self): 
         # round open for ms to seconds
         openForMsRounded = int(self.openForMs / 1000) * 1000
+
+        reportState = f"Locked {self.doorState}" if self.locked else self.doorState
+
         telemetry = { 
-            "garagedoorStatus": self.doorState, 
+            "garagedoorStatus": reportState, 
             "openForMs": openForMsRounded,
             "switch/garagedoorlock": 1 if self.locked else 0,  # Send 1 for locked, 0 otherwise
             "button/garagedoortrigger": 0
@@ -100,18 +103,24 @@ class GarageDoorControl(BasicModule):
         return toSend
 
     def processCommands(self, commands):
+        
         for c in commands:
             if (c.startswith("/garagedoor/lock")):
                 self.lock()
             if (c.startswith("/garagedoor/unlock")):
                 self.unlock()
-            if (c.startswith("/switch/on/garagedoorlock")):
-                self.lock()
-            if (c.startswith("/switch/off/garagedoorlock")):
-                self.unlock()
                 
         if "/button/press/garagedoortrigger" in commands:
-            self.commandTrigger = 1
+            if (not self.locked):
+                self.commandTrigger = 1
+            else:
+                SerialLog.log("Garage Door is locked, trigger ignored")
+
+        if "/switch/off/garagedoorlock" in commands:
+            self.unlock()
+        
+        if "/switch/on/garagedoorlock" in commands:
+            self.lock()
 
     def getRoutes(self):
         return { 
