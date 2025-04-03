@@ -70,16 +70,16 @@ class BinaryClock(BasicModule):
         decimal_tens = (round(number) // 10) % 10 
         decimal_ones = round(number) % 10 
         self.drawBCD(decimal_ones, x, y, full)
-        self.drawBCD(decimal_tens, x, y + 43, full)
+        self.drawBCD(decimal_tens, x, y + 43, full, tens=True)
 
     # draws one decimal digit as a series of bit leds
-    def drawBCD(self, number, x, y, full):
+    def drawBCD(self, number, x, y, full, tens = False):
         decimal_ones = number % 10
         ones = round(decimal_ones) % 2 
         twos = round(decimal_ones - ones) % 4 
         fours = round(decimal_ones - ones - twos) % 8 
         eights = round(decimal_ones - ones - twos - fours) % 16
-        if (number == 0 or number == 8 or full == True):
+        if (not tens and (number == 0 or number == 8 or full == True)):
             self.drawBit(eights, x+10, y)
         if (number == 0 or number == 4 or number == 8 or full == True):
             self.drawBit(fours, x+52, y)
