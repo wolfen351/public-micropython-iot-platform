@@ -37,7 +37,7 @@ class NtpSync(BasicModule):
                     ntptime.settime()
                     NtpSync.lastTimeSync = time.time()
                     SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
-                    SerialLog.log("The offset is %s seconds" %str(NtpSync.UTC_OFFSET))
+                    SerialLog.log("The offset is %s seconds / %s hours" % (NtpSync.UTC_OFFSET, NtpSync.UTC_OFFSET / 3600))
                     localTime = time.localtime(time.time() + NtpSync.UTC_OFFSET)
                     SerialLog.log("Local time after UTC Offset & DST Calculation: %s" %str(localTime))
                     NtpSync.gotTime = True

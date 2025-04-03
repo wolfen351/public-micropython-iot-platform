@@ -100,3 +100,5 @@ class BasicModule:
         f = open("prefs.json", "w")
         f.write(ujson.dumps(self.prefs))
         f.close()
+
+        SerialLog.log("Set preference %s.%s to %s" % (sectionName, settingName, value))
