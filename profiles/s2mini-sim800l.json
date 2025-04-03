@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini SIM 800L",
     "shortName": "s2mini-sim800l",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "sim800l"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "sim800l"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {

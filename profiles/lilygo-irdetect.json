@@ -1,7 +1,7 @@
 {
     "name": "LilyGo Battery Powered Motion Sensor",
     "shortName": "lilygo-irdetect",
-    "activeModules": ["basic", "mqtt", "ota", "thingsboard", "web", "wifi", "homeassistant", "wdt", "pir", "lilygo_battery"],
+    "activeModules": ["basic", "mqtt", "ota", "web", "wifi", "homeassistant", "wdt", "pir", "lilygo_battery"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
     "ota": {

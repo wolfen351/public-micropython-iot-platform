@@ -1,7 +1,7 @@
 {
     "name": "LilyGo Ethernet Sensor",
     "shortName": "lilygopoe-eth",
-    "activeModules": ["basic", "mqtt", "ota", "thingsboard", "web", "wifi", "homeassistant"],
+    "activeModules": ["basic", "mqtt", "ota", "web", "wifi", "homeassistant"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
     "ota": {
