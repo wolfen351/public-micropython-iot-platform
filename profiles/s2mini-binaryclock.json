@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini Binary Clock",
     "shortName": "s2mini-binaryclock",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "binary_clock", "touchscreen"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "thingsboard", "web", "wifi", "ntp", "binary_clock", "touchscreen", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {

@@ -16,7 +16,7 @@ class WDTControl(BasicModule):
         self.wdt.feed()
      
     def getTelemetry(self):
-        return {} 
+        return {}
      
     def processTelemetry(self, telemetry):
         pass

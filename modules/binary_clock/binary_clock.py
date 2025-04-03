@@ -18,6 +18,7 @@ class BinaryClock(BasicModule):
     time = [0,0,0] #hms
     previous = [0,0,0] # hms
     hideDecimal = False
+    bitdata = {}
 
     def __init__(self):
         pass
@@ -89,6 +90,19 @@ class BinaryClock(BasicModule):
 
     # draws one bit (led circle)
     def drawBit(self, bitValue, x, y):
+
+        # Prevent drawing the same bit value 
+        if (x,y) not in BinaryClock.bitdata:
+            prevbitValue = -1
+        else:
+            prevbitValue = BinaryClock.bitdata[(x,y)]
+        
+        if bitValue == prevbitValue:
+            return
+        
+        BinaryClock.bitdata[(x,y)] = bitValue
+
+        # Actually draw the bit
         if (bitValue == 0):
             self.display.draw_image('modules/binary_clock/off.raw', x, y, 49, 46)
         else:
