@@ -1,7 +1,7 @@
 {
     "name": "Esp32 2 Relays Board",
     "shortName": "esp32-garagedoorcloser",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "us_range", "garage_door_closer"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "us_range", "garage_door_closer", "wdt"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 23,
     "ota": {

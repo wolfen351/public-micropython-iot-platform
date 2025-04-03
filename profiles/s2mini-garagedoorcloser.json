@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini Garage Door Closer",
     "shortName": "s2mini-garagedoorcloser",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "us_range", "garage_door_closer"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "us_range", "garage_door_closer", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {

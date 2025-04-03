@@ -1,7 +1,7 @@
 {
     "name": "Sonoff Basic R4 Board",
     "shortName": "sonoffbasicr4_relay",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "ntp", "web", "wifi", "relay", "builtin_button", "schedule"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "ntp", "web", "wifi", "relay", "builtin_button", "schedule", "wdt"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 6,
     "builtinButton": {

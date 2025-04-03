@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini DHT11",
     "shortName": "s2mini-dht11",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "dht11"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "dht11", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {

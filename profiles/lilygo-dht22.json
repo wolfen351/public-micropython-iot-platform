@@ -1,7 +1,7 @@
 {
     "name": "LilyGo Battery Powered Temp Sensor",
     "shortName": "lilygo-dht22",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "dht22", "ntp", "temphistory", "lilygo_battery"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "dht22", "ntp", "temphistory", "lilygo_battery", "wdt"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 3,
     "dht22": {

@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini GPS Unit",
     "shortName": "s2mini-gps",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "gps"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "gps", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "gps": {

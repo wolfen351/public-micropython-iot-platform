@@ -1,7 +1,7 @@
 {
     "name": "S2 Mini Mosfet Shield",
     "shortName": "s2mini-mosfet",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "mosfet"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "mosfet", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
     "ota": {

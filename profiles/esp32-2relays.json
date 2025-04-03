@@ -1,7 +1,7 @@
 {
     "name": "Esp32 2 Relays Board",
     "shortName": "esp32-2relay",
-    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2"],
+    "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "relayx2", "wdt"],
     "cpuSpeed": 160000000,
     "statusLedPin" : 2,
     "ota": {
