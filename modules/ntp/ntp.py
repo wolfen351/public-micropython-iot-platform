@@ -12,48 +12,53 @@ class NtpSync(BasicModule):
     UTC_BASE_OFFSET = 0 # seconds from utc without DST
     UTC_OFFSET = 0 # seconds from utc with DST
     previous = [-1,-1,-1,-1,-1,-1,-1]
+    lastTimeSync = 0
 
     def __init__(self):
         pass
 
-
     def start(self):
         self.sta_if = network.WLAN(network.STA_IF)
-        self.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 43200) * 60 * 60 # default is 12 hours
+        NtpSync.UTC_BASE_OFFSET = self.getPref("ntp", "defaultOffset", 43200) # default is 12 hours
         self.tzName = self.getPref("ntp", "tzIANA", "pacific/auckland")
 
         # Implement DST here
-        self.UTC_OFFSET = self.UTC_BASE_OFFSET
+        NtpSync.UTC_OFFSET = NtpSync.UTC_BASE_OFFSET
         if (self.tzName == "pacific/auckland"):
-            self.UTC_OFFSET += 3600
+            NtpSync.UTC_OFFSET += 3600
 
     def tick(self):
 
-        if (not self.gotTime):
+        if (not NtpSync.gotTime):
             if (self.sta_if.isconnected()):
                 # Set up NTP
                 try:
                     SerialLog.log("Local time before synchronization: %s" %str(time.localtime()))
                     ntptime.settime()
+                    NtpSync.lastTimeSync = time.time()
                     SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
-                    localTime = time.localtime(time.time() + self.UTC_OFFSET)
-                    SerialLog.log("Local time after UTC Offet & DST Calculation: %s" %str(localTime))
-                    self.gotTime = True
+                    SerialLog.log("The offset is %s seconds" %str(NtpSync.UTC_OFFSET))
+                    localTime = time.localtime(time.time() + NtpSync.UTC_OFFSET)
+                    SerialLog.log("Local time after UTC Offset & DST Calculation: %s" %str(localTime))
+                    NtpSync.gotTime = True
                 except Exception as e:
                     SerialLog.log("Error syncing time: ", e)
                     import sys
                     sys.print_exception(e)
 
         if (not self.sta_if.isconnected()):
-            self.gotTime = False # resync time when wifi comes back
-        
+            NtpSync.gotTime = False # resync time when wifi comes back
+
+        if (NtpSync.lastTimeSync != 0):
+            if (time.time() - NtpSync.lastTimeSync > 3 * 3600):
+                NtpSync.gotTime = False # resync time every 3 hours
 
     def getTelemetry(self):
         
-        if (not self.gotTime):
+        if (not NtpSync.gotTime):
             return { "ntp": "Waiting" }
         
-        localTime = time.localtime(time.time() + self.UTC_OFFSET)
+        localTime = time.localtime(time.time() + NtpSync.UTC_OFFSET)
         # format localTime as a ISO 8601 string
         localTime = "%04d-%02d-%02dT%02d:%02d:%02d" % (localTime[0], localTime[1], localTime[2], localTime[3], localTime[4], localTime[5])
         telemetry = {
