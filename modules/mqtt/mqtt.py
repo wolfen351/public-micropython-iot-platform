@@ -197,8 +197,9 @@ class MQTTClient:
         self.sock.setblocking(True)
         if res is None:
             return None
-        if res == b"":
-            raise OSError(-1)
+        if res == b"": # This means the connection is closed
+            self.sock.close()
+            raise OSError("Connection closed") 
         if res == b"\xd0":  # PINGRESP
             sz = self.sock.read(1)[0]
             assert sz == 0
