@@ -8,7 +8,7 @@ class WDTControl(BasicModule):
         pass
      
     def start(self):
-        self.wdt = WDT(timeout=900000) # 15 min
+        self.wdt = WDT(timeout=300000) # 5 min
         self.wdt.feed()
         SerialLog.log("WDT started")
      
