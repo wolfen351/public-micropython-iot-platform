@@ -74,10 +74,14 @@ function Find-MicrocontrollerPort {
     )
 
     $SerialPorts = Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name, Description, DeviceID
-    $Name = $SerialPorts | Where-Object { $acceptableDescriptions -contains $_.Description } | Select-Object -ExpandProperty Name
-    $Name -match "COM\d+" > $null
+    $Names = $SerialPorts | Where-Object { $acceptableDescriptions -contains $_.Description } | Select-Object -ExpandProperty Name
 
-    $port = $Matches.0
+    $Names | ForEach-Object { 
+        # Extract the port number from the name
+        if ($_ -match 'COM\d+') {
+            $port = $Matches.0
+        }
+    }
 
     if ($null -eq $port) {
         # Print a list of serial ports 
@@ -88,6 +92,11 @@ function Find-MicrocontrollerPort {
     }
 
     if ('COM1' -eq $port) {
+        Write-Host "Available Serial Ports:"
+        Get-WmiObject Win32_PnPEntity | Where-Object Name -match 'COM\d+' | Select-Object Name | ForEach-Object { Write-Host "$($_.Name)" }
+
+        Write-Host "Please connect the microcontroller to the PC and try again."
+
         throw "Only found COM1, which is not a valid port"
     }
 

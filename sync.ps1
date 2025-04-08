@@ -13,6 +13,7 @@ if ($args -contains "/?") {
 }
 
 # Globals
+try {    Remove-Module -Name serial-toys } catch {     }
 Import-Module .\serial-toys.psm1
 
 
