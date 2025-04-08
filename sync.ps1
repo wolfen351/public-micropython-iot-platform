@@ -13,7 +13,7 @@ if ($args -contains "/?") {
 }
 
 # Globals
-try {    Remove-Module -Name serial-toys } catch {     }
+Remove-Module -Name serial-toys 2>$null
 Import-Module .\serial-toys.psm1
 
 
@@ -48,15 +48,23 @@ if ($port -eq "COM1")
     Write-Error "Board not detected. Aborting." -ErrorAction Stop
 }
 
-Start-Sleep 4
-
 $MAX = 0
 $MAXEDITTIME = 0
 
 # check basic connectivity to the board
-ampy --port $port ls > $null 2>&1
-if ($? -eq $false) {
-    Write-Error "Could not connect to the board. Aborting." -ErrorAction Stop
+Write-Host "Checking basic connectivity on $port to the board.."
+$job = Start-Job -ScriptBlock { ampy --port $using:port ls } 
+Wait-Job -Job $job -Timeout 10 | Out-Null
+if ($job.State -eq "Running") {
+    Stop-Job -Job $job
+    Write-Error "Could not connect - timed out" -ErrorAction Stop
+} else {
+    $output = Receive-Job -Job $job
+
+    if (-not $output -or $output -match "Error" -or $output -match "Traceback") {
+        Write-Output "Error: $LASTEXITCODE $output"
+        Write-Error "Could not connect to the board. Please check the connection." -ErrorAction Stop
+    } 
 }
 
 # if the user specified -wipe or -prod, delete all files on the board

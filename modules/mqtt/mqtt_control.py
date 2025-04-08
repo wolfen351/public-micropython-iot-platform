@@ -57,7 +57,8 @@ class MqttControl(BasicModule):
 
         # check incoming messages
         try:
-            self.client.check_msg()
+            if (self.client != None):
+                self.client.check_msg()
         except Exception as e:
             SerialLog.log("MQTT connection failed: ", e)
             self.init = False

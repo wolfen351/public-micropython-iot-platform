@@ -80,6 +80,7 @@ function Find-MicrocontrollerPort {
         # Extract the port number from the name
         if ($_ -match 'COM\d+') {
             $port = $Matches.0
+            $desc = $_
         }
     }
 
@@ -100,7 +101,7 @@ function Find-MicrocontrollerPort {
         throw "Only found COM1, which is not a valid port"
     }
 
-    Write-Host "Detected $port"
+    Write-Host "Detected $port - $desc"
     return $port
 }
 
