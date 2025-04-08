@@ -6,7 +6,7 @@ from ubinascii import hexlify
 from machine import unique_id, reset
 import network
 from modules.web.web_processor import okayHeader, unquote
-from time import sleep, ticks_ms, ticks_diff
+from time import sleep, ticks_ms
 from modules.ota.ota import local_version
 
 class MqttControl(BasicModule):
@@ -23,9 +23,6 @@ class MqttControl(BasicModule):
         self.client = None
         self.commands = []
         self.lastConnectAttempt = 0
-        self.lastPingSent = 0
-        self.keepAliveSeconds = 300 # 5 minutes
-        self.pingFreqSeconds = self.keepAliveSeconds // 2.1 # ping at 40% and 80% of the keepalive time
 
     def start(self):
         BasicModule.start(self)
@@ -62,16 +59,7 @@ class MqttControl(BasicModule):
         try:
             self.client.check_msg()
         except Exception as e:
-            self.init = False
-            raise
-
-        # send ping to tell the server we are still alive
-        try:
-            if ticks_diff(ticks_ms(), self.lastPingSent) > self.pingFreqSeconds*1000:
-                self.lastPingSent = ticks_ms()
-                self.client.ping()
-        except Exception as e:
-            SerialLog.log("MQTT Ping failed: ", e)
+            SerialLog.log("MQTT connection failed: ", e)
             self.init = False
             raise
 
@@ -155,7 +143,14 @@ class MqttControl(BasicModule):
 
     def connect_and_subscribe(self):
         SerialLog.log('Connecting to %s MQTT broker' % (self.mqtt_server))
-        self.client = MQTTClient(b"mqtt-%s" % (self.client_id), self.mqtt_server, int(self.mqtt_port), self.mqtt_user, self.mqtt_password, self.keepAliveSeconds) # 300 second keepalive
+        self.client = MQTTClient(
+            b"mqtt-%s" % (self.client_id),
+            self.mqtt_server,
+            int(self.mqtt_port),
+            self.mqtt_user,
+            self.mqtt_password,
+            keepalive=300  # Default keepalive value (300 seconds)
+        )
         self.client.set_callback(self.sub_cb)
         self.client.connect()
         # Tell the server we are online
@@ -164,14 +159,13 @@ class MqttControl(BasicModule):
         self.client.lw_topic = self.topic_pub + "/online"
         self.client.lw_msg = "0"
         self.client.lw_retain = True
-        # subscribe to the version topic for updates
+        # Subscribe to the version topic for updates
         self.client.subscribe("iot-platform/version")
-        # subscribe to the command topic
+        # Subscribe to the command topic
         self.client.subscribe(self.topic_sub)
-        SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))        
-        # resend all telemetry on connect
+        SerialLog.log('Connected to %s MQTT broker, subscribed to %s topic' % (self.mqtt_server, self.topic_sub))
+        # Resend all telemetry on connect
         self.telemetry = {}
-        self.lastPingSent = ticks_ms()
 
     def settings(self, settingsVals):
         # Apply the new settings

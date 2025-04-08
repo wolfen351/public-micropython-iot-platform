@@ -11,6 +11,7 @@
 from serial_log import SerialLog
 import usocket as socket
 import ustruct as struct
+from time import ticks_ms, ticks_diff
 
 class MQTTException(Exception):
     pass
@@ -42,6 +43,10 @@ class MQTTClient:
         self.lw_retain = False
         self.server = server
         self.port = port
+
+        # Keepalive-related attributes
+        self.last_ping_sent = 0
+        self.ping_freq_ms = (self.keepalive * 1000) // 2.1  # Ping at 40% and 80% of the keepalive time
 
     def _send_str(self, s):
         self.sock.write(struct.pack("!H", len(s)))
@@ -112,6 +117,7 @@ class MQTTClient:
 
     def ping(self):
         self.sock.write(b"\xc0\0")
+        SerialLog.log("MQTT Ping Sent: ", self.client_id, self.server, self.port)
 
     def publishInternal(self, topic, msg, retain=False, qos=0):
         pkt = bytearray(b"\x30\0\0\0")
@@ -229,6 +235,15 @@ class MQTTClient:
     # If not, returns immediately with None. Otherwise, does
     # the same processing as wait_msg.
     def check_msg(self):
+        # Send a ping if needed
+        if ticks_diff(ticks_ms(), self.last_ping_sent) > self.ping_freq_ms:
+            try:
+                self.ping()
+                self.last_ping_sent = ticks_ms()
+            except Exception as e:
+                raise MQTTException(f"MQTT Ping failed: {e}")
+
+        # Process incoming messages
         self.sock.setblocking(False)
         return self.wait_msg()
 

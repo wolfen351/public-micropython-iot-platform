@@ -105,10 +105,6 @@ class HomeAssistantControl(BasicModule):
                 processed.add(attr)
 
             self.telemetry = telemetry.copy()
-        
-        if ticks_diff(ticks_ms(), self.lastKeepAliveSend) > 10000:
-            self.safePublish("%s/%s/%s/keepalive" % (self.haPrefixUrl, "sensor", self.deviceId), "online", False)
-            self.lastKeepAliveSend = ticks_ms()
 
     def sendSingleTelemetry(self, attr, value, telemetry):
         if isinstance(value, bytes):
@@ -214,6 +210,7 @@ class HomeAssistantControl(BasicModule):
             self.client.subscribe("homeassistant/+/%s/+/command" % (self.deviceId))
             SerialLog.log('Connected to %s HA MQTT broker' % (self.mqtt_server))
             self.connected = True
+            self.safePublish("%s/sensor/%s/keepalive" % (self.haPrefixUrl, self.deviceId), "online", False)
     
     def get_basic_payload(self, name, uniqueid, attr, value):
         wlan_mac = WLAN(STA_IF).config('mac')
