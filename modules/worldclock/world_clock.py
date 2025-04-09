@@ -19,7 +19,6 @@ class WorldClock(BasicModule):
     gotTime = False
     time = [0,0,0] #hms
     previous = [0,0,0] # hms
-    hideDecimal = False
     offsetData = {}
     timeData = { "US": [0,0,0], "IN": [0,0,0], "SA": [0,0,0], "NZ": [0,0,0] }
 
@@ -35,7 +34,7 @@ class WorldClock(BasicModule):
 
         # Get TZ offset for all 4 locations
         self.GetTzOffset("NZ", "Pacific/Auckland") # New Zealand
-        self.GetTzOffset("EST", "America/New_York") # US Eastern
+        self.GetTzOffset("US", "America/New_York") # US Eastern
         self.GetTzOffset("IN", "Asia/Kolkata") # India
         self.GetTzOffset("SA", "Africa/Johannesburg") # South Africa
 
@@ -70,7 +69,7 @@ class WorldClock(BasicModule):
             timeNZ = list(map(int, self.time.split("T")[1].split(":")))
 
             secondsTimeUTC = timeNZ[0] * 3600 + timeNZ[1] * 60 + timeNZ[2] - self.offset # convert to utc seconds
-            secondsTimeEST = secondsTimeUTC + self.offsetData["EST"] # convert to est seconds
+            secondsTimeEST = secondsTimeUTC + self.offsetData["US"] # convert to est seconds
             secondsTimeIN = secondsTimeUTC + self.offsetData["IN"] # convert to in seconds
             secondsTimeSA = secondsTimeUTC + self.offsetData["SA"] # convert to sa seconds
 
@@ -78,7 +77,6 @@ class WorldClock(BasicModule):
             timeEST = [(secondsTimeEST // 3600) % 24, (secondsTimeEST % 3600) // 60, secondsTimeEST % 60]
             timeIN = [(secondsTimeIN // 3600) % 24, (secondsTimeIN % 3600) // 60, secondsTimeIN % 60]
             timeSA = [(secondsTimeSA // 3600) % 24, (secondsTimeSA % 3600) // 60, secondsTimeSA % 60]
-            timeNZ = [(secondsTimeUTC // 3600) % 24, (secondsTimeUTC % 3600) // 60, secondsTimeUTC % 60]
             
             self.drawTime("US", timeEST, top=5, left=40)
             self.drawTime("IN", timeIN, top=70, left=40)
@@ -132,8 +130,6 @@ class WorldClock(BasicModule):
     def processCommands(self, commands):
         for c in commands:
             if ("/touch" in c):
-                self.display.clear(color565(0, 0, 0))                
-                self.hideDecimal = not self.hideDecimal
                 self.displayTime(True)
 
     def getRoutes(self):
