@@ -107,11 +107,11 @@ class NtpSync(BasicModule):
             if (self.sta_if.isconnected()):
                 # Set up NTP
                 try:
-                    SerialLog.log("Local time before synchronization: %s" %str(time.localtime()))
+                    SerialLog.log("Local time before synchronization: %s" %str(time.localtime(time.time() + NtpSync.UTC_OFFSET)))
                     ntptime.settime()
                     NtpSync.lastTimeSync = time.time()
-                    SerialLog.log("Local time after synchronization: %s" %str(time.localtime(time.time())))
-
+                    SerialLog.log("Local time after synchronization:  %s" %str(time.localtime(time.time() + NtpSync.UTC_OFFSET)))
+                    self.updateDST()
                     NtpSync.gotTime = True
                 except Exception as e:
                     SerialLog.log("Error syncing time: ", e)
