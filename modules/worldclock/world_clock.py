@@ -13,12 +13,15 @@ class WorldClock(BasicModule):
     spi = None
     display = None
     xpt = None
-    font = XglcdFont('modules/touchscreen/font25x57.c', 25, 57, 32, 97, 228)
+    # path, width, height, start_letter=32, letter_count=96, bytes_per_letter=0
+    #font = XglcdFont('modules/touchscreen/font25x57.c', 25, 57, 32, 97, 228)
+    font = XglcdFont('modules/touchscreen/Roboto_18x22.c', 18, 22)
     gotTime = False
     time = [0,0,0] #hms
     previous = [0,0,0] # hms
     hideDecimal = False
-    bitdata = {}
+    offsetData = {}
+    timeData = { "US": [0,0,0], "IN": [0,0,0], "SA": [0,0,0], "NZ": [0,0,0] }
 
     def __init__(self):
         pass
@@ -30,6 +33,30 @@ class WorldClock(BasicModule):
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
 
+        # Get TZ offset for all 4 locations
+        self.GetTzOffset("NZ", "Pacific/Auckland") # New Zealand
+        self.GetTzOffset("EST", "America/New_York") # US Eastern
+        self.GetTzOffset("IN", "Asia/Kolkata") # India
+        self.GetTzOffset("SA", "Africa/Johannesburg") # South Africa
+
+    def GetTzOffset(self, name, tz):
+        # Get the timezone information from online source using the timezone: 'https://www.timeapi.io/api/timezone/zone?timeZone=Pacific/Auckland'
+        # and set the UTC_OFFSET based on the timezone information
+        response = None
+        try:
+            import urequests as requests
+            response = requests.get("https://www.timeapi.io/api/timezone/zone?timeZone=%s" % tz)
+            if response.status_code == 200:
+                data = response.json()
+                # save this info to a file for later use
+                self.offsetData[name] = data["currentUtcOffset"]["seconds"]
+            else:
+                SerialLog.log("Error getting timezone information: %s" % response.status_code)
+        except Exception as e:
+            SerialLog.log("Error getting timezone information: %s" % str(e))
+            if response:
+                response.close()
+
     def tick(self):
         if self.gotTime and (self.previous[0] != self.time[0] or self.previous[1] != self.time[1] or self.previous[2] != self.time[2]):
             self.displayTime()
@@ -40,19 +67,40 @@ class WorldClock(BasicModule):
         
         if (self.gotTime):
             # convert the string in self.time from ISO format to a list of integers
-            localTime = list(map(int, self.time.split("T")[1].split(":")))
-            spacing = 65
-            leftspacing = 60
-            if (self.previous[2] != localTime[2] or full == True):
-                if (not self.hideDecimal):
-                    self.drawNumber(localTime[2], 200, leftspacing, False) # seconds
-            if (self.previous[1] != localTime[1] or full == True):
-                if (not self.hideDecimal):
-                    self.drawNumber(localTime[1], 200, leftspacing+spacing) # mins
-            if (self.previous[0] != localTime[0] or full == True):
-                if (not self.hideDecimal):
-                    self.drawNumber(localTime[0], 200, leftspacing+spacing*2) # hours
-            self.previous = localTime
+            timeNZ = list(map(int, self.time.split("T")[1].split(":")))
+
+            secondsTimeUTC = timeNZ[0] * 3600 + timeNZ[1] * 60 + timeNZ[2] - self.offset # convert to utc seconds
+            secondsTimeEST = secondsTimeUTC + self.offsetData["EST"] # convert to est seconds
+            secondsTimeIN = secondsTimeUTC + self.offsetData["IN"] # convert to in seconds
+            secondsTimeSA = secondsTimeUTC + self.offsetData["SA"] # convert to sa seconds
+
+            # convert the seconds to list of hms format
+            timeEST = [secondsTimeEST // 3600, (secondsTimeEST % 3600) // 60, secondsTimeEST % 60]
+            timeIN = [secondsTimeIN // 3600, (secondsTimeIN % 3600) // 60, secondsTimeIN % 60]
+            timeSA = [secondsTimeSA // 3600, (secondsTimeSA % 3600) // 60, secondsTimeSA % 60]
+            
+            self.drawTime("US", timeEST, top=5, left=40)
+            self.drawTime("IN", timeIN, top=70, left=40)
+            self.drawTime("SA", timeSA, top=135, left=40)
+            self.drawTime("NZ", timeNZ, top=200, left=40)
+            self.display.draw_text(0, 260, "US", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+            self.display.draw_text(65, 260, "IN", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+            self.display.draw_text(130, 260, "SA", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+            self.display.draw_text(195, 260, "NZ", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+
+    def drawTime(self, name, time, top, left):
+        spacing = 65
+        if self.timeData[name][0] != time[0]:
+            self.drawNumber(time[0], top, left+spacing*2) # hours
+
+        if self.timeData[name][1] != time[1]:
+            self.drawNumber(time[1], top, left+spacing) # mins
+
+        if self.timeData[name][2] != time[2]:
+            self.drawNumber(time[2], top, left, False) # seconds
+
+        # store the current time for this location
+        self.timeData[name] = time
 
     # draws a decimal number
     def drawNumber(self, number, x, y, showColon = True):
@@ -69,6 +117,8 @@ class WorldClock(BasicModule):
         return telemetry
 
     def processTelemetry(self, telemetry):
+        if "offset" in telemetry:
+            self.offset = telemetry["offset"]
         if ("time" in telemetry):
             self.time = telemetry["time"]
             if not self.gotTime:

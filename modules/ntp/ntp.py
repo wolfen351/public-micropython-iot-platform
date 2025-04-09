@@ -136,7 +136,8 @@ class NtpSync(BasicModule):
         telemetry = {
             "time" : localTime,
             "timeZone": self.tzName,
-            "ntp": "Synchronized"
+            "ntp": "Synchronized",
+            "offset": NtpSync.UTC_OFFSET,
         }
         return telemetry
 
