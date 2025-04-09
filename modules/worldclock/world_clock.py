@@ -74,10 +74,11 @@ class WorldClock(BasicModule):
             secondsTimeIN = secondsTimeUTC + self.offsetData["IN"] # convert to in seconds
             secondsTimeSA = secondsTimeUTC + self.offsetData["SA"] # convert to sa seconds
 
-            # convert the seconds to list of hms format
-            timeEST = [secondsTimeEST // 3600, (secondsTimeEST % 3600) // 60, secondsTimeEST % 60]
-            timeIN = [secondsTimeIN // 3600, (secondsTimeIN % 3600) // 60, secondsTimeIN % 60]
-            timeSA = [secondsTimeSA // 3600, (secondsTimeSA % 3600) // 60, secondsTimeSA % 60]
+            # convert the seconds to list of hms format and wrap hours using modulo 24
+            timeEST = [(secondsTimeEST // 3600) % 24, (secondsTimeEST % 3600) // 60, secondsTimeEST % 60]
+            timeIN = [(secondsTimeIN // 3600) % 24, (secondsTimeIN % 3600) // 60, secondsTimeIN % 60]
+            timeSA = [(secondsTimeSA // 3600) % 24, (secondsTimeSA % 3600) // 60, secondsTimeSA % 60]
+            timeNZ = [(secondsTimeUTC // 3600) % 24, (secondsTimeUTC % 3600) // 60, secondsTimeUTC % 60]
             
             self.drawTime("US", timeEST, top=5, left=40)
             self.drawTime("IN", timeIN, top=70, left=40)
