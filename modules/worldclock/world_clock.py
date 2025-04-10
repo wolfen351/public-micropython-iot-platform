@@ -35,6 +35,15 @@ class WorldClock(BasicModule):
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
         self.display.draw_text(100, 200, "NTP Sync...", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+        # load all the offsets from the prefs file
+        self.loadOffsets()
+
+    def loadOffsets(self):
+        # load all the offsets from the prefs file
+        self.offsetData["US"] = self.getPref("worldclock", "offset_US", 0)
+        self.offsetData["IN"] = self.getPref("worldclock", "offset_IN", 0)
+        self.offsetData["SA"] = self.getPref("worldclock", "offset_SA", 0)
+        self.offsetData["NZ"] = self.getPref("worldclock", "offset_NZ", 0)
 
     def updateOffsets(self):
         # Get TZ offset for all 4 locations
@@ -46,7 +55,7 @@ class WorldClock(BasicModule):
     def GetTzOffset(self, name, tz):
         # Get the timezone information from online source using the timezone: 'https://www.timeapi.io/api/timezone/zone?timeZone=Pacific/Auckland'
         # and set the UTC_OFFSET based on the timezone information
-        SerialLog.log("Getting timezone information for %s" % name)
+        SerialLog.log("Getting timezone information for %s i.e. %s" % (name, tz))
         response = None
         try:
             import urequests as requests
@@ -55,7 +64,8 @@ class WorldClock(BasicModule):
                 data = response.json()
                 # save this info to a file for later use
                 self.offsetData[name] = data["currentUtcOffset"]["seconds"]
-                SerialLog.log("Timezone information for %s: Current offset is %s" % (name, data["currentUtcOffset"]["seconds"]))
+                self.setPref("worldclock", "offset_" + name, self.offsetData[name])
+                SerialLog.log("Timezone information for %s: Current offset is %s seconds" % (name, data["currentUtcOffset"]["seconds"]))
             else:
                 SerialLog.log("Error getting timezone information: %s" % response.status_code)
         except Exception as e:
