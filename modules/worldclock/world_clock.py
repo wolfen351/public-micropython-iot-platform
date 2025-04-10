@@ -3,6 +3,7 @@ from modules.touchscreen.ili9341 import Display, color565
 from modules.touchscreen.xglcd_font import XglcdFont
 from machine import Pin, SPI
 from serial_log import SerialLog
+import time
 
 # Screen is 320x240 px
 # X is left to right on the small side (0-240)
@@ -10,17 +11,19 @@ from serial_log import SerialLog
 
 class WorldClock(BasicModule):
 
-    spi = None
-    display = None
+    spi = SPI(1, baudrate=60000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
+    display = Display(spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
+    display.clear(color565(0, 0, 0))
     xpt = None
     # path, width, height, start_letter=32, letter_count=96, bytes_per_letter=0
     #font = XglcdFont('modules/touchscreen/font25x57.c', 25, 57, 32, 97, 228)
     font = XglcdFont('modules/touchscreen/Roboto_18x22.c', 18, 22)
+    display.draw_text(100, 200, "Loading...", font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
     gotTime = False
     time = [0,0,0] #hms
-    previous = [0,0,0] # hms
-    offsetData = {}
-    timeData = { "US": [0,0,0], "IN": [0,0,0], "SA": [0,0,0], "NZ": [0,0,0] }
+    offsetUpdatedAt = 0
+    offsetData = { "US": 0, "IN": 0, "SA": 0, "NZ": 0 }
+    timeData = { "US": [-1,-1,-1], "IN": [-1,-1,-1], "SA": [-1,-1,-1], "NZ": [-1,-1,-1] }
 
     def __init__(self):
         pass
@@ -31,7 +34,9 @@ class WorldClock(BasicModule):
         self.spi = SPI(1, baudrate=60000000, sck=Pin(7), mosi=Pin(11), miso=Pin(9))
         self.display = Display(self.spi, dc=Pin(12), cs=Pin(5), rst=Pin(0))
         self.display.clear(color565(0, 0, 0))
+        self.display.draw_text(100, 200, "NTP Sync...", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
 
+    def updateOffsets(self):
         # Get TZ offset for all 4 locations
         self.GetTzOffset("NZ", "Pacific/Auckland") # New Zealand
         self.GetTzOffset("US", "America/New_York") # US Eastern
@@ -41,6 +46,7 @@ class WorldClock(BasicModule):
     def GetTzOffset(self, name, tz):
         # Get the timezone information from online source using the timezone: 'https://www.timeapi.io/api/timezone/zone?timeZone=Pacific/Auckland'
         # and set the UTC_OFFSET based on the timezone information
+        SerialLog.log("Getting timezone information for %s" % name)
         response = None
         try:
             import urequests as requests
@@ -49,6 +55,7 @@ class WorldClock(BasicModule):
                 data = response.json()
                 # save this info to a file for later use
                 self.offsetData[name] = data["currentUtcOffset"]["seconds"]
+                SerialLog.log("Timezone information for %s: Current offset is %s" % (name, data["currentUtcOffset"]["seconds"]))
             else:
                 SerialLog.log("Error getting timezone information: %s" % response.status_code)
         except Exception as e:
@@ -57,8 +64,12 @@ class WorldClock(BasicModule):
                 response.close()
 
     def tick(self):
-        if self.gotTime and (self.previous[0] != self.time[0] or self.previous[1] != self.time[1] or self.previous[2] != self.time[2]):
-            self.displayTime()
+        self.displayTime()
+
+        # every 6 hours, update offsets
+        if self.offsetUpdatedAt == 0 or time.ticks_diff(time.ticks_ms(), self.offsetUpdatedAt) > 21600000:
+            self.offsetUpdatedAt = time.ticks_ms()
+            self.updateOffsets()
 
     def displayTime(self, full = False):
         # Speed up SPI for drawing
@@ -82,33 +93,37 @@ class WorldClock(BasicModule):
             self.drawTime("IN", timeIN, top=70, left=40)
             self.drawTime("SA", timeSA, top=135, left=40)
             self.drawTime("NZ", timeNZ, top=200, left=40)
-            self.display.draw_text(0, 260, "US", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
-            self.display.draw_text(65, 260, "IN", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
-            self.display.draw_text(130, 260, "SA", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
-            self.display.draw_text(195, 260, "NZ", self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
 
     def drawTime(self, name, time, top, left):
         spacing = 65
         if self.timeData[name][0] != time[0]:
-            self.drawNumber(time[0], top, left+spacing*2) # hours
+            self.drawNumber(time[0], top, left+spacing*2, self.timeData[name][0]) # hours
 
         if self.timeData[name][1] != time[1]:
-            self.drawNumber(time[1], top, left+spacing) # mins
+            self.drawNumber(time[1], top, left+spacing, self.timeData[name][1]) # mins
 
         if self.timeData[name][2] != time[2]:
-            self.drawNumber(time[2], top, left, False) # seconds
+            self.drawNumber(time[2], top, left, self.timeData[name][2]) # seconds
+
+        if self.timeData[name][0] == -1:
+            self.display.draw_text(top-5, 260, name, self.font, color565(255, 255, 255), color565(0, 0, 0), landscape=True)
+            self.display.draw_image('modules/worldclock/colon.raw',top,left+spacing*2-10,36,7)
+            self.display.draw_image('modules/worldclock/colon.raw',top,left+spacing-10,36,7)
 
         # store the current time for this location
         self.timeData[name] = time
 
     # draws a decimal number
-    def drawNumber(self, number, x, y, showColon = True):
+    def drawNumber(self, number, x, y, prevNumber):
+        prevTens = (round(prevNumber) // 10) % 10
         tens = (round(number) // 10) % 10 
+        prevOnes = round(prevNumber) % 10
         ones = round(number) % 10 
-        if showColon:
-            self.display.draw_image('modules/worldclock/colon.raw',x,y-10,36,7)
-        self.display.draw_image('modules/worldclock/small'+str(tens)+'.raw',x,y+25,36,24)
-        self.display.draw_image('modules/worldclock/small'+str(ones)+'.raw',x,y,36,24)
+
+        if prevTens != tens or prevNumber == -1:
+            self.display.draw_image('modules/worldclock/small'+str(tens)+'.raw',x,y+25,36,24)
+        if prevOnes != ones or prevNumber == -1:
+            self.display.draw_image('modules/worldclock/small'+str(ones)+'.raw',x,y,36,24)
 
     def getTelemetry(self):
         telemetry = {
@@ -118,9 +133,10 @@ class WorldClock(BasicModule):
     def processTelemetry(self, telemetry):
         if "offset" in telemetry:
             self.offset = telemetry["offset"]
-        if ("time" in telemetry):
+        if "time" in telemetry:
             self.time = telemetry["time"]
             if not self.gotTime:
+                self.display.clear(color565(0, 0, 0))
                 self.gotTime = True
                 self.displayTime(True)
 

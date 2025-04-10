@@ -1,6 +1,6 @@
 {
-    "name": "S2 Mini Binary Clock",
-    "shortName": "s2mini-binaryclock",
+    "name": "S2 Mini World Clock",
+    "shortName": "s2mini-worldclock",
     "activeModules": ["basic", "homeassistant", "mqtt", "ota", "web", "wifi", "ntp", "worldclock", "touchscreen", "wdt"],
     "cpuSpeed": 240000000,
     "statusLedPin" : 15,
