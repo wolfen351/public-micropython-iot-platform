@@ -5,6 +5,23 @@
 from serial_log import SerialLog
 SerialLog.log("Boot starting...")
 
+from board_system.cpu_hardware import CpuHardware
+try:
+    CpuHardware.StatusLedOn()
+except Exception as e:
+    SerialLog.log("Error: ", e)
+
+try:
+    CpuHardware.printResetCause()
+except Exception as e:
+    SerialLog.log("Error: ", e)
+
+try:
+    CpuHardware.printVersion()
+except Exception as e:
+    SerialLog.log("Error: ", e)
+
+
 def runSafe(cmd, p1 = None):
     try:
         if (p1 != None):
@@ -18,10 +35,6 @@ def runSafe(cmd, p1 = None):
         gc.collect()
 
 try:
-    # Turn on the LED to show we are alive
-    from board_system.cpu_hardware import CpuHardware
-    CpuHardware.StatusLedOn()
-
     # set the CPU to max speed
     CpuHardware.SetCpuMaxSpeed()    
 

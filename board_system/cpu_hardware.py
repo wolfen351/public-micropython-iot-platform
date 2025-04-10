@@ -62,4 +62,40 @@ class CpuHardware():
         if (timeToNapInMs-200 > 0):
             machine.lightsleep(timeToNapInMs-200) # Sleep to save power 
         SerialLog.log("Woke up..")
+    
+    @staticmethod
+    def printResetCause():
+        resetCause = machine.reset_cause()
+        if resetCause == 0:
+            SerialLog.log("Boot: Power on")
+        elif resetCause == 1:
+            SerialLog.log("Boot: External reset")
+        elif resetCause == 2:
+            SerialLog.log("Boot: Watchdog reset")
+        elif resetCause == 3:
+            SerialLog.log("Boot: Exception reset")
+        elif resetCause == 4:
+            SerialLog.log("Boot: Deep sleep wakeup")
+        elif resetCause == 5:
+            SerialLog.log("Boot: Software reset")
+        elif resetCause == 6:
+            SerialLog.log("Boot: RTC wakeup")
+        elif resetCause == 7:
+            SerialLog.log("Boot: Timer wakeup")
+        elif resetCause == 8:
+            SerialLog.log("Boot: Unknown")
+        else:
+            SerialLog.log("Boot: Unknown (%d)" % resetCause)
 
+
+    def printVersion():
+        import os
+        # Get the version of the board
+        board = os.uname().machine
+        SerialLog.log(board)
+        version = os.uname().version
+        SerialLog.log("Micropython:", version)
+        # Get the version of the micropython
+        with open('version', 'r') as f:
+            local_version = f.read().strip() 
+            SerialLog("App Version:", local_version)
