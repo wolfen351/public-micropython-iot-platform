@@ -128,7 +128,7 @@ def check_for_updates(version_check=True) -> bool:
 
     for attempt in range(20):
         try:
-            response = requests.get(latestUrl)
+            response = requests.get(latestUrl, timeout=10)
         except Exception as e:
             SerialLog.log("Attempt", attempt + 1, "failed with error: ", e, ", retrying...")
             continue
@@ -170,7 +170,7 @@ def check_for_updates(version_check=True) -> bool:
         SerialLog.log("Fetching update on: ", downloadUrl)
         for attempt in range(20):
             try:
-                response = requests.get(downloadUrl)
+                response = requests.get(downloadUrl, timeout=10)
                 SerialLog.log("Download Response:", response.status_code)
                 if response.status_code == 200:
                     with open(ota_config['tmp_filename'], 'wb') as f:

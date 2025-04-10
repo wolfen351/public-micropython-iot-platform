@@ -44,7 +44,7 @@ class NtpSync(BasicModule):
         response = None
         try:
             import urequests as requests
-            response = requests.get("https://www.timeapi.io/api/timezone/zone?timeZone=%s" % self.tzName)
+            response = requests.get("https://www.timeapi.io/api/timezone/zone?timeZone=%s" % self.tzName, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 # save this info to a file for later use
