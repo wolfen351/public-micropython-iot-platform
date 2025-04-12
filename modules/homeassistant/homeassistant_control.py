@@ -32,9 +32,9 @@ class HomeAssistantControl(BasicModule):
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.example.com")
         
         # set some defaults for timers
-        self.lastConnectTime = ticks_ms()
-        self.lastConfigureTime = ticks_ms()
-        self.lastFullTelemetrySend = ticks_ms()
+        self.lastConnectTime = ticks_ms() - 90000
+        self.lastConfigureTime = ticks_ms() - 90000
+        self.lastFullTelemetrySend = ticks_ms() - 90000
 
         if self.enabled != "Y":
             SerialLog.log("Home Assistant Integration Disabled")
