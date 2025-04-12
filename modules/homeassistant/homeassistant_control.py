@@ -16,13 +16,13 @@ class HomeAssistantControl(BasicModule):
         self.deviceId = hexlify(unique_id()).decode('ascii')
         self.telemetry = {}
         self.client = None
-        self.lastConnectTime = 0
         self.topics = {}
         self.version = local_version()
         self.ip = "0.0.0.0"
         self.commands = []
-        self.lastConfigureTime = 0
         self.connected = False
+        self.lastConnectTime = 0
+        self.lastConfigureTime = 0
         self.lastFullTelemetrySend = 0
         self.lastKeepAliveSend = 0
     
@@ -30,6 +30,7 @@ class HomeAssistantControl(BasicModule):
         BasicModule.start(self)
         self.enabled = self.getPref("homeassistant", "enabled", "Y")
         self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.example.com")
+        self.lastConnectTime = ticks_ms()
 
         if self.enabled != "Y":
             SerialLog.log("Home Assistant Integration Disabled")
