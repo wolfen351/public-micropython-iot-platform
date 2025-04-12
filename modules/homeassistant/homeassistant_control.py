@@ -48,7 +48,19 @@ class HomeAssistantControl(BasicModule):
                     SerialLog.log("Error checking MQTT messages (HA)")
     
     def getTelemetry(self):
-        return {}
+        # Convert lastConnectTime, lastFullTelemetrySend and lastConfigureTime to a human-readable format (seconds)
+        lastConnectTimeS = ticks_diff(ticks_ms(), self.lastConnectTime) // 1000
+        lastConfigureTimeS = ticks_diff(ticks_ms(), self.lastConfigureTime) // 1000
+        lastFullTelemetrySendS = ticks_diff(ticks_ms(), self.lastFullTelemetrySend) // 1000
+
+        return {
+            "homeassistantserver": self.mqtt_server,
+            "homeassistantconnected": self.connected,
+            "homeassistantenabled": self.enabled,
+            "homeassistantlastconnecttime": lastConnectTimeS,
+            "homeassistantlastconfigtime": lastConfigureTimeS,
+            "homeassistantlastfulltelemetrysend": lastFullTelemetrySendS
+        }
 
     def processTelemetry(self, telemetry):
 
@@ -317,3 +329,6 @@ class HomeAssistantControl(BasicModule):
         except OSError as e:
             SerialLog.log("Error publishing MQTT message: %s" % (e))
             self.connected = False
+
+    def getIndexFileName(self):
+        return { "homeassistant" : "/modules/homeassistant/homeassistant_index.html" }
