@@ -246,6 +246,8 @@ class WifiHandler(BasicModule):
         # Squash OTA exceptions
         try:
             # Check for update and update if needed
+            SerialLog.log("Forcing OTA update")
+            ota.force_version_number()
             ota.force_update()
             return b"Update started, rebooting...", okayHeader, True
         except Exception as e:

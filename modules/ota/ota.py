@@ -61,7 +61,13 @@ def local_version():
             return local_version
     except OSError:
             return "unknown!"
-    
+
+def force_version_number():
+    # Overwrite the version number in the version file with 1.0.0 to force a firmware update on next boot
+    with open('version', 'w') as f:
+        f.write("1.0.0")
+    SerialLog.log("Forced version number to 1.0.0")
+
 def force_update():
     SerialLog.purge()
     SerialLog.log("Forcing update")
