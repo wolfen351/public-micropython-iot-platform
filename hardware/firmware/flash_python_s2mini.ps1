@@ -13,4 +13,4 @@ $port = Find-MicrocontrollerPort
 Write-Output "Found port: $port"
 
 esptool --chip esp32-s2 --port $port erase_flash
-esptool --chip esp32-s2 --port $port --baud 1000000 write_flash -z 0x1000 ./firmware/LOLIN_S2_MINI-20240105-v1.22.1.bin
+esptool --chip esp32-s2 --port $port --baud 1000000 write_flash -z 0x1000 ./LOLIN_S2_MINI-20240105-v1.22.1.bin

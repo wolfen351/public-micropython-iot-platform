@@ -206,6 +206,10 @@ def check_for_updates(version_check=True) -> bool:
                 SerialLog.log("Attempt", attempt + 1, "failed with error: ", str(e), "retrying...")
                 gc.collect()
         SerialLog.log("Error! Unable to download update after multiple attempts")
+        try:
+            uos.remove(ota_config['tmp_filename'])
+        except OSError:
+            pass
         return False
     else:
         SerialLog.log("Up to date!")
