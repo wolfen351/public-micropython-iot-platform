@@ -71,9 +71,9 @@ class MqttSettings:
             return False
         if not isinstance(self.Publish, bytes):
             return False
-       if not isinstance(self.Username, bytes):
+        if not isinstance(self.Username, bytes):
             return False
-       if not isinstance(self.Password, bytes):
+        if not isinstance(self.Password, bytes):
             return False
 
         return True
