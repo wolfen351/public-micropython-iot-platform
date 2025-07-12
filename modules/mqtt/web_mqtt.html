@@ -85,6 +85,8 @@
         <span class="lbl">Server:</span><input type="text" name="server" value="mqtt.example.com" id="Server"><br />
         <span class="lbl">Subscribe To:</span><input type="text" name="subscribe" value="temp/qweqwewqe/command" id="Subscribe"><br />
         <span class="lbl">Publish To:</span><input type="text" name="publish" value="temp/qweqwewqe/command" id="Publish"><br />
+        <span class="lbl">Username:</span><input type="text" name="username" value="temp/qweqwewqe/command" id="Username"><br />
+        <span class="lbl">Password:</span><input type="text" name="password" value="temp/qweqwewqe/command" id="Password"><br />
         <input type="hidden" name="enable" value="Y" id="hide" />
         <button type="submit" class="btn">Save</button>
 
@@ -131,6 +133,9 @@
         $("#Server").val(s.server);
         $("#Subscribe").val(s.subscribe);
         $("#Publish").val(s.publish);
+        $("#Username").val(s.username);
+        $("#Password").val(s.password);
+
 
       })
 

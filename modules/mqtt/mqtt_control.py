@@ -17,7 +17,7 @@ class MqttControl(BasicModule):
         self.status = None
         self.sta_if = network.WLAN(network.STA_IF)
         self.mqtt_port = 1883
-        self.mqtt_user = None
+        self.mqtt_username = None
         self.mqtt_password = None
         self.telemetry = {}
         self.client = None
@@ -30,6 +30,9 @@ class MqttControl(BasicModule):
         settings.load()
         self.enabled = settings.Enable
         self.mqtt_server = settings.Server
+        self.mqtt_username = settings.Username
+        self.mqtt_password = settings.Password
+
         if (settings.Subscribe != b""):
             self.topic_sub = settings.Subscribe
         else:
@@ -108,7 +111,7 @@ class MqttControl(BasicModule):
     def loadmqttsettings(self, params):
         settings =  self.getsettings()
         headers = okayHeader
-        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3])
+        data = b"{ \"enable\": \"%s\", \"server\": \"%s\", \"subscribe\": \"%s\", \"publish\": \"%s\", \"username\": \"%s\", \"password\": \"%s\" }" % (settings[0], settings[1], settings[2], settings[3], settings[4], settings[5])
         return data, headers
 
     def savemqttsettings(self, params):
@@ -117,7 +120,9 @@ class MqttControl(BasicModule):
         server = unquote(params.get(b"server", None))
         subscribe = unquote(params.get(b"subscribe", None))
         publish = unquote(params.get(b"publish", None))
-        settings = (enable, server, subscribe, publish)
+        username = unquote(params.get(b"username", None))
+        password = unquote(params.get(b"password", None))
+        settings = (enable, server, subscribe, publish, username, password)
         self.settings(settings)
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
         return b"", headers
@@ -149,7 +154,7 @@ class MqttControl(BasicModule):
             b"mqtt-%s" % (self.client_id),
             self.mqtt_server,
             int(self.mqtt_port),
-            self.mqtt_user,
+            self.mqtt_username,
             self.mqtt_password,
             keepalive=300  # Default keepalive value (300 seconds)
         )
@@ -184,15 +189,21 @@ class MqttControl(BasicModule):
         else: 
             self.topic_pub = b'%s/%s/status' % (self.basicSettings['shortName'], self.client_id)
 
+        self.mqtt_username = settingsVals[4]
+        self.mqtt_password = settingsVals[5]
+
+
         # Save the settings to disk
         settings = MqttSettings()
         settings.Enable = self.enabled
         settings.Server = self.mqtt_server
         settings.Subscribe = self.topic_sub
         settings.Publish = self.topic_pub
+        settings.Username = self.mqtt_username
+        settings.Password = self.mqtt_password
         settings.write()
     
     def getsettings(self):
-        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub)
+        s = (self.enabled, self.mqtt_server, self.topic_sub, self.topic_pub, self.mqtt_username, self.mqtt_password)
         return s
 
