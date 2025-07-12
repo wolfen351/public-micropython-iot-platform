@@ -241,9 +241,8 @@ class MQTTClient:
                 self.ping()
                 self.last_ping_sent = ticks_ms()
             except Exception as e:
-                raise MQTTException(f"MQTT Ping failed: {e}")
+                raise MQTTException("MQTT Ping failed: {e}")
 
         # Process incoming messages
         self.sock.setblocking(False)
         return self.wait_msg()
-
