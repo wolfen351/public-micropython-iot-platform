@@ -34,7 +34,8 @@ try {
     Write-Host "Active Modules: $activeModules"
 
     $dest = "$PSScriptRoot\profile.json"
-    Invoke-Expression "xcopy .\profiles\$profileName.json $dest /Y /-I"
+    Write-Output "Placeholder" > $dest
+    Invoke-Expression "xcopy .\profiles\$profileName.json $dest /Y"
 }
 catch {
     Write-Error "Could not load profile from file .\profiles\$profileName.json"
