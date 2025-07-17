@@ -322,6 +322,9 @@ class HomeAssistantControl(BasicModule):
                 payload.update({ "payload_press": "/button/press/"+endbit, "cmd_t": "~/command" })
                 telemetryType = "button" 
 
+            if key.startswith('temperature'):
+                payload.update({ "state_class": "measurement" })
+
             telemetryUrl = "%s/%s/%s/%s" % (self.haPrefixUrl, telemetryType, self.deviceId, telemetryId)
             payload.update({"~": telemetryUrl}),
             topic = "%s/config" % (telemetryUrl)
