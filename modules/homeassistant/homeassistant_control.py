@@ -279,6 +279,10 @@ class HomeAssistantControl(BasicModule):
             uom = uomLookup.get(lookupkey, "")
             devclass = devClassLookup.get(lookupkey, "")
             telemetryType = "sensor"
+
+            # if uom contains a * then replace it with a degree symbol
+            if uom and "*" in uom:
+                uom = uom.replace("*", chr(176))
                         
             if "/" in key:
                 name = "%s %s" % (name, key.split("/")[1])
