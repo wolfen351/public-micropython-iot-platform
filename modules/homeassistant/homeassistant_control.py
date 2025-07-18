@@ -333,7 +333,7 @@ class HomeAssistantControl(BasicModule):
             payload.update({"~": telemetryUrl}),
             topic = "%s/config" % (telemetryUrl)
             self.topics[key] = telemetryUrl
-            self.safePublish(topic, dumps(payload), True)
+            self.safePublish(topic, dumps(payload).encode("utf-8"), True)
 
     def safePublish(self, topic, message, retain=False):
         try:
