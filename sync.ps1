@@ -28,6 +28,10 @@ try {
     }
 
     if (!(Test-Path -Path ".\profiles\$profileName.json")) {
+        # list all available profiles
+        $profiles = Get-ChildItem -Path ".\profiles" -Filter "*.json" | Select-Object -ExpandProperty BaseName
+        Write-Output "Available profiles: $profiles"
+
         throw "Profile file .\profiles\$profileName.json does not exist!"
     }
     
