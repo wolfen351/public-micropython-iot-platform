@@ -26,6 +26,10 @@ try {
     if ($null -eq $profileName) {
         throw "Profile Name Required!"
     }
+
+    if (!(Test-Path -Path ".\profiles\$profileName.json")) {
+        throw "Profile file .\profiles\$profileName.json does not exist!"
+    }
     
     $activeProfile = Get-Content -Raw ".\profiles\$profileName.json" | ConvertFrom-Json 
     # load active modules
