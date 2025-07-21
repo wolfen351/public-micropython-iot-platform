@@ -252,6 +252,9 @@ class WifiHandler(BasicModule):
         self.setPref("ota", "release", unquote(release))
 
         SerialLog.log(f'Set OTA release type to {release}')
+
+        self.forceUpdate(params)  # Force update to apply the new release type immediately
+        
         return b'Release type set to ' + release.encode('utf-8'), okayHeader, True
 
     def forceUpdate(self, params):
