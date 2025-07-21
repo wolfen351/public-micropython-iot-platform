@@ -150,6 +150,9 @@ try:
             elif modname == "relayx2":
                 from modules.relayx2.relayx2 import Relayx2
                 allModules.append(Relayx2())
+            elif modname == "worldclock":
+                from modules.worldclock.world_clock import WorldClock
+                allModules.append(WorldClock())
             else:
                 SerialLog.log("Error: Unsupported Module! ", modname);
             SerialLog.log("Completed loading ", modname, " Ram Used:", ramfree - gc.mem_free())
