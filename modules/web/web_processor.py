@@ -1,6 +1,7 @@
 from modules.basic.basic_module import BasicModule
 from modules.web.web_server import WebServer
 import json
+import time
 
 # Public static vars
 okayHeader = b"HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n"
@@ -48,7 +49,8 @@ class WebProcessor(BasicModule):
         self.telemetry = {}
         self.panels = {}
         self.boardName = ""
-        self.statusLedEnabled = self.getPref("web", "statusLedEnabled", True)     
+        self.statusLedEnabled = self.getPref("web", "statusLedEnabled", True)
+        self.last_telemetry_broadcast = 0     
 
     def start(self):
         super().start()
@@ -58,6 +60,12 @@ class WebProcessor(BasicModule):
      
     def tick(self):
         self.server.tick()
+        
+        # Broadcast telemetry via WebSocket every second
+        current_time = time.ticks_ms()
+        if time.ticks_diff(current_time, self.last_telemetry_broadcast) > 1000:
+            self.server.broadcast_telemetry(self.telemetry)
+            self.last_telemetry_broadcast = current_time
      
     def getTelemetry(self):
         return { 

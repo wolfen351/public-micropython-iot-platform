@@ -130,6 +130,46 @@
   <script type="text/javascript">
 
     window.telHandlers = [];
+    let websocket = null;
+    let reconnectInterval = null;
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.hostname}:81`;
+      
+      websocket = new WebSocket(wsUrl);
+      
+      websocket.onopen = function(event) {
+        console.log('WebSocket connected');
+        if (reconnectInterval) {
+          clearInterval(reconnectInterval);
+          reconnectInterval = null;
+        }
+      };
+      
+      websocket.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          updateTelemetry(data);
+        } catch (e) {
+          console.error('Error parsing WebSocket message:', e);
+        }
+      };
+      
+      websocket.onclose = function(event) {
+        console.log('WebSocket disconnected');
+        websocket = null;
+        // Try to reconnect every 5 seconds
+        if (!reconnectInterval) {
+          reconnectInterval = setInterval(connectWebSocket, 5000);
+        }
+      };
+      
+      websocket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+      };
+    }
+
     fetch('/panels')
       .then(response => response.json())
       .then(files => {
@@ -147,84 +187,98 @@
 
             })
         }
-        getTelemetry();
+        // Start WebSocket connection after panels are loaded
+        connectWebSocket();
       });
 
     function leftFillNum(num, targetLength) {
       return num.toString().padStart(targetLength, 0);
     }
 
-    function getTelemetry() {
-      setTimeout(function () {
-        fetch('/telemetry')
-          .then(response => response.json())
-          .then(data => {
-            s = data;
-            html = "";
-            for (let key of Object.keys(s)) {
+    function updateTelemetry(data) {
+      s = data;
+      html = "";
+      for (let key of Object.keys(s)) {
 
-              panelItem = $(`*[dataitem="${key}"]`);
-              if (panelItem[0]) {
-                // If the panelItem is a select, auto select the value
-                if (panelItem[0].tagName == 'SELECT') {
-                  panelItem.val(s[key]);
-                }
-                //FORMAT AS ONOFF
-                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
-                  if (s[key] == 1) {
-                    panelItem.html("ON");
-                    panelItem.addClass("on");
-                    panelItem.removeClass("off");
-                  }
-                  else {
-                    panelItem.html("OFF");
-                    panelItem.removeClass("on");
-                    panelItem.addClass("off");
-                  }
-                  // FORMAT AS CLASS
-                } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
-                  val = panelItem.attr('data');
-                  panelItem.removeClass('data_' + val);
-                  panelItem.addClass('data_' + s[key]);
-                  panelItem.attr("data", s[key]);
-                }
-                // FORMAT AS SWITCH
-                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
-                  if (s[key] == 'Enabled') {
-                    panelItem.html('<input type="checkbox" id="scales" name="scales" checked="checked">');
-                  } else {
-                    panelItem.html('<input type="checkbox" id="scales" name="scales">');
-                  }
-                }
-                // FORMAT AS TIME
-                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'timearray') {
-                  panelItem.html(s[key][0] + "/" + s[key][1] + "/" + s[key][2] + "  " + leftFillNum(s[key][3],2) + ":" + leftFillNum(s[key][4],2) + ":" + leftFillNum(s[key][5],2));
-                }
-                // JUST DISPLAY IT
-                else {
-                  panelItem.html(s[key]);
-                }
-
-                if ($("#nameval").val() === "Name Here") {
-                  $("#nameval").val(s.name);
-                }
-              }
-              else {
-                // IGNORE IT
-                if (key != 'tempReadAt')
-                {
-                  // FALLBACK FOR UNHANDLED
-                  for (const h of window.telHandlers) {
-                    h(key);
-                  }
-                  html += "<p>" + key + ": " + s[key] + "</p>"
-                }
-              }
+        panelItem = $(`*[dataitem="${key}"]`);
+        if (panelItem[0]) {
+          // If the panelItem is a select, auto select the value
+          if (panelItem[0].tagName == 'SELECT') {
+            panelItem.val(s[key]);
+          }
+          //FORMAT AS ONOFF
+          else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+            if (s[key] == 1) {
+              panelItem.html("ON");
+              panelItem.addClass("on");
+              panelItem.removeClass("off");
             }
-            $('#rawdisplay').html(html);
-            getTelemetry();
-          })
-      }, 1000);
+            else {
+              panelItem.html("OFF");
+              panelItem.removeClass("on");
+              panelItem.addClass("off");
+            }
+            // FORMAT AS CLASS
+          } else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'class') {
+            val = panelItem.attr('data');
+            panelItem.removeClass('data_' + val);
+            panelItem.addClass('data_' + s[key]);
+            panelItem.attr("data", s[key]);
+          }
+          // FORMAT AS SWITCH
+          else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'switch') {
+            if (s[key] == 'Enabled') {
+              panelItem.html('<input type="checkbox" id="scales" name="scales" checked="checked">');
+            } else {
+              panelItem.html('<input type="checkbox" id="scales" name="scales">');
+            }
+          }
+          // FORMAT AS TIME
+          else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'timearray') {
+            panelItem.html(s[key][0] + "/" + s[key][1] + "/" + s[key][2] + "  " + leftFillNum(s[key][3],2) + ":" + leftFillNum(s[key][4],2) + ":" + leftFillNum(s[key][5],2));
+          }
+          // JUST DISPLAY IT
+          else {
+            panelItem.html(s[key]);
+          }
+
+          if ($("#nameval").val() === "Name Here") {
+            $("#nameval").val(s.name);
+          }
+        }
+        else {
+          // IGNORE IT
+          if (key != 'tempReadAt')
+          {
+            // FALLBACK FOR UNHANDLED
+            for (const h of window.telHandlers) {
+              h(key);
+            }
+            html += "<p>" + key + ": " + s[key] + "</p>"
+          }
+        }
+      }
+      $('#rawdisplay').html(html);
+    }
+
+    // Fallback function for compatibility - now uses WebSocket data
+    function getTelemetry() {
+      // This function is kept for compatibility but telemetry is now updated via WebSocket
+      // If WebSocket is not connected, fall back to polling
+      if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+        setTimeout(function () {
+          fetch('/telemetry')
+            .then(response => response.json())
+            .then(data => {
+              updateTelemetry(data);
+              setTimeout(getTelemetry, 5000); // Poll every 5 seconds as fallback
+            })
+            .catch(error => {
+              console.error('Polling fallback error:', error);
+              setTimeout(getTelemetry, 5000);
+            });
+        }, 1000);
+      }
     }
 
     function post(url) {

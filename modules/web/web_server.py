@@ -11,11 +11,13 @@ WriteConn = namedtuple("WriteConn", ["body", "buff", "buffmv", "write_range"])
 ReqInfo = namedtuple("ReqInfo", ["type", "path", "params", "host", "post_params"])
 
 from modules.web.server import Server
+from modules.web.websocket_server import WebSocketServer
 
 class WebServer():
     def __init__(self):
         self.poller = select.poll()
         self.httpServer = Server(self.poller, 80, socket.SOCK_STREAM)
+        self.websocketServer = WebSocketServer(self.poller, 81)
         self.request = dict()
         self.conns = dict()
 
@@ -28,6 +30,10 @@ class WebServer():
     def handle(self, sock, event, others):
         if sock is self.httpServer.sock:
             self.accept(sock)
+        elif sock is self.websocketServer.server_sock:
+            self.websocketServer.handle(sock, event)
+        elif sock in [client['sock'] for client in self.websocketServer.clients.values()]:
+            self.websocketServer.handle(sock, event)
         elif event & select.POLLIN:
             self.read(sock)
         elif event & select.POLLOUT:
@@ -238,6 +244,11 @@ class WebServer():
         if self.shouldReboot:
             machine.reset()
 
+    def stop(self):
+        """Stop the web server and WebSocket server"""
+        self.websocketServer.stop()
+        self.httpServer.stop(self.poller)
+
     def start(self):
         SerialLog.log("Web server started")
 
@@ -248,3 +259,7 @@ class WebServer():
         for response in self.poller.ipoll(0):
             sock, event, *others = response
             self.handle(sock, event, others)
+
+    def broadcast_telemetry(self, telemetry_data):
+        """Broadcast telemetry data to WebSocket clients"""
+        self.websocketServer.broadcast_telemetry(telemetry_data)
