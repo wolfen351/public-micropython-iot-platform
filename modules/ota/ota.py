@@ -35,6 +35,12 @@ def load_ota_cfg():
         except OSError:
             SerialLog.log('Error reading prefs.json. Using default OTA channel:', ota_channel)
 
+        if not ota_config['url'].endswith('/'):
+            ota_config['url'] = ota_config['url'] + '/'
+
+        if ota_channel == "canary":
+            ota_config['url'] = ota_config['url'].replace("/firmware/", "/canary/firmware/") 
+
         return True
     except OSError:
         SerialLog.log('Cannot find ota config file in profile.json. OTA is disabled.')
@@ -141,14 +147,7 @@ def check_for_updates(version_check=True) -> bool:
         import mip
         mip.install('requests')
 
-
-    if not ota_config['url'].endswith('/'):
-        ota_config['url'] = ota_config['url'] + '/'
-
-    if ota_channel == "canary":
-        latestUrl = ota_config['url']  + shortName + '/canary'
-    else:
-        latestUrl = ota_config['url']  + shortName + '/latest'
+    latestUrl = ota_config['url']  + shortName + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
 
     for attempt in range(20):
