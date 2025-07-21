@@ -180,6 +180,16 @@ class HomeAssistantControl(BasicModule):
         self.setPref("homeassistant", "mqtt_password", unquote(params.get(b"password", None)))
 
         headers = b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /\r\n"
+
+        # Reset the connection, load the new settings
+        self.connected = False
+        self.enabled = self.getPref("homeassistant", "enabled", "Y")
+        self.mqtt_server = self.getPref("homeassistant", "mqtt_server", "mqtt.example.com")
+        try:
+          self.client.disconnect()
+        except:
+            pass
+
         return b"", headers
 
     def sub_cb(self, topic, msg):
