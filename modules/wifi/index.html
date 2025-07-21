@@ -51,6 +51,17 @@
     </div>
 
     <div class="line">
+        <div class="lineitem">Release</div>
+        <div dataitem="release"></div>
+        <div>
+            <select dataitem="otaChannel" onchange="post('/setRelease?release=' + this.value)">
+                <option value="stable">Stable</option>
+                <option value="canary">Canary</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="line">
         <div class="lineitem">OS Version</div>
         <div dataitem="osname"></div>
     </div>

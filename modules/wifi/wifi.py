@@ -212,7 +212,8 @@ class WifiHandler(BasicModule):
                 "freedisk": self.freediskbytes,
                 "osname": uname().release,
                 "wifiMode": b"Station",
-                "wifiUptime": wifiUptime
+                "wifiUptime": wifiUptime,
+                "otaChannel": self.getPref("ota", "release", "stable").encode('utf-8')
             }
     
 
@@ -234,13 +235,24 @@ class WifiHandler(BasicModule):
             b"/getlog": self.getlog,
             b"/forceUpdate": self.forceUpdate,
             b"/firmware": b"/modules/wifi/firmware.html",
-            b'/upload': self.webUpload
+            b'/upload': self.webUpload,
+            b'/setRelease': self.setRelease
         }
 
     def getIndexFileName(self):
         return {"wifi": "/modules/wifi/index.html"}
 
     # internal functions
+    def setRelease(self, params):
+        # Set the release type for OTA updates
+        release = params.get(b'release', b'stable').decode('utf-8')
+        if release not in ['stable', 'canary']:
+            return b'Invalid release type', okayHeader
+
+        self.setPref("ota", "release", unquote(release))
+
+        SerialLog.log(f'Set OTA release type to {release}')
+        return b'Release type set to ' + release.encode('utf-8'), okayHeader, True
 
     def forceUpdate(self, params):
         # Squash OTA exceptions

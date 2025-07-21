@@ -165,8 +165,12 @@
 
               panelItem = $(`*[dataitem="${key}"]`);
               if (panelItem[0]) {
-                // FORMAT AS ONOFF
-                if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
+                // If the panelItem is a select, auto select the value
+                if (panelItem[0].tagName == 'SELECT') {
+                  panelItem.val(s[key]);
+                }
+                //FORMAT AS ONOFF
+                else if (panelItem[0].attributes['datadisplay'] && panelItem[0].attributes['datadisplay'].nodeValue == 'onoff') {
                   if (s[key] == 1) {
                     panelItem.html("ON");
                     panelItem.addClass("on");

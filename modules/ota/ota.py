@@ -8,6 +8,7 @@ import network
 GZDICT_SZ = const(31)
 ota_config = {}
 shortName = ""
+ota_channel = "stable"
 
 def load_ota_cfg():
     try:
@@ -17,8 +18,23 @@ def load_ota_cfg():
         basicSettings = ujson.loads(settings_string)
         global shortName
         global ota_config
+        global ota_channel
         ota_config.update(basicSettings['ota'])
         shortName = basicSettings["shortName"]
+
+        # read the ota channel from prefs.json
+        try:
+            f = open("prefs.json",'r')
+            settings_string=f.read()
+            f.close()
+            prefs = ujson.loads(settings_string)
+            pref = prefs['ota']
+            if ('release' in pref and pref['release'] != None): 
+                ota_channel = pref['release']
+                SerialLog.log("OTA channel set to", ota_channel)        
+        except OSError:
+            SerialLog.log('Error reading prefs.json. Using default OTA channel:', ota_channel)
+
         return True
     except OSError:
         SerialLog.log('Cannot find ota config file in profile.json. OTA is disabled.')
@@ -129,7 +145,10 @@ def check_for_updates(version_check=True) -> bool:
     if not ota_config['url'].endswith('/'):
         ota_config['url'] = ota_config['url'] + '/'
 
-    latestUrl = ota_config['url']  + shortName + '/latest'
+    if ota_channel == "canary":
+        latestUrl = ota_config['url']  + shortName + '/canary'
+    else:
+        latestUrl = ota_config['url']  + shortName + '/latest'
     SerialLog.log("Checking for updates on: ", latestUrl)
 
     for attempt in range(20):
